@@ -1,5 +1,7 @@
 from pathlib import Path
 import environ
+from django.utils.log import DEFAULT_LOGGING
+import logging.config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -139,6 +141,52 @@ MEDIA_ROOT = BASE_DIR / 'media/'
 MEDIA_URL = '/media/'
 
 SITE_ID = 1
+
+# https://lincolnloop.com/blog/django-logging-right-way/
+# Disable Django's logging setup
+LOGGING_CONFIG = None
+LOGGER_HANDLERS = ['console']
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'default': {
+            # exact format is not important, this is the minimum information
+            'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+        },
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(name)-12s %(module)s '
+                      '%(process)d %(thread)d %(message)s'
+        },
+        'django.server': DEFAULT_LOGGING['formatters']['django.server'],
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',  # STDERR
+            'formatter': 'verbose',
+        },
+        'django.server': DEFAULT_LOGGING['handlers']['django.server'],
+    },
+    'loggers': {
+        '': {
+            'level': 'WARNING',
+            'handlers': LOGGER_HANDLERS,
+        },
+        'api': {
+            'level': 'INFO' if DEBUG else 'WARNING',
+            'handlers': LOGGER_HANDLERS,
+            'propagate': False,
+        },
+        'core': {
+            'level': 'INFO' if DEBUG else 'WARNING',
+            'handlers': LOGGER_HANDLERS,
+            'propagate': False,
+        },
+        # Default runserver request logging
+        'django.server': DEFAULT_LOGGING['loggers']['django.server'],
+    },
+})
 
 # Rest framework
 REST_FRAMEWORK = {
