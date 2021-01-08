@@ -1,19 +1,14 @@
-.cache
-.git
-.tox
-.tx
-.github
-.env
+FROM python:3.9
+EXPOSE 8080
 
-__pycache__
-*.pyc
+ENV PYTHONUNBUFFERED 1
 
-node_modules/
-/static/
-/media/
-venv/
-docker-compose.yml
-Dockerfile
-Makefile
-secrets/
-requirements-debug.txt
+RUN mkdir /srv/nephrolog-api
+WORKDIR /srv/nephrolog-api
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["/bin/sh", "config/start.sh"]
