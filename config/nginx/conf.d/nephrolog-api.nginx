@@ -34,7 +34,7 @@ server {
     }
 
     location /media {
-        root /srv/nephrolog-api/media;
+        root /srv/nephrolog-api;
 
         expires 14d;
         add_header Pragma public;
@@ -42,7 +42,7 @@ server {
     }
 
     location /static {
-        root /srv/nephrolog-api/static;
+        root /srv/nephrolog-api;
 
         expires 14d;
         add_header Pragma public;
