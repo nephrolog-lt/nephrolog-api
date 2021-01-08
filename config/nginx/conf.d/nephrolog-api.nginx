@@ -1,0 +1,51 @@
+upstream nephrolog_api {
+    server api:8080;
+}
+
+server {
+    listen 80 default_server;
+    server_name _;
+    return 444;
+}
+
+server {
+    listen 80;
+    server_name api.nephrolog.lt;
+
+    gzip on;
+
+    # Don't compress anything that's already small and unlikely to shrink much
+    # if at all (the default is 20 bytes, which is bad as that usually leads to
+    # larger files after gzipping).
+    # Default: 20
+    gzip_min_length    256;
+
+    gzip_comp_level 5;
+    gzip_vary on;
+    gzip_types text/plain text/css application/json application/x-javascript application/javascript text/xml application/xml application/rss+xml text/javascript image/svg+xml application/vnd.ms-fontobject application/x-font-ttf font/opentype application/x-font-woff application/font-woff;
+
+    location / {
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+
+        proxy_pass http://nephrolog_api;
+    }
+
+    location /media {
+        root /srv/nephrolog-api/media;
+
+        expires 14d;
+        add_header Pragma public;
+        add_header Cache-Control "public";
+    }
+
+    location /static {
+        root /srv/nephrolog-api/static;
+
+        expires 14d;
+        add_header Pragma public;
+        add_header Cache-Control "public";
+    }
+}

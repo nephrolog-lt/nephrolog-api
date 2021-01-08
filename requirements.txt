@@ -1,0 +1,44 @@
+Django==3.1.5
+gunicorn==20.0.4
+python-environ==0.4.54
+
+# Storage and caching
+psycopg2-binary==2.8.6
+django-redis==4.12.1
+
+# Authentication
+django-allauth==0.44.0
+firebase-admin==4.5.0
+
+# Celery
+celery[redis]==5.0.5
+django-celery-results==2.0.0
+
+# Admin
+django-admin-sortable2==0.7.7
+
+# Logging and monitoring
+sentry-sdk==0.19.5
+
+# Django rest framework
+djangorestframework==3.12.2
+drf-firebase-token-auth==0.2.1
+drf-spectacular==0.12.0
+django-filter==2.4.0
+
+# Additional functionality
+Pillow==8.1.0
+requests==2.25.1
+python-dateutil==2.8.1
+pytz==2020.5
+
+# Debugging
+ipdb==0.13.4
+django-extensions==3.1.0
+
+# Required for tests
+Faker==5.4.0
+factory_boy==3.2.0
+
+
+

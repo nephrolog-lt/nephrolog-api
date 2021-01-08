@@ -1,0 +1,46 @@
+name: Test, build Docker image and deploy to production
+on: push
+
+jobs:
+  push_docker:
+    name: Build and push Docker image to registry
+    runs-on: ubuntu-20.04
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Publish to Registry
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          name: nephrolog-lt/nephrolog-api
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.OWNER_GITHUB_TOKEN }}
+          cache: true
+          snapshot: true
+
+  deploy:
+    name: Deploy to production
+    runs-on: ubuntu-20.04
+    needs: push_docker
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Copy docker-compose and nginx for deployement
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.HOST_USERNAME }}
+          passphrase: ${{ secrets.HOST_PASSWORD }}
+          key: ${{ secrets.HOST_PRIVATE_KEY }}
+          source: "docker-compose.yml,nginx"
+          target: "/srv/nephrolog-api/"
+
+      - name: Deploy to production
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.HOST_USERNAME }}
+          passphrase: ${{ secrets.HOST_PASSWORD }}
+          key: ${{ secrets.HOST_PRIVATE_KEY }}
+          script: docker stack deploy nephrolog-api --compose-file /srv/nephrolog-api/docker-compose.yml
