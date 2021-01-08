@@ -6,7 +6,7 @@ services:
     env_file:
       - secrets/.env
     labels:
-      - "lt.nephrolog.api"
+      - lt.nephrolog.api
     deploy:
       replicas: 2
       update_config:
