@@ -62,8 +62,7 @@ class DiabetesComplications(models.TextChoices):
     Yes = "Yes"
 
 
-class UserProfile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
+class BaseUserProfile(models.Model):
     gender = models.CharField(
         max_length=8,
         choices=Gender.choices,
@@ -106,6 +105,9 @@ class UserProfile(models.Model):
     _base_male_weight = 48.08
     _male_weight_increase_constant = 2.72
 
+    class Meta:
+        abstract = True
+
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         if self.diabetes_type in (DiabetesType.Unknown, DiabetesType.No):
@@ -113,10 +115,6 @@ class UserProfile(models.Model):
             self.diabetes_years = None
 
         super().save(force_insert, force_update, using, update_fields)
-
-    @staticmethod
-    def get_for_user(user: AbstractUser) -> UserProfile:
-        return UserProfile.objects.get(user=user)
 
     def daily_norm_potassium_mg(self) -> Optional[int]:
         if self.dialysis_type == DialysisType.Hemodialysis:
@@ -180,6 +178,61 @@ class UserProfile(models.Model):
     def perfect_weight_kg(self) -> float:
         return (max(self.height_cm - self._base_height,
                     0) / self._cm_per_inch) * self._weight_increase_constant + self._base_weight
+
+
+class UserProfile(BaseUserProfile):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super().save(force_insert, force_update, using, update_fields)
+
+        HistoricalUserProfile.create_or_update_historical_user_profile(user_profile=self)
+        DailyIntakesReport.recalculate_daily_norms_for_date_if_exists(user=self.user, date=datetime.datetime.now())
+
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
+
+    @staticmethod
+    def get_for_user(user: AbstractUser) -> UserProfile:
+        return UserProfile.objects.get(user=user)
+
+
+class HistoricalUserProfile(BaseUserProfile):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
+    date = models.DateField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'date'], name='unique_user_date_historical_user_profile')
+        ]
+
+    # Setting date without user timezone information is hack, but it's acceptable
+    @staticmethod
+    def create_or_update_historical_user_profile(user_profile: UserProfile) -> HistoricalUserProfile:
+        historical_profile, _ = HistoricalUserProfile.objects.create_or_update(
+            user=user_profile.user,
+            date=datetime.date.today(),
+            defaults={
+                'gender': user_profile.gender,
+                'birthday': user_profile.birthday,
+                'height_cm': user_profile.height_cm,
+                'weight_kg': user_profile.weight_kg,
+                'chronic_kidney_disease_years': user_profile.chronic_kidney_disease_years,
+                'chronic_kidney_disease_stage': user_profile.chronic_kidney_disease_stage,
+                'dialysis_type': user_profile.dialysis_type,
+                'diabetes_complications': user_profile.diabetes_complications,
+                'created_at': user_profile.created_at,
+                'updated_at': user_profile.updated_at,
+            })
+
+        return historical_profile
+
+    @staticmethod
+    def get_nearest_historical_profile_for_date(user: AbstractBaseUser, date: datetime.date) -> HistoricalUserProfile:
+        historical_profile_for_date = HistoricalUserProfile.objects.filter(user=user, date__lte=date).order_by(
+            '-date').first()
+
+        if historical_profile_for_date:
+            return historical_profile_for_date
+
+        return HistoricalUserProfile.objects.filter(user=user).exclude(date__lte=date).order_by('date').get()
 
 
 # Nutrition
@@ -290,7 +343,11 @@ class DailyIntakesReport(models.Model):
         return sum(intake.liquids_ml for intake in self.intakes.all())
 
     def recalculate_daily_norms(self):
-        profile = UserProfile.get_for_user(self.user)
+        profile = HistoricalUserProfile.get_nearest_historical_profile_for_date(self.user, self.date)
+
+        if not profile:
+            return
+
         health_status = DailyHealthStatus.get_for_user_and_date(user=self.user, date=self.date)
 
         self.daily_norm_potassium_mg = profile.daily_norm_potassium_mg()
@@ -313,6 +370,13 @@ class DailyIntakesReport(models.Model):
                 'daily_norm_liquids_ml'
             )
         )
+
+    @staticmethod
+    def recalculate_daily_norms_for_date_if_exists(user: AbstractBaseUser, date: datetime.date):
+        report = DailyIntakesReport.objects.filter(user=user, date=date).first()
+
+        if report:
+            report.recalculate_daily_norms()
 
     @staticmethod
     def get_or_create_for_user_and_date(user: AbstractBaseUser, date: datetime.date) -> DailyIntakesReport:
@@ -468,6 +532,12 @@ class DailyHealthStatus(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['user', 'date'], name='unique_user_date_daily_health_status')
         ]
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        super().save(force_insert, force_update, using, update_fields)
+
+        DailyIntakesReport.recalculate_daily_norms_for_date_if_exists(user=self.user, date=self.date)
 
     def clean(self) -> None:
         super().clean()
