@@ -1,10 +1,14 @@
 import datetime
 
+from django.db import IntegrityError
 from django.db.models import QuerySet
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView, \
     RetrieveUpdateDestroyAPIView, get_object_or_404
+from rest_framework.request import Request
+from rest_framework.response import Response
 
 from api import serializers
 from api.filters import ProductFilter
@@ -110,6 +114,12 @@ class UserProfileView(CreateAPIView, RetrieveUpdateAPIView):
 
     def get_object(self):
         return get_object_or_404(self.filter_queryset(self.get_queryset()), user=self.request.user)
+
+    def create(self, request: Request, *args, **kwargs) -> Response:
+        try:
+            return super().create(request, *args, **kwargs)
+        except IntegrityError:
+            return super().update(request, *args, **kwargs)
 
 
 @extend_schema(
