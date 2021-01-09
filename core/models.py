@@ -24,7 +24,7 @@ class DailyNutrientConsumption:
 
 class User(AbstractUser):
     def __str__(self):
-        return self.get_full_name() or self.get_username() or self.email
+        return self.get_username() or self.get_full_name() or self.email
 
 
 class Gender(models.TextChoices):
