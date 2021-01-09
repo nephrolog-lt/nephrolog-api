@@ -1,9 +1,12 @@
 from pathlib import Path
 import environ
+import sentry_sdk
 from django.utils.log import DEFAULT_LOGGING
 import logging.config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+from sentry_sdk.integrations.django import DjangoIntegration
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env(
@@ -187,6 +190,14 @@ logging.config.dictConfig({
         'django.server': DEFAULT_LOGGING['loggers']['django.server'],
     },
 })
+
+if not DEBUG:
+    sentry_sdk.init(
+        dsn=env.str('SENTRY_DSN'),
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=1.0,
+        send_default_pii=True
+    )
 
 # Rest framework
 REST_FRAMEWORK = {
