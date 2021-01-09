@@ -30,7 +30,7 @@ class ProductListView(ListAPIView):
             if last_consumed_products:
                 return last_consumed_products
 
-        return super().filter_queryset(queryset)
+        return super().filter_queryset(queryset)[:self._limit]
 
 
 @extend_schema(tags=['nutrition'])
