@@ -15,7 +15,7 @@ class ProductAdmin(admin.ModelAdmin):
         'id',
         'name_lt',
         'name_en',
-        'kind',
+        'product_kind',
         'potassium_mg',
         'proteins_mg',
         'sodium_mg',
@@ -26,7 +26,7 @@ class ProductAdmin(admin.ModelAdmin):
         'created_at',
         'updated_at',
     )
-    list_filter = ('kind', 'created_at', 'updated_at')
+    list_filter = ('product_kind', 'created_at', 'updated_at')
     search_fields = ('name_lt', 'name_en')
 
 

@@ -19,7 +19,7 @@ class Command(BaseCommand):
             defaults = {
                 'name_lt': item['Name'],
                 'name_en': item['NameEn'],
-                'kind': ProductKind.Drink if item['EDIBLE'] > 0.9 else ProductKind.Food,
+                'product_kind': ProductKind.Drink if item['EDIBLE'] > 0.9 else ProductKind.Food,
                 'liquids_ml': item['WATER'],
                 'energy_kcal': item['ENERKC'],
                 'potassium_mg': item['K'],

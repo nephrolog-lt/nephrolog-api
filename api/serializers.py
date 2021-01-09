@@ -38,7 +38,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'kind',)
+        fields = ('id', 'name', 'product_kind',)
 
 
 class IntakeSerializer(serializers.ModelSerializer):

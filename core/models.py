@@ -193,7 +193,7 @@ class Product(models.Model):
     name_lt = models.CharField(max_length=128, unique=True)
     name_en = models.CharField(max_length=128, null=True)
 
-    kind = models.CharField(
+    product_kind = models.CharField(
         max_length=16,
         choices=ProductKind.choices,
         default=ProductKind.Unknown,
