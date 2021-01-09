@@ -206,7 +206,7 @@ class HistoricalUserProfile(BaseUserProfile):
     # Setting date without user timezone information is hack, but it's acceptable
     @staticmethod
     def create_or_update_historical_user_profile(user_profile: UserProfile) -> HistoricalUserProfile:
-        historical_profile, _ = HistoricalUserProfile.objects.create_or_update(
+        historical_profile, _ = HistoricalUserProfile.objects.update_or_create(
             user=user_profile.user,
             date=datetime.date.today(),
             defaults={
