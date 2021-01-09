@@ -1,6 +1,5 @@
 from logging import getLogger
 
-from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -11,10 +10,10 @@ logger = getLogger()
 
 class ReadOnlySerializer(serializers.Serializer):
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         kwargs['read_only'] = True
 
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
 
     def update(self, instance, validated_data):
         raise RuntimeError("ReadOnlySerializer can not perform update")
