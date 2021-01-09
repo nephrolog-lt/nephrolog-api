@@ -31,7 +31,7 @@ class ProductAdmin(admin.ModelAdmin):
 
 
 @admin.register(models.UserProfile)
-class UserConditionAdmin(admin.ModelAdmin):
+class UserProfileAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'user',
@@ -39,10 +39,20 @@ class UserConditionAdmin(admin.ModelAdmin):
         'birthday',
         'height_cm',
         'weight_kg',
+
         'created_at',
         'updated_at',
     )
     date_hierarchy = 'created_at'
+    
+    readonly_fields = (
+        'daily_norm_potassium_mg',
+        'daily_norm_proteins_mg',
+        'daily_norm_sodium_mg',
+        'daily_norm_phosphorus_mg',
+        'daily_norm_energy_kcal',
+        'daily_norm_liquids_ml_without_urine',
+    )
 
 
 @admin.register(models.Intake)
