@@ -181,13 +181,15 @@ class BaseUserProfile(models.Model):
 
 
 class UserProfile(BaseUserProfile):
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        super().save(force_insert, force_update, using, update_fields)
-
-        HistoricalUserProfile.create_or_update_historical_user_profile(user_profile=self)
-        DailyIntakesReport.recalculate_daily_norms_for_date_if_exists(user=self.user, date=datetime.datetime.now())
-
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        with atomic():
+            super().save(force_insert, force_update, using, update_fields)
+
+            HistoricalUserProfile.create_or_update_historical_user_profile(user_profile=self)
+
+        DailyIntakesReport.recalculate_daily_norms_for_date_if_exists(user=self.user, date=datetime.datetime.now())
 
     @staticmethod
     def get_for_user(user: AbstractUser) -> UserProfile:
