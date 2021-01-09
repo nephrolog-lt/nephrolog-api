@@ -300,7 +300,7 @@ class DailyIntakesReport(models.Model):
         self.daily_norm_energy_kcal = profile.daily_norm_energy_kcal()
         self.daily_norm_liquids_ml = profile.daily_norm_liquids_ml_without_urine()
 
-        if health_status and health_status.urine_ml:
+        if self.daily_norm_liquids_ml and health_status and health_status.urine_ml:
             self.daily_norm_liquids_ml += health_status.urine_ml
 
         self.save(
