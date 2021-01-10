@@ -10,7 +10,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models.aggregates import Max
+from django.db.models.aggregates import Max, Min
 from django.db.models.functions import TruncDay
 from django.db.transaction import atomic
 
@@ -298,6 +298,10 @@ class DailyIntakesReport(models.Model):
             models.UniqueConstraint(fields=['user', 'date'], name='unique_user_date_daily_intakes_report')
         ]
 
+    @staticmethod
+    def get_earliest_report_date(user: AbstractBaseUser) -> Optional[datetime.date]:
+        return DailyIntakesReport.filter_for_user(user).aggregate(min_date=Min('date'))['min_date']
+
     @property
     def potassium_mg(self) -> DailyNutrientConsumption:
         return DailyNutrientConsumption(total=self._total_potassium_mg, norm=self.daily_norm_potassium_mg)
@@ -395,7 +399,11 @@ class DailyIntakesReport(models.Model):
     @staticmethod
     def get_for_user_between_dates(user: AbstractBaseUser, date_from: datetime.date,
                                    date_to: datetime.date):
-        return DailyIntakesReport.objects.filter(user=user, date__range=(date_from, date_to)).order_by('date')
+        return DailyIntakesReport.filter_for_user(user=user).filter(date__range=(date_from, date_to)).order_by('date')
+
+    @staticmethod
+    def filter_for_user(user: AbstractBaseUser):
+        return DailyIntakesReport.objects.filter(user=user)
 
 
 class Intake(models.Model):
@@ -548,6 +556,10 @@ class DailyHealthStatus(models.Model):
 
         if (self.systolic_blood_pressure is None) != (self.diastolic_blood_pressure is None):
             raise ValidationError('Pass both systolic and diastolic blood pressure')
+
+    @staticmethod
+    def get_earliest_user_entry_date(user: AbstractBaseUser) -> Optional[datetime.date]:
+        return DailyHealthStatus.get_for_user(user).aggregate(min_date=Min('date'))['min_date']
 
     @staticmethod
     def has_any_statuses(user: AbstractBaseUser) -> bool:

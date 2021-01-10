@@ -167,9 +167,4 @@ class HealthStatusWeeklyScreenView(RetrieveAPIView):
     serializer_class = serializers.HealthStatusWeeklyScreenResponseSerializer
 
     def get_object(self) -> HealthStatusWeeklyResponse:
-        date_from, date_to = parse_date_query_params(self.request)
-        daily_health_statuses = DailyHealthStatus.get_between_dates_for_user(self.request.user, date_from, date_to)
-
-        return HealthStatusWeeklyResponse(
-            daily_health_statuses=daily_health_statuses
-        )
+        return HealthStatusWeeklyResponse.from_api_request(self.request)

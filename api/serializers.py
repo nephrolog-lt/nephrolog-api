@@ -96,10 +96,11 @@ class NutrientScreenResponseSerializer(ReadOnlySerializer):
 
 
 class NutrientWeeklyScreenResponseSerializer(ReadOnlySerializer):
+    earliest_report_date = serializers.DateField(read_only=True, allow_null=True)
     daily_intakes_reports = DailyIntakeReportSerializer(read_only=True, many=True)
 
     class Meta:
-        fields = ('daily_intakes_reports',)
+        fields = ('earliest_report_date', 'daily_intakes_reports',)
 
 
 class DailyHealthStatusSerializer(serializers.ModelSerializer):
@@ -128,7 +129,8 @@ class HealthStatusScreenResponseSerializer(ReadOnlySerializer):
 
 
 class HealthStatusWeeklyScreenResponseSerializer(ReadOnlySerializer):
+    earliest_health_status_date = serializers.DateField(read_only=True, allow_null=True)
     daily_health_statuses = DailyHealthStatusSerializer(read_only=True, many=True)
 
     class Meta:
-        fields = ('health_status_reports',)
+        fields = ('earliest_health_status_date', 'health_status_reports',)
