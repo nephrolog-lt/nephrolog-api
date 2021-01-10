@@ -30,8 +30,32 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ('name_lt', 'name_en')
 
 
+class BaseUserProfileAdminMixin(admin.ModelAdmin):
+    raw_id_fields = ('user',)
+    list_select_related = ('user',)
+    date_hierarchy = 'created_at'
+
+
+@admin.register(models.HistoricalUserProfile)
+class HistoricalUserProfileAdmin(BaseUserProfileAdminMixin):
+    list_display = (
+        'id',
+        'user',
+        'date',
+        'gender',
+        'birthday',
+        'height_cm',
+        'weight_kg',
+
+        'created_at',
+        'updated_at',
+    )
+    list_filter = ('date',)
+    date_hierarchy = 'date'
+
+
 @admin.register(models.UserProfile)
-class UserProfileAdmin(admin.ModelAdmin):
+class UserProfileAdmin(BaseUserProfileAdminMixin):
     list_display = (
         'id',
         'user',
@@ -42,16 +66,6 @@ class UserProfileAdmin(admin.ModelAdmin):
 
         'created_at',
         'updated_at',
-    )
-    date_hierarchy = 'created_at'
-    
-    readonly_fields = (
-        'daily_norm_potassium_mg',
-        'daily_norm_proteins_mg',
-        'daily_norm_sodium_mg',
-        'daily_norm_phosphorus_mg',
-        'daily_norm_energy_kcal',
-        'daily_norm_liquids_ml_without_urine',
     )
 
 
@@ -66,7 +80,8 @@ class IntakeAdmin(admin.ModelAdmin):
         'created_at',
         'updated_at',
     )
-    raw_id_fields = ('product', 'user',)
+    list_select_related = ('user', 'product', 'daily_report')
+    raw_id_fields = ('product', 'user', 'daily_report')
     date_hierarchy = 'consumed_at'
 
 
