@@ -28,7 +28,7 @@ services:
     networks:
       - database_network
     volumes:
-      - postgres_volume:/var/lib/postgresql
+      - postgres_volume:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD", "pg_isready" ]
     labels:
