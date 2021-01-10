@@ -10,7 +10,7 @@ server {
 
 server {
     listen 80;
-    server_name api.nephrogo.lt;
+    server_name api.nephrogo.com;
 
     gzip on;
 
