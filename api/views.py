@@ -95,12 +95,7 @@ class NutritionWeeklyScreenView(RetrieveAPIView):
     serializer_class = serializers.NutrientWeeklyScreenResponseSerializer
 
     def get_object(self) -> NutrientWeeklyScreenResponse:
-        date_from, date_to = parse_date_query_params(self.request)
-        daily_intakes_reports = DailyIntakesReport.get_for_user_between_dates(self.request.user, date_from, date_to)
-
-        return NutrientWeeklyScreenResponse(
-            daily_intakes_reports=daily_intakes_reports
-        )
+        return NutrientWeeklyScreenResponse.from_api_request(self.request)
 
 
 @extend_schema(tags=['user'])
