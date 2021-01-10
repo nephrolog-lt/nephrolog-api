@@ -29,8 +29,8 @@ urlpatterns = [
 
     path('health-status/screen/', views.HealthStatusScreenView.as_view(), name="api-health-status-screen"),
     path('health-status/weekly/', views.HealthStatusWeeklyScreenView.as_view(), name="api-health-status-weekly"),
-    path('health-status/<str:date>/', views.DailyHealthStatusView.as_view(), name="api-health-status"),
-    path('health-status/', views.DailyHealthStatusCreateView.as_view(), name="api-health-status-create"),
+    path('health-status/<str:date>/', views.DailyHealthStatusByDateView.as_view(), name="api-health-status-by-date"),
+    path('health-status/', views.DailyHealthStatusView.as_view(), name="api-health-status"),
 
     path('schema.json/', SpectacularJSONAPIView.as_view(), name='schema'),
     # Optional UI:
