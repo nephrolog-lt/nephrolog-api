@@ -34,7 +34,7 @@ jobs:
           passphrase: ${{ secrets.HOST_PASSWORD }}
           key: ${{ secrets.HOST_PRIVATE_KEY }}
           overwrite: true
-          source: "docker-compose.yml,config/nginx"
+          source: "docker-compose.yml,nginx"
           target: "/srv/nephrolog-api"
 
       - name: Deploy to production

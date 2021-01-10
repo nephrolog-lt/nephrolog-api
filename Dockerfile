@@ -11,4 +11,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["/bin/sh", "config/start.sh"]
+CMD ["/bin/sh", "start.sh"]
