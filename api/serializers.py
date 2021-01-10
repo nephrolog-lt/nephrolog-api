@@ -67,7 +67,7 @@ class DailyNutrientConsumptionSerializer(ReadOnlySerializer):
         fields = ('total', 'norm')
 
 
-class DailyIntakeReportSerializer(serializers.ModelSerializer):
+class DailyIntakesReportSerializer(serializers.ModelSerializer):
     date = serializers.DateField(read_only=True)
     intakes = IntakeSerializer(read_only=True, many=True)
 
@@ -87,8 +87,8 @@ class DailyIntakeReportSerializer(serializers.ModelSerializer):
 
 
 class NutrientScreenResponseSerializer(ReadOnlySerializer):
-    today_intakes_report = DailyIntakeReportSerializer(read_only=True)
-    daily_intakes_reports = DailyIntakeReportSerializer(read_only=True, many=True)
+    today_intakes_report = DailyIntakesReportSerializer(read_only=True)
+    daily_intakes_reports = DailyIntakesReportSerializer(read_only=True, many=True)
     latest_intakes = IntakeSerializer(read_only=True, many=True)
 
     class Meta:
@@ -97,7 +97,7 @@ class NutrientScreenResponseSerializer(ReadOnlySerializer):
 
 class NutrientWeeklyScreenResponseSerializer(ReadOnlySerializer):
     earliest_report_date = serializers.DateField(read_only=True, allow_null=True)
-    daily_intakes_reports = DailyIntakeReportSerializer(read_only=True, many=True)
+    daily_intakes_reports = DailyIntakesReportSerializer(read_only=True, many=True)
 
     class Meta:
         fields = ('earliest_report_date', 'daily_intakes_reports',)
