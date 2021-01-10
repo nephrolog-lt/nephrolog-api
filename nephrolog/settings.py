@@ -215,6 +215,8 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
+
+    'DATETIME_FORMAT': r"%Y-%m-%dT%H:%M:%S%Z",
     'COERCE_DECIMAL_TO_STRING': False,
 }
 
