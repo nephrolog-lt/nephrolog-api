@@ -1,22 +1,7 @@
-from datetime import datetime
-
-from django.urls import path, register_converter
+from django.urls import path
 from drf_spectacular.views import SpectacularJSONAPIView, SpectacularSwaggerView
 
 from api import views
-
-
-class DateConverter:
-    regex = r'\d{4}-\d{2}-\d{2}'
-
-    def to_python(self, value):
-        return datetime.strptime(value, '%Y-%m-%d')
-
-    def to_url(self, value):
-        return value
-
-
-register_converter(DateConverter, 'date')
 
 urlpatterns = [
     path('user/profile/', views.UserProfileView.as_view(), name="api-user-profile"),
