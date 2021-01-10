@@ -120,10 +120,11 @@ class DailyHealthStatusSerializer(serializers.ModelSerializer):
 
 
 class HealthStatusScreenResponseSerializer(ReadOnlySerializer):
+    has_any_statuses = serializers.BooleanField(read_only=True)
     daily_health_statuses = DailyHealthStatusSerializer(read_only=True, many=True)
 
     class Meta:
-        fields = ('health_status_reports',)
+        fields = ('has_any_statuses', 'health_status_reports',)
 
 
 class HealthStatusWeeklyScreenResponseSerializer(ReadOnlySerializer):

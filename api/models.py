@@ -4,33 +4,10 @@ import datetime
 from dataclasses import dataclass
 from typing import List
 
-from django.db.models.enums import TextChoices
 from rest_framework.request import Request
 
 from api import utils
 from core.models import DailyHealthStatus, DailyIntakesReport, Intake, UserProfile
-
-
-class Nutrient(TextChoices):
-    Unknown = "Unknown"
-    Potassium = "Potassium"
-    Proteins = "Proteins"
-    Sodium = "Sodium"
-    Phosphorus = "Phosphorus"
-    Liquids = "Liquids"
-    Energy = "Energy"
-
-
-class HealthIndicator(TextChoices):
-    Unknown = "Unknown"
-    BloodPressure = "BloodPressure"
-    Weight = "Weight"
-    Urine = "Urine"
-    SeverityOfSwelling = "SeverityOfSwelling"
-    Swellings = "Swellings"
-    WellBeing = "WellBeing"
-    Appetite = "Appetite"
-    ShortnessOfBreath = "ShortnessOfBreath"
 
 
 @dataclass(frozen=True)
@@ -67,6 +44,7 @@ class NutrientWeeklyScreenResponse:
 
 @dataclass(frozen=True)
 class HealthStatusScreenResponse:
+    has_any_statuses: bool
     daily_health_statuses: List[DailyHealthStatus]
 
     @staticmethod
@@ -80,8 +58,10 @@ class HealthStatusScreenResponse:
         to_date = now.date()
 
         daily_health_statuses = DailyHealthStatus.get_between_dates_for_user(user, from_date, to_date)
+        has_any_statuses = bool(daily_health_statuses) or DailyHealthStatus.has_any_statuses(user)
 
         return HealthStatusScreenResponse(
+            has_any_statuses=has_any_statuses,
             daily_health_statuses=daily_health_statuses
         )
 

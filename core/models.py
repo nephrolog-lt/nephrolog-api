@@ -550,6 +550,10 @@ class DailyHealthStatus(models.Model):
             raise ValidationError('Pass both systolic and diastolic blood pressure')
 
     @staticmethod
+    def has_any_statuses(user: AbstractBaseUser) -> bool:
+        return DailyHealthStatus.get_for_user(user).exists()
+
+    @staticmethod
     def get_for_user(user: AbstractBaseUser):
         return DailyHealthStatus.objects.filter(user=user)
 
