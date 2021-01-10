@@ -235,7 +235,7 @@ class HistoricalUserProfile(BaseUserProfile):
         if historical_profile_for_date:
             return historical_profile_for_date
 
-        return HistoricalUserProfile.objects.filter(user=user).exclude(date__lte=date).order_by('date').get()
+        return HistoricalUserProfile.objects.filter(user=user).exclude(date__lte=date).order_by('date')[:1].get()
 
 
 # Nutrition
