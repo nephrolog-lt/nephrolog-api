@@ -3,8 +3,8 @@ EXPOSE 8080
 
 ENV PYTHONUNBUFFERED 1
 
-RUN mkdir /srv/nephrolog-api
-WORKDIR /srv/nephrolog-api
+RUN mkdir /srv/nephrogo-api
+WORKDIR /srv/nephrogo-api
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

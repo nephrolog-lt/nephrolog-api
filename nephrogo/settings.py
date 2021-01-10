@@ -59,7 +59,7 @@ MIDDLEWARE = [
 if DEBUG:
     INSTALLED_APPS.append('django_admin_generator')
 
-ROOT_URLCONF = 'nephrolog.urls'
+ROOT_URLCONF = 'nephrogo.urls'
 
 TEMPLATES = [
     {
@@ -77,7 +77,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'nephrolog.wsgi.application'
+WSGI_APPLICATION = 'nephrogo.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
@@ -226,7 +226,7 @@ DRF_FIREBASE_TOKEN_AUTH = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'NephroLog API',
+    'TITLE': 'NephroGo API',
     'DESCRIPTION': '',
     'TOS': None,
     'VERSION': '1.0.0',

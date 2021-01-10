@@ -2,20 +2,20 @@ version: "3.9"
 
 services:
   api:
-    image: ghcr.io/nephrolog-lt/nephrolog-api:latest
+    image: ghcr.io/nephrogo-lt/nephrogo-api:latest
     env_file:
       - secrets/.env
     labels:
-      - lt.nephrolog.api
+      - lt.nephrogo.api
     deploy:
       replicas: 2
       update_config:
         delay: 5s
         order: stop-first
     volumes:
-      - static_volume:/srv/nephrolog-api/static
-      - media_volume:/srv/nephrolog-api/media
-      - /srv/nephrolog-api/secrets:/srv/nephrolog-api/secrets
+      - static_volume:/srv/nephrogo-api/static
+      - media_volume:/srv/nephrogo-api/media
+      - /srv/nephrogo-api/secrets:/srv/nephrogo-api/secrets
     networks:
       - nginx_network
       - database_network
@@ -32,7 +32,7 @@ services:
     healthcheck:
       test: [ "CMD", "pg_isready" ]
     labels:
-      - lt.nephrolog.postgres
+      - lt.nephrogo.postgres
     deploy:
       restart_policy:
         condition: on-failure
@@ -42,7 +42,7 @@ services:
     networks:
       - redis_network
     labels:
-      - lt.nephrolog.redis
+      - lt.nephrogo.redis
     volumes:
       - redis_volume:/data
     healthcheck:
@@ -54,14 +54,14 @@ services:
       - 80:80
       - 443:443
     volumes:
-      - /srv/nephrolog-api/nginx/conf.d:/etc/nginx/conf.d
-      - /srv/nephrolog-api/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - static_volume:/srv/nephrolog-api/static
-      - media_volume:/srv/nephrolog-api/media
+      - /srv/nephrogo-api/nginx/conf.d:/etc/nginx/conf.d
+      - /srv/nephrogo-api/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - static_volume:/srv/nephrogo-api/static
+      - media_volume:/srv/nephrogo-api/media
     networks:
       - nginx_network
     labels:
-      - lt.nephrolog.nginx
+      - lt.nephrogo.nginx
 
 networks:
   nginx_network:

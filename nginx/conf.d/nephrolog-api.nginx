@@ -1,4 +1,4 @@
-upstream nephrolog_api {
+upstream nephrogo_api {
     server api:8080;
 }
 
@@ -10,7 +10,7 @@ server {
 
 server {
     listen 80;
-    server_name api.nephrolog.lt;
+    server_name api.nephrogo.lt;
 
     gzip on;
 
@@ -30,11 +30,11 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-Proto https;
 
-        proxy_pass http://nephrolog_api;
+        proxy_pass http://nephrogo_api;
     }
 
     location /media {
-        root /srv/nephrolog-api;
+        root /srv/nephrogo-api;
 
         expires 14d;
         add_header Pragma public;
@@ -42,7 +42,7 @@ server {
     }
 
     location /static {
-        root /srv/nephrolog-api;
+        root /srv/nephrogo-api;
 
         expires 14d;
         add_header Pragma public;

@@ -14,7 +14,7 @@ from django.db.models.aggregates import Max, Min
 from django.db.models.functions import TruncDay
 from django.db.transaction import atomic
 
-from nephrolog import settings
+from nephrogo import settings
 
 
 @dataclass(frozen=True)

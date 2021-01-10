@@ -12,7 +12,7 @@ jobs:
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
-          name: nephrolog-lt/nephrolog-api
+          name: nephrogo/nephrogo-api
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.OWNER_GITHUB_TOKEN }}
@@ -35,7 +35,7 @@ jobs:
           key: ${{ secrets.HOST_PRIVATE_KEY }}
           overwrite: true
           source: "docker-compose.yml,nginx"
-          target: "/srv/nephrolog-api"
+          target: "/srv/nephrogo-api"
 
       - name: Deploy to production
         uses: appleboy/ssh-action@master
@@ -44,4 +44,4 @@ jobs:
           username: ${{ secrets.HOST_USERNAME }}
           passphrase: ${{ secrets.HOST_PASSWORD }}
           key: ${{ secrets.HOST_PRIVATE_KEY }}
-          script: docker stack deploy nephrolog-api --compose-file /srv/nephrolog-api/docker-compose.yml
+          script: docker stack deploy nephrogo-api --compose-file /srv/nephrogo-api/docker-compose.yml
