@@ -10,6 +10,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models.aggregates import Max
 from django.db.models.functions import TruncDay
 from django.db.transaction import atomic
 
@@ -271,7 +272,8 @@ class Product(models.Model):
 
     @staticmethod
     def last_consumed_products_by_user(user: AbstractBaseUser):
-        return Product.objects.filter(intakes__user=user).distinct().order_by('-intakes__consumed_at')
+        return Product.objects.filter(intakes__user=user).annotate(
+            max_consumed_at=Max('intakes__consumed_at')).order_by('-max_consumed_at')
 
     def __str__(self):
         return self.name_lt
