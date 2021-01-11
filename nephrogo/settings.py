@@ -253,6 +253,7 @@ SPECTACULAR_SETTINGS = {
     'TOS': None,
     'VERSION': '1.0.0',
     'SCHEMA_PATH_PREFIX': '/v1/',
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAdminUser'],
     'SERVE_INCLUDE_SCHEMA': False,
     # Create separate components for PATCH endpoints (without required list)
     'COMPONENT_SPLIT_PATCH': False,
