@@ -74,7 +74,7 @@ services:
       - DD_APM_ENABLED=true
       - DD_LOGS_ENABLED=true
     env_file:
-      - .env
+      - secrets/.env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /proc/:/host/proc/:ro
