@@ -1,8 +1,11 @@
 from pathlib import Path
+
+import django
 import environ
 import sentry_sdk
 from django.utils.log import DEFAULT_LOGGING
 import logging.config
+from ddtrace import Pin, config, patch_all, tracer
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 from sentry_sdk.integrations.django import DjangoIntegration
@@ -208,6 +211,16 @@ if not DEBUG:
         send_default_pii=True
     )
 
+# Datadog
+if not DEBUG:
+    tracer.configure(hostname='ddagent', port=8126, enabled=not DEBUG)
+    config.django['service_name'] = 'nephrogo-api'
+    config.django['instrument_databases'] = True
+    config.django['instrument_caches'] = True
+    config.django['trace_query_string'] = True
+    config.django['analytics_enabled'] = True
+    tracer.set_tags({'env': 'production'})
+
 # Rest framework
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
@@ -248,3 +261,6 @@ SPECTACULAR_SETTINGS = {
     # Adds "blank" and "null" enum choices where appropriate. disable on client generation issues
     'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': False,
 }
+
+patch_all()
+Pin.override(Pin.get_from(django))
