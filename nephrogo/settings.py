@@ -191,6 +191,15 @@ logging.config.dictConfig({
     },
 })
 
+# Cache
+if not DEBUG:
+    CACHES = {
+        "default": env.cache('REDIS_URL', backend='django_redis.cache.RedisCache')
+    }
+
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    SESSION_CACHE_ALIAS = "default"
+
 if not DEBUG:
     sentry_sdk.init(
         dsn=env.str('SENTRY_DSN'),
