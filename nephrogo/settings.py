@@ -213,7 +213,7 @@ if not DEBUG:
 
 # Datadog
 if not DEBUG:
-    tracer.configure(hostname='ddagent', port=8126, enabled=not DEBUG)
+    tracer.configure(hostname=env.str('DD_AGENT_HOST'), port=env.str('DD_TRACE_AGENT_PORT'), enabled=not DEBUG)
     config.django['service_name'] = 'nephrogo-api'
     config.django['instrument_databases'] = True
     config.django['instrument_caches'] = True
@@ -262,5 +262,6 @@ SPECTACULAR_SETTINGS = {
     'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': False,
 }
 
-patch_all()
-Pin.override(Pin.get_from(django))
+if not DEBUG:
+    patch_all()
+    Pin.override(Pin.get_from(django))
