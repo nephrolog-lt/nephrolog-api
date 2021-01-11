@@ -20,6 +20,7 @@ services:
       - nginx_network
       - database_network
       - redis_network
+      - datadog_network
 
   postgres:
     image: postgres:13.1
@@ -27,6 +28,7 @@ services:
       - secrets/.env
     networks:
       - database_network
+      - datadog_network
     volumes:
       - postgres_volume:/var/lib/postgresql/data
     healthcheck:
@@ -41,6 +43,7 @@ services:
     image: redis:6.0
     networks:
       - redis_network
+      - datadog_network
     labels:
       - lt.nephrogo.redis
     volumes:
@@ -60,8 +63,24 @@ services:
       - media_volume:/srv/nephrogo-api/media
     networks:
       - nginx_network
+      - datadog_network
     labels:
       - lt.nephrogo.nginx
+
+  ddagent:
+    image: datadog/agent:7
+    environment:
+      - DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true
+      - DD_APM_ENABLED=true
+      - DD_LOGS_ENABLED=true
+    env_file:
+      - .env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+    networks:
+      - datadog_network
 
 networks:
   nginx_network:
@@ -69,6 +88,8 @@ networks:
   database_network:
     driver: overlay
   redis_network:
+    driver: overlay
+  datadog_network:
     driver: overlay
 
 volumes:
