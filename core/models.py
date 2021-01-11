@@ -7,9 +7,12 @@ from typing import Optional
 
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AbstractUser
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector, TrigramDistance, TrigramSimilarity
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import QuerySet
 from django.db.models.aggregates import Max, Min
 from django.db.models.functions import TruncDay
 from django.db.transaction import atomic
@@ -271,6 +274,22 @@ class Product(models.Model):
 
     class Meta:
         ordering = ("-pk",)
+        indexes = [
+            GinIndex(fields=('name_lt',)),
+            GinIndex(fields=('name_en',)),
+        ]
+
+    @staticmethod
+    def filter_by_user_and_query(user: AbstractBaseUser, query: Optional[str]) -> QuerySet[Product]:
+        query = query.strip() if query else None
+
+        if not query:
+            products: QuerySet[Product] = Product.last_consumed_products_by_user(user)
+            if products.exists():
+                return products
+
+        return Product.objects.annotate(similarity=TrigramSimilarity('name_lt__unaccent', query)).filter(
+            similarity__gt=0.1).order_by('-similarity')
 
     @staticmethod
     def last_consumed_products_by_user(user: AbstractBaseUser):
@@ -408,6 +427,11 @@ class DailyIntakesReport(models.Model):
         return DailyIntakesReport.objects.filter(user=user)
 
 
+class IntakeQuerySet(models.QuerySet):
+    def select_related_product(self) -> IntakeQuerySet:
+        return self.select_related('product')
+
+
 class Intake(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
     daily_report = models.ForeignKey(DailyIntakesReport, on_delete=models.CASCADE, related_name='intakes')
@@ -418,19 +442,21 @@ class Intake(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    objects = IntakeQuerySet.as_manager()
+
     class Meta:
         indexes = [
             models.Index(fields=('user', '-consumed_at')),
         ]
 
     @staticmethod
-    def get_latest_user_intakes(user: AbstractBaseUser, limit: int):
-        return Intake.objects.filter(user=user).select_related('product').order_by('-consumed_at')[:limit]
+    def get_latest_user_intakes(user: AbstractBaseUser, limit: int) -> IntakeQuerySet:
+        return Intake.objects.filter(user=user).select_related_product().order_by('-consumed_at')[:limit]
 
     @staticmethod
     def get_user_intakes_between_dates(user: AbstractBaseUser, date_from: datetime.date, date_to: datetime.date,
-                                       tzinfo: datetime.timezone):
-        return Intake.objects.filter(user=user).select_related('product').annotate(
+                                       tzinfo: datetime.timezone) -> IntakeQuerySet:
+        return Intake.objects.filter(user=user).select_related_product().annotate(
             date=TruncDay('consumed_at', tzinfo=tzinfo)).filter(
             date__range=(date_from, date_to)).order_by('consumed_at')
 

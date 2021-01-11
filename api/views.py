@@ -15,21 +15,26 @@ from api.utils import datetime_to_date, parse_date_or_validation_error, parse_ti
 from core import models
 
 
-@extend_schema(tags=['nutrition'])
+@extend_schema(
+    tags=['nutrition'],
+    parameters=[
+        OpenApiParameter(
+            name='query',
+            type=OpenApiTypes.STR,
+            required=True,
+            location=OpenApiParameter.QUERY,
+        )
+    ],
+)
 class ProductListView(ListAPIView):
     queryset = models.Product.objects.all()
     serializer_class = serializers.ProductSerializer
-    filterset_class = ProductFilter
-    _limit = 20
+    _limit = 15
 
-    def filter_queryset(self, queryset: QuerySet[models.Product]) -> QuerySet[models.Product]:
-        if not self.request.query_params.get('query', None):
-            last_consumed_products = models.Product.last_consumed_products_by_user(self.request.user)[:self._limit]
+    def get_queryset(self):
+        query = self.request.query_params.get('query', None)
 
-            if last_consumed_products:
-                return last_consumed_products
-
-        return super().filter_queryset(queryset)[:self._limit]
+        return models.Product.filter_by_user_and_query(self.request.user, query)[:self._limit]
 
 
 @extend_schema(tags=['nutrition'])
