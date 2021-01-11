@@ -117,6 +117,10 @@ class BaseUserProfile(models.Model):
 
         super().save(force_insert, force_update, using, update_fields)
 
+    @property
+    def _is_diabetic(self) -> bool:
+        return self.diabetes_type in (DiabetesType.Type1, DiabetesType.Type2)
+
     def daily_norm_potassium_mg(self) -> Optional[int]:
         if self.dialysis_type == DialysisType.Hemodialysis:
             return round(40 * self.perfect_weight_kg)
@@ -127,16 +131,16 @@ class BaseUserProfile(models.Model):
 
     def daily_norm_proteins_mg(self) -> Optional[int]:
         if self.dialysis_type == DialysisType.NotPerformed:
-            return round(800 * self.perfect_weight_kg)
+            if self._is_diabetic:
+                return round(800 * self.perfect_weight_kg)
+            else:
+                return round(600 * self.perfect_weight_kg)
 
-        if self.dialysis_type == DialysisType.Hemodialysis:
+        if self.dialysis_type in (DialysisType.PeriotonicDialysis, DialysisType.Hemodialysis):
             return round(1200 * self.perfect_weight_kg)
 
-        if self.dialysis_type == DialysisType.PeriotonicDialysis:
-            return round(1500 * self.perfect_weight_kg)
-
         if self.dialysis_type == DialysisType.PostTransplant:
-            return round(1000 * self.perfect_weight_kg)
+            return round(800 * self.perfect_weight_kg)
 
         return None
 
@@ -144,11 +148,9 @@ class BaseUserProfile(models.Model):
         return 2300
 
     def daily_norm_phosphorus_mg(self) -> Optional[int]:
-        if self.dialysis_type == DialysisType.NotPerformed:
-            return round(12 * self.perfect_weight_kg)
-
-        if self.dialysis_type in (DialysisType.Hemodialysis, DialysisType.PeriotonicDialysis):
-            return 1200
+        if self.dialysis_type in (
+                DialysisType.Hemodialysis, DialysisType.PeriotonicDialysis, DialysisType.NotPerformed):
+            return 1000
 
         return None
 
