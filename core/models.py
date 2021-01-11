@@ -17,6 +17,7 @@ from django.db.models.aggregates import Max, Min
 from django.db.models.functions import TruncDay
 from django.db.transaction import atomic
 
+from core.utils import str_to_ascii
 from nephrogo import settings
 
 
@@ -287,6 +288,8 @@ class Product(models.Model):
             products: QuerySet[Product] = Product.last_consumed_products_by_user(user)
             if products.exists():
                 return products
+
+        query = str_to_ascii(query or "")
 
         return Product.objects.annotate(similarity=TrigramSimilarity('name_lt__unaccent', query)).filter(
             similarity__gt=0.1).order_by('-similarity')
