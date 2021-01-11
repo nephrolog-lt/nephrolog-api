@@ -3,6 +3,9 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from core import models
 
+admin.site.site_header = 'NephroGo Administration'
+admin.site.site_title = admin.site.site_header
+
 
 @admin.register(models.User)
 class UserAdmin(BaseUserAdmin):
