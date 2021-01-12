@@ -420,9 +420,14 @@ class DailyIntakesReport(models.Model):
             report.recalculate_daily_norms()
 
     @staticmethod
-    def get_or_create_for_user_and_date(user: AbstractBaseUser, date: datetime.date) -> DailyIntakesReport:
+    def get_or_create_for_user_and_date(user: AbstractBaseUser, date: datetime.date,
+                                        prefetch: bool = False) -> DailyIntakesReport:
         with atomic():
-            report, created = DailyIntakesReport.objects.get_or_create(user=user, date=date)
+            queryset: DailyIntakesReportQuerySet = DailyIntakesReport.objects.all()
+            if prefetch:
+                queryset = queryset.prefetch_intakes()
+
+            report, created = queryset.get_or_create(user=user, date=date)
 
             if created:
                 report.recalculate_daily_norms()

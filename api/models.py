@@ -27,7 +27,7 @@ class NutrientScreenResponse:
         from_date = (now - datetime.timedelta(days=7)).date()
         to_date = now.date()
 
-        today_intakes_report = DailyIntakesReport.get_or_create_for_user_and_date(user, to_date)
+        today_intakes_report = DailyIntakesReport.get_or_create_for_user_and_date(user, to_date, prefetch=True)
         daily_intakes_reports = DailyIntakesReport.get_for_user_between_dates(request.user, from_date, to_date)
         latest_intakes = Intake.get_latest_user_intakes(user)[:3]
 
