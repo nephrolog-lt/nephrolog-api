@@ -16,9 +16,9 @@ class UserAdmin(BaseUserAdmin):
 class ProductAdmin(admin.ModelAdmin):
     list_display = (
         'id',
+        'product_kind',
         'name_lt',
         'name_en',
-        'product_kind',
         'potassium_mg',
         'proteins_mg',
         'sodium_mg',
@@ -30,6 +30,7 @@ class ProductAdmin(admin.ModelAdmin):
         'updated_at',
     )
     list_filter = ('product_kind', 'created_at', 'updated_at')
+    list_editable = ('product_kind', 'name_lt', 'name_en')
     search_fields = ('name_lt', 'name_en')
 
 
