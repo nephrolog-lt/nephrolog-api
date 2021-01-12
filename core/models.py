@@ -8,13 +8,12 @@ from typing import Optional
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.indexes import GinIndex
-from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector, TrigramDistance, TrigramSimilarity
+from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import Prefetch, QuerySet
 from django.db.models.aggregates import Max, Min
-from django.db.models.functions import TruncDay
 from django.db.transaction import atomic
 
 from core.utils import str_to_ascii
@@ -305,6 +304,11 @@ class Product(models.Model):
         return self.name_lt
 
 
+class DailyIntakesReportQuerySet(models.QuerySet):
+    def prefetch_intakes(self) -> DailyIntakesReportQuerySet:
+        return self.prefetch_related(Prefetch('intakes', queryset=Intake.objects.select_related_product()))
+
+
 class DailyIntakesReport(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
     date = models.DateField()
@@ -318,6 +322,8 @@ class DailyIntakesReport(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = DailyIntakesReportQuerySet.as_manager()
 
     class Meta:
         constraints = [
@@ -425,7 +431,8 @@ class DailyIntakesReport(models.Model):
     @staticmethod
     def get_for_user_between_dates(user: AbstractBaseUser, date_from: datetime.date,
                                    date_to: datetime.date):
-        return DailyIntakesReport.filter_for_user(user=user).filter(date__range=(date_from, date_to)).order_by('date')
+        return DailyIntakesReport.filter_for_user(user=user).filter(
+            date__range=(date_from, date_to)).prefetch_intakes().order_by('date')
 
     @staticmethod
     def filter_for_user(user: AbstractBaseUser):
@@ -455,15 +462,8 @@ class Intake(models.Model):
         ]
 
     @staticmethod
-    def get_latest_user_intakes(user: AbstractBaseUser, limit: int) -> IntakeQuerySet:
-        return Intake.objects.filter(user=user).select_related_product().order_by('-consumed_at')[:limit]
-
-    @staticmethod
-    def get_user_intakes_between_dates(user: AbstractBaseUser, date_from: datetime.date, date_to: datetime.date,
-                                       tzinfo: datetime.timezone) -> IntakeQuerySet:
-        return Intake.objects.filter(user=user).select_related_product().annotate(
-            date=TruncDay('consumed_at', tzinfo=tzinfo)).filter(
-            date__range=(date_from, date_to)).order_by('consumed_at')
+    def get_latest_user_intakes(user: AbstractBaseUser) -> IntakeQuerySet:
+        return Intake.objects.filter(user=user).select_related_product().order_by('-consumed_at')
 
     @property
     def _amount_nutrient_ratio(self) -> Decimal:
