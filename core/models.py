@@ -526,18 +526,6 @@ class Appetite(models.TextChoices):
     VeryBad = "VeryBad"
 
 
-class Swelling(models.TextChoices):
-    Unknown = "Unknown"
-    Eyes = "Eyes"
-    WholeFace = "WholeFace"
-    HandBreadth = "HandBreadth"
-    Hands = "Hands"
-    Belly = "Belly"
-    Knees = "Knees"
-    Foot = "Foot"
-    WholeLeg = "WholeLeg"
-
-
 class ShortnessOfBreath(models.TextChoices):
     Unknown = "Unknown"
     No = "No"
@@ -547,6 +535,28 @@ class ShortnessOfBreath(models.TextChoices):
     Backbreaking = "Backbreaking"
 
 
+class SwellingEnum(models.TextChoices):
+    Unknown = "Unknown"
+    Eyes = "Eyes"
+    WholeFace = "WholeFace"
+    HandBreadth = "HandBreadth"
+    Hands = "Hands"
+    Belly = "Belly"
+    Knees = "Knees"
+    Foot = "Foot"
+    WholeLegs = "WholeLegs"
+
+
+class Swelling(models.Model):
+    swelling = models.CharField(
+        max_length=16,
+        choices=SwellingEnum.choices,
+    )
+
+    def __str__(self):
+        return self.swelling
+
+
 class DailyHealthStatus(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
     date = models.DateField()
@@ -554,21 +564,14 @@ class DailyHealthStatus(models.Model):
     systolic_blood_pressure = models.PositiveSmallIntegerField(null=True, blank=True)
     diastolic_blood_pressure = models.PositiveSmallIntegerField(null=True, blank=True)
 
-    swellings = ArrayField(
-        models.CharField(
-            max_length=16,
-            choices=Swelling.choices,
-        ),
-        blank=True,
-        default=list,
-    )
-
     weight_kg = models.DecimalField(null=True, blank=True, max_digits=4, decimal_places=1,
                                     validators=[MinValueValidator(Decimal('10'))])
 
     glucose = models.DecimalField(null=True, blank=True, max_digits=7, decimal_places=2,
                                   validators=[MinValueValidator(Decimal('0'))])
     urine_ml = models.PositiveSmallIntegerField(null=True, blank=True)
+
+    swellings = models.ManyToManyField(Swelling, blank=True)
 
     swelling_difficulty = models.CharField(
         max_length=16,

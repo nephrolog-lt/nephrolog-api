@@ -1,9 +1,10 @@
 from logging import getLogger
+from typing import Dict
 
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from core.models import DailyHealthStatus, DailyIntakesReport, Intake, Product, UserProfile
+from core.models import DailyHealthStatus, DailyIntakesReport, Intake, Product, Swelling, UserProfile
 
 logger = getLogger()
 
@@ -103,8 +104,15 @@ class NutrientWeeklyScreenResponseSerializer(ReadOnlySerializer):
         fields = ('earliest_report_date', 'daily_intakes_reports',)
 
 
+class SwellingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Swelling
+        fields = ('swelling',)
+
+
 class DailyHealthStatusSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    swellings = SwellingSerializer(many=True)
 
     class Meta:
         model = DailyHealthStatus
@@ -118,6 +126,29 @@ class DailyHealthStatusSerializer(serializers.ModelSerializer):
                 fields=('date', 'user')
             ),
         )
+
+    def _replace_swellings(self, health_status: DailyHealthStatus, swellings_data: Dict):
+        health_status.swellings.clear()
+        for data in swellings_data:
+            health_status.swellings.create(swelling=data['swelling'])
+
+    def update(self, instance: DailyHealthStatus, validated_data: Dict) -> DailyHealthStatus:
+        swellings_data = validated_data.pop('swellings', None)
+
+        health_status: DailyHealthStatus = super().update(instance, validated_data)
+
+        self._replace_swellings(health_status, swellings_data)
+
+        return health_status
+
+    def create(self, validated_data: Dict) -> DailyHealthStatus:
+        swellings_data = validated_data.pop('swellings', None)
+
+        health_status = super().create(validated_data)
+
+        self._replace_swellings(health_status, swellings_data)
+
+        return health_status
 
 
 class HealthStatusScreenResponseSerializer(ReadOnlySerializer):
