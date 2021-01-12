@@ -24,7 +24,8 @@ class FirebaseAuthenticationScheme(OpenApiAuthenticationExtension):
 class FirebaseAuthentication(BaseFirebaseAuthentication):
 
     def cache_key_name(self, token: str) -> str:
-        return f'django-rest-framework-user-pk-by-token-{base64.encodestring(token.encode())}'
+        encoded_token = base64.b64encode(token.encode()).decode()
+        return f'django-rest-framework-user-pk-by-token-{encoded_token}'
 
     def save_user_to_cache(self, user: User, token: str):
         cache.set(self.cache_key_name(token), user.pk, 600)
