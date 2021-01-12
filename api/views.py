@@ -8,7 +8,6 @@ from rest_framework.generics import CreateAPIView, DestroyAPIView, ListAPIView, 
     RetrieveUpdateDestroyAPIView, UpdateAPIView, get_object_or_404
 
 from api import serializers
-from api.filters import ProductFilter
 from api.models import HealthStatusScreenResponse, HealthStatusWeeklyResponse, NutrientScreenResponse, \
     NutrientWeeklyScreenResponse
 from api.utils import datetime_to_date, parse_date_or_validation_error, parse_time_zone
