@@ -7,6 +7,7 @@ from typing import Optional
 
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AbstractUser
+from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ValidationError
@@ -525,6 +526,18 @@ class Appetite(models.TextChoices):
     VeryBad = "VeryBad"
 
 
+class Swelling(models.TextChoices):
+    Unknown = "Unknown"
+    Eyes = "Eyes"
+    WholeFace = "WholeFace"
+    HandBreadth = "HandBreadth"
+    Hands = "Hands"
+    Belly = "Belly"
+    Knees = "Knees"
+    Foot = "Foot"
+    WholeLeg = "WholeLeg"
+
+
 class ShortnessOfBreath(models.TextChoices):
     Unknown = "Unknown"
     No = "No"
@@ -540,6 +553,15 @@ class DailyHealthStatus(models.Model):
 
     systolic_blood_pressure = models.PositiveSmallIntegerField(null=True, blank=True)
     diastolic_blood_pressure = models.PositiveSmallIntegerField(null=True, blank=True)
+
+    swellings = ArrayField(
+        models.CharField(
+            max_length=16,
+            choices=Swelling.choices,
+        ),
+        blank=True,
+        default=list,
+    )
 
     weight_kg = models.DecimalField(null=True, blank=True, max_digits=4, decimal_places=1,
                                     validators=[MinValueValidator(Decimal('10'))])

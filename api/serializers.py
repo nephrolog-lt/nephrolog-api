@@ -110,7 +110,7 @@ class DailyHealthStatusSerializer(serializers.ModelSerializer):
         model = DailyHealthStatus
         fields = (
             'date', 'user', 'systolic_blood_pressure', 'diastolic_blood_pressure', 'weight_kg', 'glucose', 'urine_ml',
-            'swelling_difficulty', 'well_feeling', 'appetite', 'shortness_of_breath'
+            'swelling_difficulty', 'well_feeling', 'appetite', 'shortness_of_breath', 'swellings',
         )
         validators = (
             UniqueTogetherValidator(
