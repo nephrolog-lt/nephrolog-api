@@ -289,7 +289,9 @@ class Product(models.Model):
             if products.exists():
                 return products
 
-        query = str_to_ascii(query or "")
+            return Product.objects.order_by('-pk')
+
+        query = str_to_ascii(query)
 
         return Product.objects.annotate(similarity=TrigramSimilarity('name_lt__unaccent', query)).filter(
             similarity__gt=0.1).order_by('-similarity')
