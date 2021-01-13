@@ -360,6 +360,10 @@ class DailyIntakesReport(models.Model):
         return DailyNutrientConsumption(total=self._total_liquids_g, norm=self.daily_norm_liquids_g)
 
     @property
+    def liquids_ml(self) -> DailyNutrientConsumption:
+        return self.liquids_g
+
+    @property
     def _total_potassium_mg(self):
         return sum(intake.potassium_mg for intake in self.intakes.all())
 

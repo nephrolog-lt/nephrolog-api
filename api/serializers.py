@@ -81,12 +81,13 @@ class DailyIntakesReportSerializer(serializers.ModelSerializer):
     phosphorus_mg = DailyNutrientConsumptionSerializer(read_only=True)
     energy_kcal = DailyNutrientConsumptionSerializer(read_only=True)
     liquids_g = DailyNutrientConsumptionSerializer(read_only=True)
+    liquids_ml = DailyNutrientConsumptionSerializer(read_only=True)
 
     class Meta:
         model = DailyIntakesReport
         fields = (
             'date', 'intakes',
-            'potassium_mg', 'proteins_mg', 'sodium_mg', 'phosphorus_mg', 'energy_kcal', 'liquids_g'
+            'potassium_mg', 'proteins_mg', 'sodium_mg', 'phosphorus_mg', 'energy_kcal', 'liquids_g', 'liquids_ml',
         )
 
 
