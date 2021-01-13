@@ -50,13 +50,16 @@ class IntakeSerializer(serializers.ModelSerializer):
     sodium_mg = serializers.IntegerField(read_only=True)
     phosphorus_mg = serializers.IntegerField(read_only=True)
     energy_kcal = serializers.IntegerField(read_only=True)
-    liquids_ml = serializers.IntegerField(read_only=True)
+    liquids_g = serializers.IntegerField(read_only=True)
+    # TODO remove this one in the near future
+    liquids_ml = serializers.IntegerField(read_only=True, source='liquids_g')
 
     class Meta:
         model = Intake
         fields = (
-            'id', 'user', 'product_id', 'product', 'consumed_at', 'amount_g',
-            'potassium_mg', 'proteins_mg', 'sodium_mg', 'phosphorus_mg', 'energy_kcal', 'liquids_ml',
+            'id', 'user', 'product_id', 'consumed_at', 'amount_g',
+            'potassium_mg', 'proteins_mg', 'sodium_mg', 'phosphorus_mg', 'energy_kcal', 'liquids_g', 'liquids_ml',
+            'product',
         )
 
 
@@ -77,13 +80,13 @@ class DailyIntakesReportSerializer(serializers.ModelSerializer):
     sodium_mg = DailyNutrientConsumptionSerializer(read_only=True)
     phosphorus_mg = DailyNutrientConsumptionSerializer(read_only=True)
     energy_kcal = DailyNutrientConsumptionSerializer(read_only=True)
-    liquids_ml = DailyNutrientConsumptionSerializer(read_only=True)
+    liquids_g = DailyNutrientConsumptionSerializer(read_only=True)
 
     class Meta:
         model = DailyIntakesReport
         fields = (
             'date', 'intakes',
-            'potassium_mg', 'proteins_mg', 'sodium_mg', 'phosphorus_mg', 'energy_kcal', 'liquids_ml'
+            'potassium_mg', 'proteins_mg', 'sodium_mg', 'phosphorus_mg', 'energy_kcal', 'liquids_g'
         )
 
 

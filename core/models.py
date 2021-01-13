@@ -161,7 +161,7 @@ class BaseUserProfile(models.Model):
     def daily_norm_energy_kcal(self) -> Optional[int]:
         return round(35 * self.perfect_weight_kg)
 
-    def daily_norm_liquids_ml_without_urine(self) -> Optional[int]:
+    def daily_norm_liquids_g_without_urine(self) -> Optional[int]:
         if self.dialysis_type in (DialysisType.Hemodialysis, DialysisType.PeriotonicDialysis):
             return 1000
 
@@ -266,7 +266,7 @@ class Product(models.Model):
     phosphorus_mg = models.DecimalField(max_digits=7, decimal_places=2, validators=[MinValueValidator(Decimal('0'))])
     proteins_mg = models.PositiveIntegerField()
     energy_kcal = models.PositiveSmallIntegerField()
-    liquids_ml = models.PositiveSmallIntegerField()
+    liquids_g = models.PositiveSmallIntegerField()
 
     raw_id = models.CharField(max_length=64, null=True, blank=True, editable=False, unique=True)
 
@@ -319,7 +319,7 @@ class DailyIntakesReport(models.Model):
     daily_norm_sodium_mg = models.PositiveIntegerField(null=True, blank=True)
     daily_norm_phosphorus_mg = models.PositiveIntegerField(null=True, blank=True)
     daily_norm_energy_kcal = models.PositiveIntegerField(null=True, blank=True)
-    daily_norm_liquids_ml = models.PositiveIntegerField(null=True, blank=True)
+    daily_norm_liquids_g = models.PositiveIntegerField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -356,8 +356,8 @@ class DailyIntakesReport(models.Model):
         return DailyNutrientConsumption(total=self._total_energy_kcal, norm=self.daily_norm_energy_kcal)
 
     @property
-    def liquids_ml(self) -> DailyNutrientConsumption:
-        return DailyNutrientConsumption(total=self._total_liquids_ml, norm=self.daily_norm_liquids_ml)
+    def liquids_g(self) -> DailyNutrientConsumption:
+        return DailyNutrientConsumption(total=self._total_liquids_g, norm=self.daily_norm_liquids_g)
 
     @property
     def _total_potassium_mg(self):
@@ -380,8 +380,8 @@ class DailyIntakesReport(models.Model):
         return sum(intake.energy_kcal for intake in self.intakes.all())
 
     @property
-    def _total_liquids_ml(self):
-        return sum(intake.liquids_ml for intake in self.intakes.all())
+    def _total_liquids_g(self):
+        return sum(intake.liquids_g for intake in self.intakes.all())
 
     def recalculate_daily_norms(self):
         profile = HistoricalUserProfile.get_nearest_historical_profile_for_date(self.user, self.date)
@@ -396,10 +396,10 @@ class DailyIntakesReport(models.Model):
         self.daily_norm_sodium_mg = profile.daily_norm_sodium_mg()
         self.daily_norm_phosphorus_mg = profile.daily_norm_phosphorus_mg()
         self.daily_norm_energy_kcal = profile.daily_norm_energy_kcal()
-        self.daily_norm_liquids_ml = profile.daily_norm_liquids_ml_without_urine()
+        self.daily_norm_liquids_g = profile.daily_norm_liquids_g_without_urine()
 
-        if self.daily_norm_liquids_ml and health_status and health_status.urine_ml:
-            self.daily_norm_liquids_ml += health_status.urine_ml
+        if self.daily_norm_liquids_g and health_status and health_status.urine_ml:
+            self.daily_norm_liquids_g += health_status.urine_ml
 
         self.save(
             update_fields=(
@@ -408,7 +408,7 @@ class DailyIntakesReport(models.Model):
                 'daily_norm_sodium_mg',
                 'daily_norm_phosphorus_mg',
                 'daily_norm_energy_kcal',
-                'daily_norm_liquids_ml'
+                'daily_norm_liquids_g'
             )
         )
 
@@ -496,8 +496,8 @@ class Intake(models.Model):
         return int(self.product.energy_kcal * self._amount_nutrient_ratio)
 
     @property
-    def liquids_ml(self) -> int:
-        return int(self.product.liquids_ml * self._amount_nutrient_ratio)
+    def liquids_g(self) -> int:
+        return int(self.product.liquids_g * self._amount_nutrient_ratio)
 
     def __str__(self):
         return str(self.product)

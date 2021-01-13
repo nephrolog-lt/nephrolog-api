@@ -24,7 +24,7 @@ class ProductAdmin(admin.ModelAdmin):
         'sodium_mg',
         'phosphorus_mg',
         'energy_kcal',
-        'liquids_ml',
+        'liquids_g',
         'raw_id',
         'created_at',
         'updated_at',
@@ -116,7 +116,7 @@ class DailyIntakesReportAdmin(admin.ModelAdmin):
         'daily_norm_sodium_mg',
         'daily_norm_phosphorus_mg',
         'daily_norm_energy_kcal',
-        'daily_norm_liquids_ml',
+        'daily_norm_liquids_g',
         'created_at',
         'updated_at',
     )

@@ -20,7 +20,7 @@ class Command(BaseCommand):
                 'name_lt': item['Name'],
                 'name_en': item['NameEn'],
                 'product_kind': ProductKind.Drink if item['EDIBLE'] > 0.9 else ProductKind.Food,
-                'liquids_ml': item['WATER'],
+                'liquids_g': item['WATER'],
                 'energy_kcal': item['ENERKC'],
                 'potassium_mg': item['K'],
                 'proteins_mg': item['PROT'] * 1000,
