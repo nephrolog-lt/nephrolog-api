@@ -23,7 +23,7 @@ class Command(BaseCommand):
                 'liquids_ml': item['WATER'],
                 'energy_kcal': item['ENERKC'],
                 'potassium_mg': item['K'],
-                'proteins_mg': item['PROT'],
+                'proteins_mg': item['PROT'] * 1000,
                 'sodium_mg': item['NA'],
                 'phosphorus_mg': item['P'],
             }

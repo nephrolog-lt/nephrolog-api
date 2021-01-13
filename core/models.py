@@ -262,9 +262,9 @@ class Product(models.Model):
     )
 
     potassium_mg = models.DecimalField(max_digits=7, decimal_places=2, validators=[MinValueValidator(Decimal('0'))])
-    proteins_mg = models.DecimalField(max_digits=7, decimal_places=2, validators=[MinValueValidator(Decimal('0'))])
     sodium_mg = models.DecimalField(max_digits=7, decimal_places=2, validators=[MinValueValidator(Decimal('0'))])
     phosphorus_mg = models.DecimalField(max_digits=7, decimal_places=2, validators=[MinValueValidator(Decimal('0'))])
+    proteins_mg = models.PositiveIntegerField()
     energy_kcal = models.PositiveSmallIntegerField()
     liquids_ml = models.PositiveSmallIntegerField()
 
