@@ -1,6 +1,7 @@
 from logging import getLogger
 from typing import Dict
 
+from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -41,6 +42,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'product_kind',)
 
 
+@extend_schema_serializer(exclude_fields=['liquids_ml'])
 class IntakeSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
     product_id = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), source='product', write_only=True)
@@ -71,6 +73,7 @@ class DailyNutrientConsumptionSerializer(ReadOnlySerializer):
         fields = ('total', 'norm')
 
 
+@extend_schema_serializer(exclude_fields=['liquids_ml'])
 class DailyIntakesReportSerializer(serializers.ModelSerializer):
     date = serializers.DateField(read_only=True)
     intakes = IntakeSerializer(read_only=True, many=True)
