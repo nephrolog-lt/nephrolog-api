@@ -33,16 +33,7 @@ class FirebaseAuthentication(BaseFirebaseAuthentication):
     def get_user_from_cache(self, token: str) -> Optional[User]:
         user_pk = cache.get(self.cache_key_name(token), None)
 
-        if user_pk:
-            user = User.objects.filter(pk=user_pk).first()
-
-            if user:
-                user.last_login = timezone.now()
-                user.save(update_fields=['last_login'])
-
-                return user
-
-        return None
+        return User.objects.filter(pk=user_pk).first() if user_pk else None
 
     def authenticate_credentials(self, token: str) -> Tuple[User, None]:
         user_from_cache = self.get_user_from_cache(token)
