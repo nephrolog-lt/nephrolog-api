@@ -39,7 +39,8 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'product_kind',)
+        fields = ('id', 'name', 'product_kind',
+                  'potassium_mg', 'proteins_mg', 'sodium_mg', 'phosphorus_mg', 'energy_kcal', 'liquids_g',)
 
 
 @extend_schema_serializer(exclude_fields=['liquids_ml'])
