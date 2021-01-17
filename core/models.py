@@ -312,7 +312,7 @@ class Product(models.Model):
 
         query = str_to_ascii(query)
 
-        return Product.objects.annotate(similarity=TrigramSimilarity('name_lt__unaccent', query)).filter(
+        return Product.objects.annotate(similarity=TrigramSimilarity('name_search_lt', query)).filter(
             similarity__gt=0.1).order_by('-similarity')
 
     @staticmethod

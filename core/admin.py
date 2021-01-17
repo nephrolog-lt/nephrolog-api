@@ -30,7 +30,7 @@ class ProductAdmin(admin.ModelAdmin):
         'created_at',
         'updated_at',
     )
-    readonly_fields = ('product_source',)
+    readonly_fields = ('product_source', 'name_search_lt',)
     list_filter = ('product_kind', 'product_source', 'created_at', 'updated_at')
     list_editable = ('product_kind', 'name_lt', 'name_en')
     search_fields = ('name_lt', 'name_en')
