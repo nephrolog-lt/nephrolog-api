@@ -251,6 +251,11 @@ class ProductKind(models.TextChoices):
     Drink = "Drink"
 
 
+class ProductSource(models.TextChoices):
+    LT = "LT"
+    DN = "DN"
+
+
 class Product(models.Model):
     name_lt = models.CharField(max_length=128)
     name_en = models.CharField(max_length=128, null=True)
@@ -261,6 +266,13 @@ class Product(models.Model):
         max_length=16,
         choices=ProductKind.choices,
         default=ProductKind.Unknown,
+    )
+
+    product_source = models.CharField(
+        max_length=2,
+        choices=ProductSource.choices,
+        default=ProductSource.LT,
+        editable=False
     )
 
     potassium_mg = models.DecimalField(max_digits=7, decimal_places=2, validators=[MinValueValidator(Decimal('0'))])
