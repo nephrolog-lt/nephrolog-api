@@ -260,7 +260,7 @@ class Product(models.Model):
     name_lt = models.CharField(max_length=128)
     name_en = models.CharField(max_length=128, null=True)
 
-    name_search_lt = models.CharField(max_length=128, null=True)
+    name_search_lt = models.CharField(max_length=128)
 
     product_kind = models.CharField(
         max_length=16,
