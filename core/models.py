@@ -295,7 +295,7 @@ class Product(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
-        self.name_search_lt = str_to_ascii(self.name_lt)
+        self.name_search_lt = str_to_ascii(self.name_lt).lower()
 
         super().save(force_insert, force_update, using, update_fields)
 
@@ -310,7 +310,7 @@ class Product(models.Model):
 
             return Product.objects.order_by('-pk')
 
-        query = str_to_ascii(query)
+        query = str_to_ascii(query).lower()
 
         return Product.objects.annotate(similarity=TrigramSimilarity('name_search_lt', query)).filter(
             similarity__gt=0.1).order_by('-similarity')
