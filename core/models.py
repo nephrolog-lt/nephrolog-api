@@ -290,7 +290,7 @@ class Product(models.Model):
     class Meta:
         ordering = ("-pk",)
         indexes = [
-            GinIndex(fields=('name_search_lt',)),
+            GinIndex(name="gin_trgm_product_lt", fields=('name_search_lt',), opclasses=("gin_trgm_ops",)),
         ]
 
     def save(self, force_insert=False, force_update=False, using=None,
