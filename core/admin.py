@@ -19,6 +19,7 @@ class ProductAdmin(admin.ModelAdmin):
         'product_kind',
         'name_lt',
         'name_en',
+        'product_source',
         'potassium_mg',
         'proteins_mg',
         'sodium_mg',
@@ -29,7 +30,8 @@ class ProductAdmin(admin.ModelAdmin):
         'created_at',
         'updated_at',
     )
-    list_filter = ('product_kind', 'created_at', 'updated_at')
+    readonly_fields = ('product_source',)
+    list_filter = ('product_kind', 'product_source', 'created_at', 'updated_at')
     list_editable = ('product_kind', 'name_lt', 'name_en')
     search_fields = ('name_lt', 'name_en')
 
