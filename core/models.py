@@ -252,8 +252,10 @@ class ProductKind(models.TextChoices):
 
 
 class Product(models.Model):
-    name_lt = models.CharField(max_length=128, unique=True)
+    name_lt = models.CharField(max_length=128)
     name_en = models.CharField(max_length=128, null=True)
+
+    name_search_lt = models.CharField(max_length=128, null=True)
 
     product_kind = models.CharField(
         max_length=16,
@@ -276,9 +278,14 @@ class Product(models.Model):
     class Meta:
         ordering = ("-pk",)
         indexes = [
-            GinIndex(fields=('name_lt',)),
-            GinIndex(fields=('name_en',)),
+            GinIndex(fields=('name_search_lt',)),
         ]
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        self.name_search_lt = str_to_ascii(self.name_lt)
+
+        super().save(force_insert, force_update, using, update_fields)
 
     @staticmethod
     def filter_by_user_and_query(user: AbstractBaseUser, query: Optional[str]) -> QuerySet[Product]:
