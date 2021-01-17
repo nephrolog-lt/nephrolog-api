@@ -8,7 +8,7 @@ from typing import Optional
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
-from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.indexes import GinIndex, GistIndex
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
@@ -291,6 +291,7 @@ class Product(models.Model):
         ordering = ("-pk",)
         indexes = [
             GinIndex(name="gin_trgm_product_lt", fields=('name_search_lt',), opclasses=("gin_trgm_ops",)),
+            GistIndex(name="gist_trgm_product_lt", fields=('name_search_lt',), opclasses=("gist_trgm_ops",)),
         ]
 
     def save(self, force_insert=False, force_update=False, using=None,
