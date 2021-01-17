@@ -1,7 +1,9 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.postgres.search import TrigramSimilarity
 
 from core import models
+from core.models import Product
 
 admin.site.site_header = 'NephroGo Administration'
 admin.site.site_title = admin.site.site_header
@@ -20,6 +22,7 @@ class ProductAdmin(admin.ModelAdmin):
         'name_lt',
         'name_en',
         'product_source',
+        'most_similar',
         'potassium_mg',
         'proteins_mg',
         'sodium_mg',
@@ -33,7 +36,12 @@ class ProductAdmin(admin.ModelAdmin):
     readonly_fields = ('product_source', 'name_search_lt',)
     list_filter = ('product_kind', 'product_source', 'created_at', 'updated_at')
     list_editable = ('product_kind', 'name_lt', 'name_en')
-    search_fields = ('name_lt', 'name_en')
+    search_fields = ('name_lt', 'name_en', 'name_search_lt')
+
+    def most_similar(self, obj):
+        return '\n\n'.join(map(lambda x: x.name_lt, Product.objects.annotate(
+            similarity=TrigramSimilarity('name_search_lt', obj.name_search_lt)).exclude(
+            pk=obj.pk).order_by('-similarity')[:3]))
 
 
 class BaseUserProfileAdminMixin(admin.ModelAdmin):
