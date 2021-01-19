@@ -257,7 +257,7 @@ class ProductSource(models.TextChoices):
 
 class Product(models.Model):
     name_lt = models.CharField(max_length=128, unique=True)
-    name_en = models.CharField(max_length=128, null=True)
+    name_en = models.CharField(max_length=128, unique=True)
 
     name_search_lt = models.CharField(max_length=128, unique=True)
 
