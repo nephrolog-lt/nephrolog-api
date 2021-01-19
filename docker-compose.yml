@@ -8,7 +8,7 @@ services:
     labels:
       - lt.nephrogo.api
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:8080/health/ || exit 1" ]
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/health/?format=json || exit 1" ]
     stop_grace_period: 60s
     deploy:
       replicas: 2
