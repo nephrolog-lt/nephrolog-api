@@ -9,6 +9,7 @@ from ddtrace import Pin, config, patch_all, tracer
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -207,9 +208,13 @@ if not DEBUG:
     SESSION_CACHE_ALIAS = "default"
 
 if not DEBUG:
+    sentry_logging = LoggingIntegration(
+        level=logging.INFO,
+        event_level=logging.WARNING
+    )
     sentry_sdk.init(
         dsn=env.str('SENTRY_DSN'),
-        integrations=[DjangoIntegration(), RedisIntegration()],
+        integrations=[sentry_logging, DjangoIntegration(), RedisIntegration()],
         traces_sample_rate=1.0,
         send_default_pii=True,
         request_bodies='always',
