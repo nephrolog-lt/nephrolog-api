@@ -24,7 +24,6 @@ drf-spectacular==0.13.0
 django-filter==2.4.0
 
 # Additional functionality
-Pillow==8.1.0
 requests==2.25.1
 python-dateutil==2.8.1
 pytz==2020.5
