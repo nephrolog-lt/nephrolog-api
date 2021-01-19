@@ -9,6 +9,11 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
+      - name: Set Git variables for docker image
+        run: |
+          echo "GIT_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
+
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
@@ -18,6 +23,7 @@ jobs:
           password: ${{ secrets.OWNER_GITHUB_TOKEN }}
           cache: true
           snapshot: true
+          buildargs: GIT_COMMIT,GIT_BRANCH
 
   deploy:
     name: Deploy to production
