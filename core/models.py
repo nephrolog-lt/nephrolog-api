@@ -477,7 +477,7 @@ class IntakeQuerySet(models.QuerySet):
 class Intake(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
     daily_report = models.ForeignKey(DailyIntakesReport, on_delete=models.CASCADE, related_name='intakes')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='intakes')
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='intakes')
     consumed_at = models.DateTimeField()
     amount_g = models.PositiveSmallIntegerField(validators=(MinValueValidator(1),))
 
