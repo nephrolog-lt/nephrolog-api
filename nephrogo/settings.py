@@ -245,7 +245,6 @@ if not DEBUG:
     config.django['trace_query_string'] = True
     config.django['analytics_enabled'] = True
 
-    config.http.trace_query_string = True
     config.trace_headers([
         'user-agent',
         'transfer-encoding',
