@@ -17,32 +17,6 @@ class UserAdmin(BaseUserAdmin):
     pass
 
 
-class DuplicateProductNameFilter(SimpleListFilter):
-    """
-       This filter is being used in django admin panel.
-       """
-    title = 'Duplicates'
-    parameter_name = 'video_id'
-
-    def lookups(self, request, model_admin):
-        return (
-            ('duplicates', 'Duplicates'),
-        )
-
-    def queryset(self, request, queryset):
-        if not self.value():
-            return queryset
-        if self.value().lower() == 'duplicates':
-            dups = (
-                Product.objects.values('name_en')
-                    .annotate(count=Count('id'))
-                    .values('name_en')
-                    .order_by()
-                    .filter(count__gt=1)
-            )
-            return queryset.filter().filter(name_en__in=dups)
-
-
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = (
@@ -63,7 +37,7 @@ class ProductAdmin(admin.ModelAdmin):
         'updated_at',
     )
     readonly_fields = ('product_source', 'name_search_lt',)
-    list_filter = (DuplicateProductNameFilter, 'product_kind', 'product_source', 'created_at', 'updated_at')
+    list_filter = ('product_kind', 'product_source', 'created_at', 'updated_at')
     list_editable = ('product_kind', 'name_lt', 'name_en')
     search_fields = ('name_lt', 'name_en', 'name_search_lt')
 
