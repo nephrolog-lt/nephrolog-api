@@ -1,6 +1,8 @@
 from django.contrib import admin
+from django.contrib.admin import SimpleListFilter
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.postgres.search import TrigramSimilarity
+from django.db.models.aggregates import Count
 from django.utils.safestring import mark_safe
 
 from core import models
@@ -13,6 +15,32 @@ admin.site.site_title = admin.site.site_header
 @admin.register(models.User)
 class UserAdmin(BaseUserAdmin):
     pass
+
+
+class DuplicateProductNameFilter(SimpleListFilter):
+    """
+       This filter is being used in django admin panel.
+       """
+    title = 'Duplicates'
+    parameter_name = 'video_id'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('duplicates', 'Duplicates'),
+        )
+
+    def queryset(self, request, queryset):
+        if not self.value():
+            return queryset
+        if self.value().lower() == 'duplicates':
+            dups = (
+                Product.objects.values('name_lt')
+                    .annotate(count=Count('id'))
+                    .values('name_lt')
+                    .order_by()
+                    .filter(count__gt=1)
+            )
+            return queryset.filter().filter(name_lt__in=dups)
 
 
 @admin.register(models.Product)
@@ -35,7 +63,7 @@ class ProductAdmin(admin.ModelAdmin):
         'updated_at',
     )
     readonly_fields = ('product_source', 'name_search_lt',)
-    list_filter = ('product_kind', 'product_source', 'created_at', 'updated_at')
+    list_filter = (DuplicateProductNameFilter, 'product_kind', 'product_source', 'created_at', 'updated_at')
     list_editable = ('product_kind', 'name_lt', 'name_en')
     search_fields = ('name_lt', 'name_en', 'name_search_lt')
 
