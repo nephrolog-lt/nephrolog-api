@@ -34,13 +34,13 @@ class DuplicateProductNameFilter(SimpleListFilter):
             return queryset
         if self.value().lower() == 'duplicates':
             dups = (
-                Product.objects.values('name_search_lt')
+                Product.objects.values('name_en')
                     .annotate(count=Count('id'))
-                    .values('name_search_lt')
+                    .values('name_en')
                     .order_by()
                     .filter(count__gt=1)
             )
-            return queryset.filter().filter(name_search_lt__in=dups)
+            return queryset.filter().filter(name_en__in=dups)
 
 
 @admin.register(models.Product)

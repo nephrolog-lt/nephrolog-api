@@ -7,7 +7,6 @@ from typing import Optional
 
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AbstractUser
-from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.indexes import GinIndex, GistIndex
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ValidationError
@@ -257,10 +256,10 @@ class ProductSource(models.TextChoices):
 
 
 class Product(models.Model):
-    name_lt = models.CharField(max_length=128)
+    name_lt = models.CharField(max_length=128, unique=True)
     name_en = models.CharField(max_length=128, null=True)
 
-    name_search_lt = models.CharField(max_length=128)
+    name_search_lt = models.CharField(max_length=128, unique=True)
 
     product_kind = models.CharField(
         max_length=16,
