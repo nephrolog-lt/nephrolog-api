@@ -22,5 +22,6 @@ import api.urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('v1/', include(api.urls.urlpatterns)),
+    path('health/', include('health_check.urls')),
     path('', RedirectView.as_view(pattern_name='swagger-ui'))
 ]

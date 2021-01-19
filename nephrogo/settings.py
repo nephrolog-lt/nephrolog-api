@@ -51,6 +51,12 @@ INSTALLED_APPS = [
 
     'core.apps.CoreConfig',
     'api.apps.ApiConfig',
+
+    'health_check',
+    'health_check.db',
+    'health_check.cache',
+    'health_check.storage',
+    'health_check.contrib.migrations',
 ]
 
 MIDDLEWARE = [
