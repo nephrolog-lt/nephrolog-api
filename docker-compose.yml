@@ -14,6 +14,7 @@ services:
       replicas: 2
       update_config:
         delay: 5s
+        failure_action: rollback
         order: start-first
     volumes:
       - static_volume:/srv/nephrogo-api/static
