@@ -235,7 +235,8 @@ if not DEBUG:
         port=env.str('DD_TRACE_AGENT_PORT'),
         settings={
             'FILTERS': [
-                FilterRequestsOnUrl([r'**/health/**'])
+                FilterRequestsOnUrl(
+                    [r'https://api.nephrogo.com/health/?format=json', 'http://localhost:8080/health/?format=json'])
             ],
         }
     )

@@ -1,8 +1,6 @@
 from django.contrib import admin
-from django.contrib.admin import SimpleListFilter
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.postgres.search import TrigramSimilarity
-from django.db.models.aggregates import Count
 from django.utils.safestring import mark_safe
 
 from core import models
