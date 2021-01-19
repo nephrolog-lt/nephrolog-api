@@ -7,11 +7,14 @@ services:
       - secrets/.env
     labels:
       - lt.nephrogo.api
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/health/ || exit 1" ]
+    stop_grace_period: 60s
     deploy:
       replicas: 2
       update_config:
         delay: 5s
-        order: stop-first
+        order: start-first
     volumes:
       - static_volume:/srv/nephrogo-api/static
       - media_volume:/srv/nephrogo-api/media
