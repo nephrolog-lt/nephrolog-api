@@ -233,11 +233,11 @@ if not DEBUG:
     tracer.configure(
         hostname=env.str('DD_AGENT_HOST'),
         port=env.str('DD_TRACE_AGENT_PORT'),
-        # settings={
-        #     'FILTERS': [
-        #         FilterRequestsOnUrl([r'**/health/**'])
-        #     ],
-        # }
+        settings={
+            'FILTERS': [
+                FilterRequestsOnUrl([r'**/health/**'])
+            ],
+        }
     )
     config.django['service_name'] = 'nephrogo-api'
     config.django['instrument_databases'] = True
