@@ -3,6 +3,7 @@ from pathlib import Path
 import django
 import environ
 import sentry_sdk
+from ddtrace.filters import FilterRequestsOnUrl
 from django.utils.log import DEFAULT_LOGGING
 import logging.config
 from ddtrace import Pin, config, patch_all, tracer
@@ -229,7 +230,15 @@ if not DEBUG:
 
 # Datadog
 if not DEBUG:
-    tracer.configure(hostname=env.str('DD_AGENT_HOST'), port=env.str('DD_TRACE_AGENT_PORT'), enabled=not DEBUG)
+    tracer.configure(
+        hostname=env.str('DD_AGENT_HOST'),
+        port=env.str('DD_TRACE_AGENT_PORT'),
+        settings={
+            'FILTERS': [
+                FilterRequestsOnUrl([r'**/health/**'])
+            ],
+        }
+    )
     config.django['service_name'] = 'nephrogo-api'
     config.django['instrument_databases'] = True
     config.django['instrument_caches'] = True
