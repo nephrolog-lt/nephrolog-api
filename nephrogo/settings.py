@@ -215,6 +215,7 @@ if not DEBUG:
     sentry_sdk.init(
         dsn=env.str('SENTRY_DSN'),
         integrations=[sentry_logging, DjangoIntegration(), RedisIntegration()],
+        release=env.str('GIT_COMMIT'),
         traces_sample_rate=1.0,
         send_default_pii=True,
         request_bodies='always',
