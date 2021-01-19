@@ -25,7 +25,6 @@ django-filter==2.4.0
 
 # Additional functionality
 requests==2.25.1
-python-dateutil==2.8.1
 pytz==2020.5
 Unidecode==1.1.2
 django-health-check==3.16.2
