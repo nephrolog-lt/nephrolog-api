@@ -13,7 +13,51 @@ admin.site.site_title = admin.site.site_header
 
 @admin.register(models.User)
 class UserAdmin(BaseUserAdmin):
-    pass
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff',
+                    'profile_count',
+                    'intakes_count', 'daily_intakes_reports_count',
+                    'daily_health_statuses_count',
+                    'historical_profiles_count',
+                    'last_login', 'date_joined')
+
+    ordering = ('last_login',)
+    date_hierarchy = 'last_login'
+    list_filter = (('profile', EmptyFieldListFilter),
+                   'last_login', 'date_joined', 'is_staff', 'is_superuser', 'is_active',)
+
+    def get_queryset(self, request):
+        return models.User.get_annotated_with_statistics()
+
+    def intakes_count(self, obj):
+        return obj.intakes_count
+
+    intakes_count.admin_order_field = "intakes_count"
+    intakes_count.short_description = "intakes"
+
+    def daily_intakes_reports_count(self, obj):
+        return obj.daily_intakes_reports_count
+
+    daily_intakes_reports_count.admin_order_field = "daily_intakes_reports_count"
+    daily_intakes_reports_count.short_description = "daily intakes reports"
+
+    def profile_count(self, obj):
+        return obj.profile_count
+
+    profile_count.admin_order_field = "profile_count"
+    profile_count.short_description = "has profile"
+    profile_count.boolean = True
+
+    def historical_profiles_count(self, obj):
+        return obj.historical_profiles_count
+
+    historical_profiles_count.admin_order_field = "historical_profiles_count"
+    historical_profiles_count.short_description = "Historical profiles"
+
+    def daily_health_statuses_count(self, obj):
+        return obj.daily_health_statuses_count
+
+    daily_health_statuses_count.admin_order_field = "daily_health_statuses_count"
+    daily_health_statuses_count.short_description = "Daily health statuses"
 
 
 @admin.register(models.Product)

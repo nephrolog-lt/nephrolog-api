@@ -30,6 +30,52 @@ class User(AbstractUser):
     def __str__(self):
         return self.get_username() or self.get_full_name() or self.email
 
+    @staticmethod
+    def get_annotated_with_statistics() -> QuerySet[User]:
+        intakes_count = User.objects.annotate(
+            intakes_count=models.Count('daily_intakes_reports__intakes')
+        ).filter(pk=models.OuterRef('pk'))
+
+        daily_intakes_reports_count = User.objects.annotate(
+            daily_intakes_reports_count=models.Count('daily_intakes_reports')
+        ).filter(pk=models.OuterRef('pk'))
+
+        profile_count = User.objects.annotate(
+            profile_count=models.Count('profile')
+        ).filter(pk=models.OuterRef('pk'))
+
+        daily_health_statuses_count = User.objects.annotate(
+            daily_health_statuses_count=models.Count('daily_health_statuses')
+        ).filter(pk=models.OuterRef('pk'))
+
+        historical_profiles_count = User.objects.annotate(
+            historical_profiles_count=models.Count('historical_profiles')
+        ).filter(pk=models.OuterRef('pk'))
+
+        return User.objects.annotate(
+            intakes_count=models.Subquery(
+                intakes_count.values('intakes_count'),
+                output_field=models.IntegerField()
+            ),
+            daily_intakes_reports_count=models.Subquery(
+                daily_intakes_reports_count.values('daily_intakes_reports_count'),
+                output_field=models.IntegerField()
+            ),
+            daily_health_statuses_count=models.Subquery(
+                daily_health_statuses_count.values('daily_health_statuses_count'),
+                output_field=models.IntegerField()
+            ),
+            profile_count=models.Subquery(
+                profile_count.values('profile_count'),
+                output_field=models.IntegerField()
+            ),
+            historical_profiles_count=models.Subquery(
+                historical_profiles_count.values('historical_profiles_count'),
+                output_field=models.IntegerField()
+            ),
+
+        )
+
 
 class Gender(models.TextChoices):
     Male = "Male"
@@ -203,10 +249,12 @@ class UserProfile(BaseUserProfile):
 
 
 class HistoricalUserProfile(BaseUserProfile):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date = models.DateField()
 
     class Meta:
+        default_related_name = "historical_profiles"
+
         constraints = [
             models.UniqueConstraint(fields=['user', 'date'], name='unique_user_date_historical_user_profile')
         ]
@@ -333,7 +381,7 @@ class DailyIntakesReportQuerySet(models.QuerySet):
 
 
 class DailyIntakesReport(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date = models.DateField()
 
     daily_norm_potassium_mg = models.PositiveIntegerField(null=True, blank=True)
@@ -349,6 +397,7 @@ class DailyIntakesReport(models.Model):
     objects = DailyIntakesReportQuerySet.as_manager()
 
     class Meta:
+        default_related_name = "daily_intakes_reports"
         constraints = [
             models.UniqueConstraint(fields=['user', 'date'], name='unique_user_date_daily_intakes_report')
         ]
@@ -589,7 +638,7 @@ class DailyHealthStatusQuerySet(models.QuerySet):
 
 
 class DailyHealthStatus(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date = models.DateField()
 
     systolic_blood_pressure = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -632,6 +681,7 @@ class DailyHealthStatus(models.Model):
     objects = DailyHealthStatusQuerySet.as_manager()
 
     class Meta:
+        default_related_name = "daily_health_statuses"
         constraints = [
             models.UniqueConstraint(fields=['user', 'date'], name='unique_user_date_daily_health_status')
         ]
