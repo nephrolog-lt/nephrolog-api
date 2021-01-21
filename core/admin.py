@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.admin import EmptyFieldListFilter
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.postgres.search import TrigramSimilarity
 from django.utils.safestring import mark_safe
@@ -22,21 +23,22 @@ class ProductAdmin(admin.ModelAdmin):
         'product_kind',
         'name_lt',
         'name_en',
-        'product_source',
         'most_similar',
+        'density_g_ml',
         'potassium_mg',
         'proteins_mg',
         'sodium_mg',
         'phosphorus_mg',
         'energy_kcal',
         'liquids_g',
+        'product_source',
         'raw_id',
         'created_at',
         'updated_at',
     )
     readonly_fields = ('product_source', 'name_search_lt',)
-    list_filter = ('product_kind', 'product_source', 'created_at', 'updated_at')
-    list_editable = ('product_kind', 'name_lt', 'name_en')
+    list_filter = (('density_g_ml', EmptyFieldListFilter), 'product_kind', 'product_source', 'created_at', 'updated_at')
+    list_editable = ('product_kind', 'name_lt', 'name_en', 'density_g_ml')
     search_fields = ('name_lt', 'name_en', 'name_search_lt')
 
     def most_similar(self, obj):

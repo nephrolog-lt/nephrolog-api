@@ -281,6 +281,9 @@ class Product(models.Model):
     energy_kcal = models.PositiveSmallIntegerField()
     liquids_g = models.PositiveSmallIntegerField()
 
+    density_g_ml = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True,
+                                       validators=[MinValueValidator(Decimal('0.01'))])
+
     raw_id = models.CharField(max_length=64, null=True, blank=True, editable=False, unique=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
