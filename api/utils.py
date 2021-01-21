@@ -37,7 +37,7 @@ def parse_date_query_params(request: Request) -> (date, date):
 
 
 def parse_time_zone(request: Request) -> timezone:
-    tz_name: str = request.headers.get('Time-Zone-Name', None)
+    tz_name: str = request.headers.get('time-zone-name', None)
 
     try:
         return pytz.timezone(tz_name)
