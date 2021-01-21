@@ -445,9 +445,7 @@ class DailyIntakesReport(models.Model):
     @staticmethod
     def get_or_create_for_user_and_date(user: AbstractBaseUser, date: datetime.date) -> DailyIntakesReport:
         with atomic():
-            queryset: DailyIntakesReportQuerySet = DailyIntakesReport.objects.prefetch_intakes()
-
-            report, created = queryset.get_or_create(user=user, date=date)
+            report, created = DailyIntakesReport.objects.get_or_create(user=user, date=date)
 
             if created:
                 report.recalculate_daily_norms()
