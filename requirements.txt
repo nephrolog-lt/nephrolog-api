@@ -10,9 +10,6 @@ django-redis==4.12.1
 django-allauth==0.44.0
 firebase-admin==4.5.0
 
-# Admin
-django-admin-sortable2==0.7.7
-
 # Logging and monitoring
 sentry-sdk==0.19.5
 ddtrace==0.45.0
