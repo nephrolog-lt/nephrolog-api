@@ -271,7 +271,7 @@ CELERY_TIMEZONE = 'UTC'
 CELERY_BEAT_SCHEDULE = {
     'hello': {
         'task': 'core.tasks.hello',
-        'schedule': timedelta(hours=1)
+        'schedule': timedelta(seconds=1)
     },
 }
 
