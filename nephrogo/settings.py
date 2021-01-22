@@ -256,7 +256,7 @@ if not DEBUG:
         'accept-encoding',
     ])
 
-    tracer.set_tags({'env': 'production'})
+    tracer.set_tags({'env': 'production', 'version': env.str('GIT_COMMIT')})
 
 REDIS_URL = env.str('REDIS_URL', None)
 
