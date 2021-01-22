@@ -236,7 +236,7 @@ if not DEBUG:
         settings={
             'FILTERS': [
                 FilterRequestsOnUrl(
-                    [r'https://api.nephrogo.com/health/?format=json', 'http://localhost:8080/health/?format=json'])
+                    [r'http://api\\.nephrogo.com/health/', r'http://localhost:8080/health/'])
             ],
         }
     )
