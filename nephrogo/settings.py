@@ -1,14 +1,17 @@
+from datetime import timedelta
 from pathlib import Path
 
 import django
 import environ
 import sentry_sdk
+from celery.schedules import crontab
 from ddtrace.filters import FilterRequestsOnUrl
 from django.utils.log import DEFAULT_LOGGING
 import logging.config
 from ddtrace import Pin, config, patch_all, tracer
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
@@ -208,7 +211,7 @@ logging.config.dictConfig({
 # Cache
 if not DEBUG:
     CACHES = {
-        "default": env.cache('REDIS_URL', backend='django_redis.cache.RedisCache')
+        "default": env.cache('REDIS_CACHE_URL', backend='django_redis.cache.RedisCache')
     }
 
     SESSION_ENGINE = "django.contrib.sessions.backends.cache"
@@ -221,7 +224,7 @@ if not DEBUG:
     )
     sentry_sdk.init(
         dsn=env.str('SENTRY_DSN'),
-        integrations=[sentry_logging, DjangoIntegration(), RedisIntegration()],
+        integrations=[sentry_logging, DjangoIntegration(), CeleryIntegration(), RedisIntegration()],
         release=env.str('GIT_COMMIT'),
         traces_sample_rate=1.0,
         send_default_pii=True,
@@ -254,6 +257,29 @@ if not DEBUG:
     ])
 
     tracer.set_tags({'env': 'production'})
+
+REDIS_URL = env.str('REDIS_URL', None)
+
+# Celery
+CELERY_BROKER_URL = REDIS_URL
+
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+CELERY_BEAT_SCHEDULE = {
+    'hello': {
+        'task': 'core.tasks.hello',
+        'schedule': timedelta(hours=1)
+    },
+}
+
+CELERYD_TASK_SOFT_TIME_LIMIT = 45 * 60
+CELERYD_SEND_EVENTS = True
+
+CELERY_TASK_SEND_SENT_EVENT = True
+CELERY_TRACK_STARTED = True
 
 # Rest framework
 REST_FRAMEWORK = {

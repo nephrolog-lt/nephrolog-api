@@ -26,6 +26,52 @@ services:
       - redis_network
       - datadog_network
 
+  celery_beat:
+    image: ghcr.io/nephrogo/nephrogo-api:latest
+    command: ddtrace-run celery -A nephrogo beat -l info --schedule=/srv/nephrogo-api/celerybeat-schedule
+    env_file:
+      - secrets/.env
+    labels:
+      - lt.nephrogo.celery.beat
+    stop_grace_period: 60s
+    deploy:
+      update_config:
+        delay: 5s
+        failure_action: rollback
+        order: start-first
+    volumes:
+      - static_volume:/srv/nephrogo-api/static
+      - media_volume:/srv/nephrogo-api/media
+      - /srv/nephrogo-api/secrets:/srv/nephrogo-api/secrets
+    networks:
+      - nginx_network
+      - database_network
+      - redis_network
+      - datadog_network
+
+  celery_default_worker:
+    image: ghcr.io/nephrogo/nephrogo-api:latest
+    command: ddtrace-run celery -A nephrogo worker -l info -E --concurrency=3
+    env_file:
+      - secrets/.env
+    labels:
+      - lt.nephrogo.celery.worker
+    stop_grace_period: 60s
+    deploy:
+      update_config:
+        delay: 5s
+        failure_action: rollback
+        order: start-first
+    volumes:
+      - static_volume:/srv/nephrogo-api/static
+      - media_volume:/srv/nephrogo-api/media
+      - /srv/nephrogo-api/secrets:/srv/nephrogo-api/secrets
+    networks:
+      - nginx_network
+      - database_network
+      - redis_network
+      - datadog_network
+
   postgres:
     image: postgres:13.1
     env_file:
