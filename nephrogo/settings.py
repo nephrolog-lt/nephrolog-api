@@ -232,6 +232,12 @@ if not DEBUG:
     )
 
 # Datadog
+DATADOG_SETTINGS = {
+    'host_name': env.str('DD_AGENT_HOST', None),
+    'api_key': env.str('DATADOG_API_KEY', None),
+    'app_key': env.str('DATADOG_APP_KEY', None),
+}
+
 if not DEBUG:
     tracer.configure(
         hostname=env.str('DD_AGENT_HOST'),
@@ -269,9 +275,9 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
 CELERY_BEAT_SCHEDULE = {
-    'hello': {
-        'task': 'core.tasks.hello',
-        'schedule': timedelta(seconds=1)
+    'sync_product_metrics': {
+        'task': 'core.tasks.sync_product_metrics',
+        'schedule': timedelta(seconds=15)
     },
 }
 
