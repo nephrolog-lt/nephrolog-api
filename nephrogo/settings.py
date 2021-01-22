@@ -277,7 +277,7 @@ CELERY_TIMEZONE = 'UTC'
 CELERY_BEAT_SCHEDULE = {
     'sync_product_metrics': {
         'task': 'core.tasks.sync_product_metrics',
-        'schedule': timedelta(seconds=15)
+        'schedule': timedelta(minutes=15)
     },
 }
 
