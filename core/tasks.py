@@ -1,4 +1,5 @@
 import logging
+from datetime import timedelta
 
 from celery import shared_task
 
@@ -7,6 +8,7 @@ from core.models import Appetite, DailyHealthStatus, DailyIntakesReport, Histori
     ShortnessOfBreath, SwellingDifficulty, User, \
     WellFeeling
 from core.utils import Datadog
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -14,15 +16,25 @@ logger = logging.getLogger(__name__)
 @shared_task(soft_time_limit=60, autoretry_for=(Exception,), retry_backoff=True)
 def sync_product_metrics():
     datadog = Datadog()
+    now = timezone.now()
+
     user_with_statistics_queryset = User.get_annotated_with_statistics()
+    user_with_statistics_and_profile_queryset = user_with_statistics_queryset.exclude(profile_count=0)
 
     datadog.gauge('product.users.total', User.objects.count())
-    datadog.gauge('product.users.profiles', user_with_statistics_queryset.exclude(profile_count=0).count())
+    datadog.gauge('product.users.profiles', user_with_statistics_and_profile_queryset.count())
     datadog.gauge('product.users.profiles.historical', HistoricalUserProfile.objects.count())
     datadog.gauge('product.users.profiles_with_intakes',
-                  user_with_statistics_queryset.exclude(intakes_count=0).count())
+                  user_with_statistics_and_profile_queryset.exclude(intakes_count=0).count())
     datadog.gauge('product.users.profiles_with_health_status',
-                  user_with_statistics_queryset.exclude(daily_health_statuses_count=0).count())
+                  user_with_statistics_and_profile_queryset.exclude(daily_health_statuses_count=0).count())
+
+    datadog.gauge('product.users.last_sign_in.24_hours',
+                  user_with_statistics_and_profile_queryset.filter(last_login__gte=now - timedelta(days=1)).count())
+    datadog.gauge('product.users.last_sign_in.3_days',
+                  user_with_statistics_and_profile_queryset.filter(last_login__gte=now - timedelta(days=3)).count())
+    datadog.gauge('product.users.last_sign_in.14_days',
+                  user_with_statistics_and_profile_queryset.filter(last_login__gte=now - timedelta(days=14)).count())
 
     datadog.gauge('product.health_status.total', DailyHealthStatus.objects.count())
 
