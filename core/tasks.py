@@ -28,7 +28,7 @@ def sync_product_metrics():
         agg_users = queryset.values(field_name).annotate(total=Count(field_name)).order_by('total')
         for metric in agg_users:
             datadog.gauge(f'product.users.profiles.{field_name}', metric['total'],
-                          tags=[f'{field_name}:{metric[{field_name}]}'])
+                          tags=[f'{field_name}:{metric[field_name]}'])
 
     user_with_statistics_queryset = User.get_annotated_with_statistics()
     user_with_statistics_and_profile_queryset = user_with_statistics_queryset.exclude(profile_count=0)
