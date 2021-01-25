@@ -51,5 +51,5 @@ class IntakeTests(TestCase):
         self.assertEqual(annotated_daily_report.total_sodium_mg, 70)
         self.assertEqual(annotated_daily_report.total_phosphorus_mg, 100)
         self.assertEqual(annotated_daily_report.total_proteins_mg, 65574)
-        self.assertEqual(annotated_daily_report.total_energy_kcal, 65539)
+        self.assertEqual(annotated_daily_report.total_energy_kcal, 65584)
         self.assertEqual(annotated_daily_report.total_liquids_g, 65594)
