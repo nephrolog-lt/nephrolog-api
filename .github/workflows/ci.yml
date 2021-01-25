@@ -6,7 +6,7 @@ jobs:
     name: Test NephroGo
     runs-on: ubuntu-20.04
     env:
-      DEV: 1
+      DEBUG: 1
       POSTGRES_HOST: localhost
       POSTGRES_USER: nephrogo
       POSTGRES_PASSWORD: nephrogo
