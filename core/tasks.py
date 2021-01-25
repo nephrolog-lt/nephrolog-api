@@ -1,7 +1,9 @@
 import logging
 from datetime import timedelta
+from typing import List
 
 from celery import shared_task
+from django.db.models import QuerySet
 from django.db.models.aggregates import Count
 
 from core.models import Appetite, DailyHealthStatus, DailyIntakesReport, DiabetesType, HistoricalUserProfile, Intake, \
@@ -14,21 +16,31 @@ from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
+_sick_years_groups = [(0, 4), (5, 9), (10, 14), (15, 19), (20, 24), (25, 29), (30, 34),
+                      (35, 39), (40, 44), (45, 49), (50, 100)]
+
 
 @shared_task(soft_time_limit=60, autoretry_for=(Exception,), retry_backoff=True)
 def sync_product_metrics():
     datadog = Datadog()
     now = timezone.now()
 
-    def _gauge_aggregated_user_profile_metric(field_name: str, only_with_diabetes: bool = False):
-        queryset = UserProfile.objects.all()
-        if only_with_diabetes:
-            queryset = queryset.filter(diabetes_type__in=(DiabetesType.Type1, DiabetesType.Type2))
+    def _gauge_aggregated_user_profile_metric(field_name: str, user_profile_queryset: QuerySet[UserProfile] = None):
+        queryset = user_profile_queryset or UserProfile.objects.all()
 
         agg_users = queryset.values(field_name).annotate(total=Count(field_name)).order_by('total')
         for metric in agg_users:
             datadog.gauge(f'product.users.profiles.{field_name}', metric['total'],
                           tags=[f'{field_name}:{metric[field_name]}'])
+
+    def _gauge_aggregated_user_profile_group_metric(field_name: str, groups: List[(int, int)],
+                                                    user_profile_queryset: QuerySet[UserProfile] = None):
+        queryset = user_profile_queryset or UserProfile.objects.all()
+
+        for group in groups:
+            total = queryset.filter(**{f"{field_name}__between": group}).count()
+            datadog.gauge(f'product.users.profiles.{field_name}', total,
+                          tags=[f'{field_name}:{group(0)}_{group(1)}'])
 
     user_with_statistics_queryset = User.get_annotated_with_statistics()
     user_with_statistics_and_profile_queryset = user_with_statistics_queryset.exclude(profile_count=0)
@@ -45,7 +57,11 @@ def sync_product_metrics():
     _gauge_aggregated_user_profile_metric('chronic_kidney_disease_stage')
     _gauge_aggregated_user_profile_metric('dialysis_type')
     _gauge_aggregated_user_profile_metric('diabetes_type')
-    _gauge_aggregated_user_profile_metric('diabetes_complications', only_with_diabetes=True)
+    _gauge_aggregated_user_profile_metric('diabetes_complications', UserProfile.objects.filter(
+        diabetes_type__in=(DiabetesType.Type1, DiabetesType.Type2)))
+
+    _gauge_aggregated_user_profile_group_metric('chronic_kidney_disease_years', _sick_years_groups)
+    _gauge_aggregated_user_profile_group_metric('diabetes_years', _sick_years_groups)
 
     datadog.gauge('product.users.last_sign_in.24_hours',
                   user_with_statistics_and_profile_queryset.filter(last_login__gte=now - timedelta(days=1)).count())
