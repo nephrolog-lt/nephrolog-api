@@ -1,3 +1,4 @@
+from csv_export.views import CSVExportView
 from django.contrib import admin
 from django.contrib.admin import EmptyFieldListFilter
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -182,3 +183,12 @@ class DailyIntakesReportAdmin(admin.ModelAdmin):
     list_select_related = ('user',)
     date_hierarchy = 'date'
     raw_id_fields = ('user',)
+
+    actions = ('export_data_csv',)
+
+    def export_data_csv(self, request, queryset):
+        view = CSVExportView(queryset=queryset.annotate_with_nutrient_totals(),
+                             fields='__all__')
+        return view.get(request)
+
+    export_data_csv.short_description = 'Export CSV'

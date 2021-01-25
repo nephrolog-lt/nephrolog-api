@@ -26,6 +26,7 @@ django-filter==2.4.0
 
 # Additional functionality
 requests==2.25.1
+django-csv-export-view==1.1.0
 pytz==2020.5
 Unidecode==1.1.2
 django-health-check==3.16.2
