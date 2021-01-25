@@ -12,7 +12,7 @@ from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Prefetch, QuerySet
+from django.db.models import Prefetch, QuerySet, functions
 from django.db.models.aggregates import Max, Min
 from django.db.transaction import atomic
 
@@ -232,8 +232,23 @@ class BaseUserProfile(models.Model):
                     0) / self._cm_per_inch) * self._weight_increase_constant + self._base_weight
 
 
+class UserProfileQuerySet(models.QuerySet):
+    def annotate_with_age(self):
+        return self.annotate(
+            age=models.ExpressionWrapper(
+                functions.Extract(
+                    models.Value(datetime.date.today(), output_field=models.DateField()) - models.F('birthday'),
+                    'DAY'
+                ) / models.Value(365.25, output_field=models.FloatField()),
+                output_field=models.IntegerField()
+            )
+        )
+
+
 class UserProfile(BaseUserProfile):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
+
+    objects = UserProfileQuerySet.as_manager()
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         with atomic():

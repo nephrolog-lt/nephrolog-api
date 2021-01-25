@@ -1,10 +1,11 @@
 import logging
-from datetime import date, timedelta
+from datetime import timedelta
 from typing import List, Tuple
 
 from celery import shared_task
 from django.db.models import QuerySet
 from django.db.models.aggregates import Count
+from django.utils import timezone
 
 from core.models import Appetite, DailyHealthStatus, DailyIntakesReport, DiabetesType, HistoricalUserProfile, Intake, \
     Product, \
@@ -12,12 +13,13 @@ from core.models import Appetite, DailyHealthStatus, DailyIntakesReport, Diabete
     ShortnessOfBreath, SwellingDifficulty, User, \
     UserProfile, WellFeeling
 from core.utils import Datadog
-from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
 _sick_years_groups = [(0, 4), (5, 9), (10, 14), (15, 19), (20, 24), (25, 29), (30, 34),
                       (35, 39), (40, 44), (45, 49), (50, 100)]
+
+_user_age_groups = [(18, 24), (25, 34), (35, 44), (45, 54), (55, 64), (65, 74), (75, 100)]
 
 
 @shared_task(soft_time_limit=60, autoretry_for=(Exception,), retry_backoff=True)
@@ -64,6 +66,10 @@ def sync_product_metrics():
 
     _gauge_aggregated_user_profile_group_metric('chronic_kidney_disease_years', _sick_years_groups)
     _gauge_aggregated_user_profile_group_metric('diabetes_years', _sick_years_groups)
+    _gauge_aggregated_user_profile_group_metric(
+        'age', _sick_years_groups,
+        user_profile_queryset=UserProfile.objects.annotate_with_age()
+    )
 
     datadog.gauge('product.users.last_sign_in.24_hours',
                   user_with_statistics_and_profile_queryset.filter(last_login__gte=now - timedelta(days=1)).count())
