@@ -4,7 +4,8 @@ from datetime import timedelta
 from celery import shared_task
 from django.db.models.aggregates import Count
 
-from core.models import Appetite, DailyHealthStatus, DailyIntakesReport, HistoricalUserProfile, Intake, Product, \
+from core.models import Appetite, DailyHealthStatus, DailyIntakesReport, DiabetesType, HistoricalUserProfile, Intake, \
+    Product, \
     ProductKind, \
     ShortnessOfBreath, SwellingDifficulty, User, \
     UserProfile, WellFeeling
@@ -19,8 +20,12 @@ def sync_product_metrics():
     datadog = Datadog()
     now = timezone.now()
 
-    def _gauge_aggregated_user_profile_metric(field_name: str):
-        agg_users = UserProfile.objects.values(field_name).annotate(total=Count(field_name)).order_by('total')
+    def _gauge_aggregated_user_profile_metric(field_name: str, only_with_diabetes: bool = False):
+        queryset = UserProfile.objects.all()
+        if only_with_diabetes:
+            queryset = queryset.exclude(diabetes_type=DiabetesType.Unknown)
+
+        agg_users = queryset.values(field_name).annotate(total=Count(field_name)).order_by('total')
         for metric in agg_users:
             datadog.gauge(f'product.users.profiles.{field_name}', metric['total'],
                           tags=[f'{field_name}:{metric[{field_name}]}'])
@@ -40,7 +45,7 @@ def sync_product_metrics():
     _gauge_aggregated_user_profile_metric('chronic_kidney_disease_stage')
     _gauge_aggregated_user_profile_metric('dialysis_type')
     _gauge_aggregated_user_profile_metric('diabetes_type')
-    _gauge_aggregated_user_profile_metric('diabetes_complications')
+    _gauge_aggregated_user_profile_metric('diabetes_complications', only_with_diabetes=True)
 
     datadog.gauge('product.users.last_sign_in.24_hours',
                   user_with_statistics_and_profile_queryset.filter(last_login__gte=now - timedelta(days=1)).count())
