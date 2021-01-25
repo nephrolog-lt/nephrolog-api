@@ -23,7 +23,7 @@ def sync_product_metrics():
     def _gauge_aggregated_user_profile_metric(field_name: str, only_with_diabetes: bool = False):
         queryset = UserProfile.objects.all()
         if only_with_diabetes:
-            queryset = queryset.exclude(diabetes_type=DiabetesType.Unknown)
+            queryset = queryset.filter(diabetes_type__in=(DiabetesType.Type1, DiabetesType.Type2))
 
         agg_users = queryset.values(field_name).annotate(total=Count(field_name)).order_by('total')
         for metric in agg_users:
