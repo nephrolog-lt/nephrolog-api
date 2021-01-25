@@ -1,6 +1,6 @@
 import logging
-from datetime import timedelta
-from typing import List
+from datetime import date, timedelta
+from typing import List, Tuple
 
 from celery import shared_task
 from django.db.models import QuerySet
@@ -26,21 +26,23 @@ def sync_product_metrics():
     now = timezone.now()
 
     def _gauge_aggregated_user_profile_metric(field_name: str, user_profile_queryset: QuerySet[UserProfile] = None):
-        queryset = user_profile_queryset or UserProfile.objects.all()
+        if user_profile_queryset is None:
+            user_profile_queryset = UserProfile.objects.all()
 
-        agg_users = queryset.values(field_name).annotate(total=Count(field_name)).order_by('total')
+        agg_users = user_profile_queryset.values(field_name).annotate(total=Count(field_name)).order_by('total')
         for metric in agg_users:
             datadog.gauge(f'product.users.profiles.{field_name}', metric['total'],
                           tags=[f'{field_name}:{metric[field_name]}'])
 
-    def _gauge_aggregated_user_profile_group_metric(field_name: str, groups: List[(int, int)],
+    def _gauge_aggregated_user_profile_group_metric(field_name: str, groups: List[Tuple[int, int]],
                                                     user_profile_queryset: QuerySet[UserProfile] = None):
-        queryset = user_profile_queryset or UserProfile.objects.all()
+        if user_profile_queryset is None:
+            user_profile_queryset = UserProfile.objects.all()
 
         for group in groups:
-            total = queryset.filter(**{f"{field_name}__between": group}).count()
+            total = user_profile_queryset.filter(**{f"{field_name}__between": group}).count()
             datadog.gauge(f'product.users.profiles.{field_name}', total,
-                          tags=[f'{field_name}:{group(0)}_{group(1)}'])
+                          tags=[f'{field_name}:{group[0]}_{group[1]}'])
 
     user_with_statistics_queryset = User.get_annotated_with_statistics()
     user_with_statistics_and_profile_queryset = user_with_statistics_queryset.exclude(profile_count=0)
