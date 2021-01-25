@@ -19,6 +19,12 @@ def sync_product_metrics():
     datadog = Datadog()
     now = timezone.now()
 
+    def _gauge_aggregated_user_profile_metric(field_name: str):
+        agg_users = UserProfile.objects.values(field_name).annotate(total=Count(field_name)).order_by('total')
+        for metric in agg_users:
+            datadog.gauge(f'product.users.profiles.{field_name}', metric['total'],
+                          tags=[f'{field_name}:{metric[{field_name}]}'])
+
     user_with_statistics_queryset = User.get_annotated_with_statistics()
     user_with_statistics_and_profile_queryset = user_with_statistics_queryset.exclude(profile_count=0)
 
@@ -30,27 +36,11 @@ def sync_product_metrics():
     datadog.gauge('product.users.profiles_with_health_status',
                   user_with_statistics_and_profile_queryset.exclude(daily_health_statuses_count=0).count())
 
-    users_by_gender = UserProfile.objects.values('gender').annotate(total=Count('gender')).order_by('total')
-    for gender in users_by_gender:
-        datadog.gauge('product.users.profiles.gender', gender['total'], tags=[f'gender:{gender["gender"]}'])
-
-    users_by_chronic_kidney_disease_stage = UserProfile.objects.values('chronic_kidney_disease_stage').annotate(
-        total=Count('chronic_kidney_disease_stage')).order_by('total')
-    for by_disease_stage in users_by_chronic_kidney_disease_stage:
-        datadog.gauge('product.users.profiles.chronic_kidney_disease_stage', by_disease_stage['total'],
-                      tags=[f'chronic_kidney_disease_stage:{by_disease_stage["chronic_kidney_disease_stage"]}'])
-
-    users_by_dialysis_type = UserProfile.objects.values('dialysis_type').annotate(
-        total=Count('dialysis_type')).order_by('total')
-    for by_dialysis_type in users_by_dialysis_type:
-        datadog.gauge('product.users.profiles.dialysis_type', by_dialysis_type['total'],
-                      tags=[f'dialysis_type:{by_dialysis_type["dialysis_type"]}'])
-
-    users_by_diabetes_complications = UserProfile.objects.values('diabetes_complications').annotate(
-        total=Count('diabetes_complications')).order_by('total')
-    for by_diabetes_complications in users_by_diabetes_complications:
-        datadog.gauge('product.users.profiles.diabetes_complications', by_diabetes_complications['total'],
-                      tags=[f'diabetes_complications:{by_diabetes_complications["diabetes_complications"]}'])
+    _gauge_aggregated_user_profile_metric('gender')
+    _gauge_aggregated_user_profile_metric('chronic_kidney_disease_stage')
+    _gauge_aggregated_user_profile_metric('dialysis_type')
+    _gauge_aggregated_user_profile_metric('diabetes_type')
+    _gauge_aggregated_user_profile_metric('diabetes_complications')
 
     datadog.gauge('product.users.last_sign_in.24_hours',
                   user_with_statistics_and_profile_queryset.filter(last_login__gte=now - timedelta(days=1)).count())
