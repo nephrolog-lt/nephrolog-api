@@ -394,6 +394,55 @@ class DailyIntakesReportQuerySet(models.QuerySet):
     def prefetch_intakes(self) -> DailyIntakesReportQuerySet:
         return self.prefetch_related(Prefetch('intakes', queryset=Intake.objects.select_related_product()))
 
+    def exclude_empty_intakes(self) -> DailyIntakesReportQuerySet:
+        return self.filter(intakes__isnull=False)
+
+    def annotate_with_nutrient_totals(self) -> QuerySet[DailyIntakesReport]:
+        return self.annotate(
+            total_potassium_mg=models.Sum(
+                models.ExpressionWrapper(
+                    models.F("intakes__product__potassium_mg") *
+                    models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField()),
+                    output_field=models.IntegerField()
+                ),
+            ),
+            total_sodium_mg=models.Sum(
+                models.ExpressionWrapper(
+                    models.F("intakes__product__sodium_mg") *
+                    models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField()),
+                    output_field=models.IntegerField()
+                ),
+            ),
+            total_phosphorus_mg=models.Sum(
+                models.ExpressionWrapper(
+                    models.F("intakes__product__phosphorus_mg") *
+                    models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField()),
+                    output_field=models.IntegerField()
+                ),
+            ),
+            total_proteins_mg=models.Sum(
+                models.ExpressionWrapper(
+                    models.F("intakes__product__proteins_mg") *
+                    models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField()),
+                    output_field=models.IntegerField()
+                ),
+            ),
+            total_energy_kcal=models.Sum(
+                models.ExpressionWrapper(
+                    models.F("intakes__product__energy_kcal") *
+                    models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField()),
+                    output_field=models.IntegerField()
+                ),
+            ),
+            total_liquids_g=models.Sum(
+                models.ExpressionWrapper(
+                    models.F("intakes__product__liquids_g") *
+                    models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField()),
+                    output_field=models.IntegerField()
+                ),
+            ),
+        )
+
 
 class DailyIntakesReport(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

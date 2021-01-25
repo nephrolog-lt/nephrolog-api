@@ -1,6 +1,7 @@
 import factory
 from django.contrib.auth import get_user_model
 from factory.django import DjangoModelFactory
+from pytz import utc
 
 from core import models
 
@@ -25,3 +26,41 @@ class UserProfileFactory(DjangoModelFactory):
     weight_kg = 188.8
     chronic_kidney_disease_years = 2
     dialysis_type = factory.Iterator(models.DialysisType.PeriotonicDialysis, models.DialysisType.PostTransplant)
+
+
+class ProductFactory(DjangoModelFactory):
+    class Meta:
+        model = models.Product
+
+    name_lt = factory.Faker('user_name')
+    name_en = factory.Faker('user_name')
+    product_kind = factory.Iterator(models.ProductKind.Food, models.ProductKind.Drink)
+
+    potassium_mg = 10
+    sodium_mg = 20
+    phosphorus_mg = 30
+    proteins_mg = 40
+    energy_kcal = 50
+    liquids_g = 60
+
+
+class IntakeFactory(DjangoModelFactory):
+    class Meta:
+        model = models.Intake
+
+    consumed_at = factory.Faker('date_time', tzinfo=utc)
+    amount_g = 150
+
+
+class DailyIntakesReportFactory(DjangoModelFactory):
+    class Meta:
+        model = models.DailyIntakesReport
+
+    date = factory.Faker('date')
+
+    daily_norm_potassium_mg = 100
+    daily_norm_proteins_mg = 200
+    daily_norm_sodium_mg = 300
+    daily_norm_phosphorus_mg = 400
+    daily_norm_energy_kcal = 500
+    daily_norm_liquids_g = 600

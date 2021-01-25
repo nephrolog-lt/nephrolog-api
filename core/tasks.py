@@ -3,8 +3,8 @@ from datetime import timedelta
 from typing import List, Tuple
 
 from celery import shared_task
-from django.db.models import QuerySet
-from django.db.models.aggregates import Count
+from django.db.models import F, QuerySet
+from django.db.models.aggregates import Count, Sum
 from django.utils import timezone
 
 from core.models import Appetite, DailyHealthStatus, DailyIntakesReport, DiabetesType, HistoricalUserProfile, Intake, \
@@ -26,6 +26,18 @@ _user_age_groups = [(18, 24), (25, 34), (35, 44), (45, 54), (55, 64), (65, 74), 
 def sync_product_metrics():
     datadog = Datadog()
     now = timezone.now()
+
+    def _gauge_daily_norm(field_name: str, metric_name: str):
+        intake_reports_with_totals = DailyIntakesReport.objects.exclude_empty_intakes() \
+            .annotate_with_nutrient_totals()
+
+        reports_with_indicator = intake_reports_with_totals.filter(**{f'daily_norm_{field_name}__isnull': False})
+        exceeded = reports_with_indicator.filter(**{f'daily_norm_{field_name}__lt': F(f'total_{field_name}')})
+
+        datadog.gauge(
+            f'product.nutrition.norms.{metric_name}.total', reports_with_indicator.count())
+        datadog.gauge(
+            f'product.nutrition.norms.{metric_name}.exceeded', exceeded.count())
 
     def _gauge_aggregated_user_profile_metric(field_name: str, user_profile_queryset: QuerySet[UserProfile] = None):
         if user_profile_queryset is None:
@@ -86,6 +98,13 @@ def sync_product_metrics():
 
     datadog.gauge(
         'product.intakes.reports.total', DailyIntakesReport.objects.exclude(intakes__isnull=True).count())
+
+    _gauge_daily_norm('potassium_mg', 'potassium')
+    _gauge_daily_norm('sodium_mg', 'sodium')
+    _gauge_daily_norm('phosphorus_mg', 'phosphorus')
+    _gauge_daily_norm('proteins_mg', 'proteins')
+    _gauge_daily_norm('energy_kcal', 'energy')
+    _gauge_daily_norm('liquids_g', 'liquids')
 
     for kind in ProductKind.values:
         datadog.gauge(
