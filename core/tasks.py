@@ -51,6 +51,8 @@ def sync_product_metrics():
 
     datadog.gauge('product.users.total', User.objects.count())
     datadog.gauge('product.users.profiles', user_with_statistics_and_profile_queryset.count())
+    datadog.gauge('product.users.profiles.diabetics', UserProfile.objects.filter(
+        diabetes_type__in=(DiabetesType.Type1, DiabetesType.Type2)).count())
     datadog.gauge('product.users.profiles.historical', HistoricalUserProfile.objects.count())
     datadog.gauge('product.users.profiles_with_intakes',
                   user_with_statistics_and_profile_queryset.exclude(intakes_count=0).count())
