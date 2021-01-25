@@ -67,7 +67,9 @@ def sync_product_metrics():
         diabetes_type__in=(DiabetesType.Type1, DiabetesType.Type2)))
 
     _gauge_aggregated_user_profile_group_metric('chronic_kidney_disease_years', _sick_years_groups)
-    _gauge_aggregated_user_profile_group_metric('diabetes_years', _sick_years_groups)
+    _gauge_aggregated_user_profile_group_metric('diabetes_years', _sick_years_groups,
+                                                user_profile_queryset=UserProfile.objects.filter(
+                                                    diabetes_type__in=(DiabetesType.Type1, DiabetesType.Type2)))
     _gauge_aggregated_user_profile_group_metric(
         'age', _user_age_groups,
         user_profile_queryset=UserProfile.objects.annotate_with_age()
