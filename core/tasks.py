@@ -42,7 +42,7 @@ def sync_product_metrics():
             user_profile_queryset = UserProfile.objects.all()
 
         for group in groups:
-            total = user_profile_queryset.filter(**{f"{field_name}__between": group}).count()
+            total = user_profile_queryset.filter(**{f"{field_name}__range": group}).count()
             datadog.gauge(f'product.users.profiles.{field_name}', total,
                           tags=[f'{field_name}:{group[0]}_{group[1]}'])
 
