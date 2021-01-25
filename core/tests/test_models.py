@@ -2,7 +2,7 @@ from datetime import date
 
 from django.test import TestCase
 
-from core.models import DailyIntakesReport, UserProfile
+from core.models import DailyIntakesReport, Product, UserProfile
 from core.tests.factories import DailyIntakesReportFactory, IntakeFactory, ProductFactory, UserFactory, \
     UserProfileFactory
 
@@ -36,9 +36,9 @@ class IntakeTests(TestCase):
             potassium_mg=15,
             sodium_mg=25,
             phosphorus_mg=35,
-            proteins_mg=45,
-            energy_kcal=55,
-            liquids_g=65,
+            proteins_mg=32767,
+            energy_kcal=32767,
+            liquids_g=32767,
         )
         daily_report = DailyIntakesReportFactory(user=user)
 
@@ -50,6 +50,6 @@ class IntakeTests(TestCase):
         self.assertEqual(annotated_daily_report.total_potassium_mg, 40)
         self.assertEqual(annotated_daily_report.total_sodium_mg, 70)
         self.assertEqual(annotated_daily_report.total_phosphorus_mg, 100)
-        self.assertEqual(annotated_daily_report.total_proteins_mg, 130)
-        self.assertEqual(annotated_daily_report.total_energy_kcal, 160)
-        self.assertEqual(annotated_daily_report.total_liquids_g, 190)
+        self.assertEqual(annotated_daily_report.total_proteins_mg, 65574)
+        self.assertEqual(annotated_daily_report.total_energy_kcal, 65539)
+        self.assertEqual(annotated_daily_report.total_liquids_g, 65594)

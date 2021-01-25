@@ -419,28 +419,30 @@ class DailyIntakesReportQuerySet(models.QuerySet):
             total_phosphorus_mg=models.Sum(
                 models.ExpressionWrapper(
                     models.F("intakes__product__phosphorus_mg") *
-                    models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField()),
+                    (models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField())),
                     output_field=models.IntegerField()
                 ),
             ),
             total_proteins_mg=models.Sum(
                 models.ExpressionWrapper(
-                    models.F("intakes__product__proteins_mg") *
+                    functions.Cast(models.F("intakes__product__proteins_mg"), output_field=models.IntegerField()) *
                     models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField()),
                     output_field=models.IntegerField()
                 ),
             ),
             total_energy_kcal=models.Sum(
                 models.ExpressionWrapper(
-                    models.F("intakes__product__energy_kcal") *
+                    functions.Cast(models.F("intakes__product__energy_kcal"), output_field=models.IntegerField()) *
                     models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField()),
                     output_field=models.IntegerField()
                 ),
             ),
             total_liquids_g=models.Sum(
                 models.ExpressionWrapper(
-                    models.F("intakes__product__liquids_g") *
-                    models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField()),
+                    functions.Cast(models.F("intakes__product__liquids_g"), output_field=models.IntegerField()) *
+                    models.ExpressionWrapper(models.F("intakes__amount_g"),
+                                             output_field=models.IntegerField()
+                                             ) / models.Value(100, output_field=models.IntegerField()),
                     output_field=models.IntegerField()
                 ),
             ),
