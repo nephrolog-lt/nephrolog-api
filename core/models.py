@@ -398,7 +398,7 @@ class DailyIntakesReportQuerySet(models.QuerySet):
         return self.prefetch_related(Prefetch('intakes', queryset=Intake.objects.select_related_product()))
 
     def exclude_empty_intakes(self) -> DailyIntakesReportQuerySet:
-        return self.filter(intakes__isnull=False)
+        return self.exclude(intakes__isnull=True)
 
     def annotate_with_nutrient_totals(self) -> QuerySet[DailyIntakesReport]:
         return self.annotate(
