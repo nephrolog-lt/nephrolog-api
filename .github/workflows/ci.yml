@@ -2,9 +2,60 @@ name: Test, build Docker image and deploy to production
 on: push
 
 jobs:
+  test:
+    name: Test NephroGo
+    runs-on: ubuntu-20.04
+    env:
+      DEV: 1
+      POSTGRES_HOST: localhost
+      POSTGRES_USER: nephrogo
+      POSTGRES_PASSWORD: nephrogo
+      POSTGRES_DB: nephrogo
+      POSTGRES_POST: 5432
+
+    services:
+      postgres:
+        image: postgres:13.1
+        ports: [ '5432:5432' ]
+        env:
+          POSTGRES_HOST: ${{ env.POSTGRES_HOST }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_POST: ${{ env.POSTGRES_POST }}
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade wheel
+          python -m pip install -r requirements.txt
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: Run tests
+        run: python manage.py test
+
   push_docker:
     name: Build and push Docker image to registry
     runs-on: ubuntu-20.04
+    needs: test
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@master
