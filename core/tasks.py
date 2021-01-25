@@ -63,8 +63,7 @@ def sync_product_metrics():
 
     datadog.gauge('product.users.total', User.objects.count())
     datadog.gauge('product.users.profiles', user_with_statistics_and_profile_queryset.count())
-    datadog.gauge('product.users.profiles.diabetics', UserProfile.objects.filter(
-        diabetes_type__in=(DiabetesType.Type1, DiabetesType.Type2)).count())
+    datadog.gauge('product.users.profiles.diabetics', UserProfile.objects.filter_diabetics().count())
     datadog.gauge('product.users.profiles.historical', HistoricalUserProfile.objects.count())
     datadog.gauge('product.users.profiles_with_intakes',
                   user_with_statistics_and_profile_queryset.exclude(intakes_count=0).count())
@@ -75,13 +74,11 @@ def sync_product_metrics():
     _gauge_aggregated_user_profile_metric('chronic_kidney_disease_stage')
     _gauge_aggregated_user_profile_metric('dialysis_type')
     _gauge_aggregated_user_profile_metric('diabetes_type')
-    _gauge_aggregated_user_profile_metric('diabetes_complications', UserProfile.objects.filter(
-        diabetes_type__in=(DiabetesType.Type1, DiabetesType.Type2)))
+    _gauge_aggregated_user_profile_metric('diabetes_complications', UserProfile.objects.filter_diabetics())
 
     _gauge_aggregated_user_profile_group_metric('chronic_kidney_disease_years', _sick_years_groups)
     _gauge_aggregated_user_profile_group_metric('diabetes_years', _sick_years_groups,
-                                                user_profile_queryset=UserProfile.objects.filter(
-                                                    diabetes_type__in=(DiabetesType.Type1, DiabetesType.Type2)))
+                                                user_profile_queryset=UserProfile.objects.filter_diabetics())
     _gauge_aggregated_user_profile_group_metric(
         'age', _user_age_groups,
         user_profile_queryset=UserProfile.objects.annotate_with_age()
@@ -97,7 +94,7 @@ def sync_product_metrics():
     datadog.gauge('product.health_status.total', DailyHealthStatus.objects.count())
 
     datadog.gauge(
-        'product.intakes.reports.total', DailyIntakesReport.objects.exclude(intakes__isnull=True).count())
+        'product.intakes.reports.total', DailyIntakesReport.objects.exclude_empty_intakes().count())
 
     _gauge_daily_norm('potassium_mg', 'potassium')
     _gauge_daily_norm('sodium_mg', 'sodium')

@@ -233,7 +233,7 @@ class BaseUserProfile(models.Model):
 
 
 class UserProfileQuerySet(models.QuerySet):
-    def annotate_with_age(self):
+    def annotate_with_age(self) -> QuerySet[UserProfile]:
         return self.annotate(
             age=models.ExpressionWrapper(
                 functions.Extract(
@@ -243,6 +243,9 @@ class UserProfileQuerySet(models.QuerySet):
                 output_field=models.IntegerField()
             )
         )
+
+    def filter_diabetics(self) -> UserProfileQuerySet:
+        return self.filter(diabetes_type__in=(DiabetesType.Type1, DiabetesType.Type2))
 
 
 class UserProfile(BaseUserProfile):
