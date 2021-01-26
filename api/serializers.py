@@ -40,7 +40,8 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ('id', 'name', 'product_kind',
-                  'potassium_mg', 'proteins_mg', 'sodium_mg', 'phosphorus_mg', 'energy_kcal', 'liquids_g',)
+                  'potassium_mg', 'proteins_mg', 'sodium_mg', 'phosphorus_mg', 'energy_kcal', 'liquids_g',
+                  'density_g_ml')
 
 
 @extend_schema_serializer(exclude_fields=['liquids_ml'])
@@ -60,7 +61,7 @@ class IntakeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Intake
         fields = (
-            'id', 'user', 'product_id', 'consumed_at', 'amount_g',
+            'id', 'user', 'product_id', 'consumed_at', 'amount_g', 'amount_ml',
             'potassium_mg', 'proteins_mg', 'sodium_mg', 'phosphorus_mg', 'energy_kcal', 'liquids_g', 'liquids_ml',
             'product',
         )

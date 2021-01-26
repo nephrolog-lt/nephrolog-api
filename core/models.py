@@ -595,6 +595,7 @@ class Intake(models.Model):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='intakes')
     consumed_at = models.DateTimeField()
     amount_g = models.PositiveSmallIntegerField(validators=(MinValueValidator(1),))
+    amount_ml = models.PositiveSmallIntegerField(null=True, blank=True, validators=(MinValueValidator(1),))
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -605,6 +606,13 @@ class Intake(models.Model):
         indexes = [
             models.Index(fields=('user', '-consumed_at')),
         ]
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        if self.amount_ml and self.product.density_g_ml:
+            self.amount_g = round(self.product.density_g_ml * self.amount_ml)
+
+        super().save(force_insert, force_update, using, update_fields)
 
     @staticmethod
     def get_latest_user_intakes(user: AbstractBaseUser) -> IntakeQuerySet:
