@@ -609,8 +609,8 @@ class Intake(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
-        if self.amount_ml and self.product.density_g_ml:
-            self.amount_g = round(self.product.density_g_ml * self.amount_ml)
+        if self.amount_ml is None and self.product.density_g_ml:
+            self.amount_ml = round(self.amount_g / self.product.density_g_ml)
 
         super().save(force_insert, force_update, using, update_fields)
 
