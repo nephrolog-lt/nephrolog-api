@@ -24,7 +24,7 @@ class NutrientScreenResponse:
 
         now = datetime.datetime.now(tz)
 
-        from_date = (now - datetime.timedelta(days=7)).date()
+        from_date = (now - datetime.timedelta(days=6)).date()
         to_date = now.date()
 
         DailyIntakesReport.get_or_create_for_user_and_date(user, to_date)
@@ -71,7 +71,7 @@ class HealthStatusScreenResponse:
 
         now = datetime.datetime.now(tz)
 
-        from_date = (now - datetime.timedelta(days=7)).date()
+        from_date = (now - datetime.timedelta(days=6)).date()
         to_date = now.date()
 
         daily_health_statuses = DailyHealthStatus.get_between_dates_for_user(user, from_date, to_date)
