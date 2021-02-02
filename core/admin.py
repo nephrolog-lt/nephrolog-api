@@ -2,11 +2,8 @@ from csv_export.views import CSVExportView
 from django.contrib import admin
 from django.contrib.admin import EmptyFieldListFilter
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.postgres.search import TrigramSimilarity
-from django.utils.safestring import mark_safe
 
 from core import models
-from core.models import Product
 
 admin.site.site_header = 'NephroGo Administration'
 admin.site.site_title = admin.site.site_header
@@ -68,7 +65,7 @@ class ProductAdmin(admin.ModelAdmin):
         'product_kind',
         'name_lt',
         'name_en',
-        'most_similar',
+        'popularity',
         'density_g_ml',
         'potassium_mg',
         'proteins_mg',
@@ -83,19 +80,28 @@ class ProductAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('product_source', 'name_search_lt',)
     list_filter = (('density_g_ml', EmptyFieldListFilter), 'product_kind', 'product_source', 'created_at', 'updated_at')
-    list_editable = ('product_kind', 'name_lt', 'name_en', 'density_g_ml')
     search_fields = ('name_lt', 'name_en', 'name_search_lt')
 
-    def most_similar(self, obj):
-        return mark_safe('<br><br>'.join(map(lambda x: x.name_lt, Product.objects.annotate(
-            similarity=TrigramSimilarity('name_search_lt', obj.name_search_lt)).exclude(
-            pk=obj.pk).order_by('-similarity')[:3]))
-                         )
+    def get_queryset(self, request):
+        return models.Product.objects.annotate_with_popularity()
+
+    def popularity(self, obj):
+        return obj.popularity
+
+    popularity.admin_order_field = "popularity"
+    popularity.short_description = "popularity"
+
+    # def most_similar(self, obj):
+    #     return mark_safe('<br><br>'.join(map(lambda x: x.name_lt, Product.objects.annotate(
+    #         similarity=TrigramSimilarity('name_search_lt', obj.name_search_lt)).exclude(
+    #         pk=obj.pk).order_by('-similarity')[:3]))
+    #                      )
 
 
 class BaseUserProfileAdminMixin(admin.ModelAdmin):
     raw_id_fields = ('user',)
     list_select_related = ('user',)
+    search_fields = ('user__pk', 'user__email', 'user__username')
     date_hierarchy = 'created_at'
 
 
@@ -131,6 +137,8 @@ class UserProfileAdmin(BaseUserProfileAdminMixin):
         'updated_at',
     )
 
+    list_filter = ('created_at',)
+
 
 @admin.register(models.Intake)
 class IntakeAdmin(admin.ModelAdmin):
@@ -145,6 +153,8 @@ class IntakeAdmin(admin.ModelAdmin):
     )
     list_select_related = ('user', 'product', 'daily_report')
     raw_id_fields = ('product', 'user', 'daily_report')
+    search_fields = ('user__pk', 'user__email', 'user__username', 'product__name_lt')
+    list_filter = ('consumed_at',)
     date_hierarchy = 'consumed_at'
 
 
@@ -163,6 +173,8 @@ class DailyHealthStatusAdmin(admin.ModelAdmin):
     )
     raw_id_fields = ('user',)
     date_hierarchy = 'date'
+    list_select_related = ('user',)
+    search_fields = ('user__pk', 'user__email', 'user__username',)
 
 
 @admin.register(models.DailyIntakesReport)
@@ -171,6 +183,7 @@ class DailyIntakesReportAdmin(admin.ModelAdmin):
         'id',
         'user',
         'date',
+        'intakes_count',
         'daily_norm_potassium_mg',
         'daily_norm_proteins_mg',
         'daily_norm_sodium_mg',
@@ -183,8 +196,18 @@ class DailyIntakesReportAdmin(admin.ModelAdmin):
     list_select_related = ('user',)
     date_hierarchy = 'date'
     raw_id_fields = ('user',)
+    search_fields = ('user__pk', 'user__email', 'user__username',)
 
     actions = ('export_data_csv',)
+
+    def get_queryset(self, request):
+        return models.DailyIntakesReport.objects.annotate_with_intakes_count()
+
+    def intakes_count(self, obj):
+        return obj.intakes_count
+
+    intakes_count.admin_order_field = "intakes_count"
+    intakes_count.short_description = "intakes_count"
 
     def export_data_csv(self, request, queryset):
         view = CSVExportView(queryset=queryset.annotate_with_nutrient_totals(),

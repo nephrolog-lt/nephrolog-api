@@ -321,6 +321,11 @@ class ProductSource(models.TextChoices):
     DN = "DN"
 
 
+class ProductQuerySet(models.QuerySet):
+    def annotate_with_popularity(self) -> QuerySet[Product]:
+        return self.annotate(popularity=models.Count('intakes'))
+
+
 class Product(models.Model):
     name_lt = models.CharField(max_length=128, unique=True)
     name_en = models.CharField(max_length=128, unique=True)
@@ -354,6 +359,8 @@ class Product(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = ProductQuerySet.as_manager()
 
     class Meta:
         ordering = ("-pk",)
@@ -399,6 +406,9 @@ class DailyIntakesReportQuerySet(models.QuerySet):
 
     def exclude_empty_intakes(self) -> DailyIntakesReportQuerySet:
         return self.exclude(intakes__isnull=True)
+
+    def annotate_with_intakes_count(self) -> QuerySet[DailyIntakesReport]:
+        return self.annotate(intakes_count=models.Count('intakes'))
 
     def annotate_with_nutrient_totals(self) -> QuerySet[DailyIntakesReport]:
         return self.annotate(
