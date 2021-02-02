@@ -1,4 +1,4 @@
-from admin_numeric_filter.admin import SliderNumericFilter
+from admin_numeric_filter.admin import NumericFilterModelAdmin, SliderNumericFilter
 from csv_export.views import CSVExportView
 from django.contrib import admin
 from django.contrib.admin import EmptyFieldListFilter
@@ -102,7 +102,7 @@ class ProductAdmin(admin.ModelAdmin):
     #                      )
 
 
-class BaseUserProfileAdminMixin(admin.ModelAdmin):
+class BaseUserProfileAdminMixin(NumericFilterModelAdmin):
     raw_id_fields = ('user',)
     list_select_related = ('user',)
     search_fields = ('user__pk', 'user__email', 'user__username')
