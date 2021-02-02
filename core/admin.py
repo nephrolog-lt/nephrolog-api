@@ -11,7 +11,7 @@ admin.site.site_title = admin.site.site_header
 
 @admin.register(models.User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff',
+    list_display = ('username', 'id', 'email', 'first_name', 'last_name', 'is_staff',
                     'profile_count',
                     'intakes_count', 'daily_intakes_reports_count',
                     'daily_health_statuses_count',
@@ -19,6 +19,8 @@ class UserAdmin(BaseUserAdmin):
                     'last_login', 'date_joined')
 
     ordering = ('-last_login',)
+    search_fields = ('username', 'first_name', 'last_name', 'email', 'pk')
+
     date_hierarchy = 'last_login'
     list_filter = (('profile', EmptyFieldListFilter),
                    'last_login', 'date_joined', 'is_staff', 'is_superuser', 'is_active',)
