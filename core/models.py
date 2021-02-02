@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime
 from dataclasses import dataclass
 from decimal import Decimal
+from itertools import chain
 from typing import Optional
 
 from django.contrib.auth.base_user import AbstractBaseUser
@@ -376,20 +377,23 @@ class Product(models.Model):
         super().save(force_insert, force_update, using, update_fields)
 
     @staticmethod
-    def filter_by_user_and_query(user: AbstractBaseUser, query: Optional[str]) -> QuerySet[Product]:
-        query = query.strip() if query else None
+    def filter_by_user_and_query(user: AbstractBaseUser, query: Optional[str], limit: int) -> QuerySet[Product]:
+        query = str_to_ascii(query.strip()).lower() if query else None
 
-        if not query:
-            products: QuerySet[Product] = Product.last_consumed_products_by_user(user)
-            if products.exists():
-                return products
+        if query:
+            return Product.objects.annotate(similarity=TrigramSimilarity('name_search_lt', query)).filter(
+                similarity__gt=0.1).order_by('-similarity')[:limit]
 
-            return Product.objects.order_by('-pk')
+        last_consumed_products: QuerySet[Product] = Product.last_consumed_products_by_user(user)[:limit]
 
-        query = str_to_ascii(query).lower()
+        remaining = max(0, limit - len(last_consumed_products))
+        if remaining == 0:
+            return last_consumed_products
 
-        return Product.objects.annotate(similarity=TrigramSimilarity('name_search_lt', query)).filter(
-            similarity__gt=0.1).order_by('-similarity')
+        popular_products = Product.objects.exclude(pk__in=last_consumed_products) \
+                               .annotate_with_popularity().order_by('-popularity')[:remaining]
+
+        return chain(last_consumed_products, popular_products)
 
     @staticmethod
     def last_consumed_products_by_user(user: AbstractBaseUser):

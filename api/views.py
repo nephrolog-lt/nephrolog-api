@@ -20,7 +20,6 @@ from core import models
         OpenApiParameter(
             name='query',
             type=OpenApiTypes.STR,
-            required=True,
             location=OpenApiParameter.QUERY,
         )
     ],
@@ -33,7 +32,7 @@ class ProductListView(ListAPIView):
     def get_queryset(self):
         query = self.request.query_params.get('query', None)
 
-        return models.Product.filter_by_user_and_query(self.request.user, query)[:self._limit]
+        return models.Product.filter_by_user_and_query(self.request.user, query, self._limit)
 
 
 @extend_schema(tags=['nutrition'])
