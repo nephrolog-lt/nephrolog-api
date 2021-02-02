@@ -18,7 +18,7 @@ class UserAdmin(BaseUserAdmin):
                     'historical_profiles_count',
                     'last_login', 'date_joined')
 
-    ordering = ('last_login',)
+    ordering = ('-last_login',)
     date_hierarchy = 'last_login'
     list_filter = (('profile', EmptyFieldListFilter),
                    'last_login', 'date_joined', 'is_staff', 'is_superuser', 'is_active',)
