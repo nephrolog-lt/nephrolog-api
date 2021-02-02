@@ -1,7 +1,9 @@
+from admin_numeric_filter.admin import SliderNumericFilter
 from csv_export.views import CSVExportView
 from django.contrib import admin
 from django.contrib.admin import EmptyFieldListFilter
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from rangefilter.filter import DateRangeFilter
 
 from core import models
 
@@ -122,24 +124,42 @@ class HistoricalUserProfileAdmin(BaseUserProfileAdminMixin):
         'updated_at',
     )
     list_filter = ('date',)
+    list_select_related = ('user',)
     date_hierarchy = 'date'
 
 
 @admin.register(models.UserProfile)
 class UserProfileAdmin(BaseUserProfileAdminMixin):
     list_display = (
-        'id',
         'user',
         'gender',
         'birthday',
         'height_cm',
         'weight_kg',
 
+        'chronic_kidney_disease_years',
+        'chronic_kidney_disease_stage',
+        'dialysis_type',
+        'diabetes_years',
+        'diabetes_type',
+        'diabetes_complications',
+
         'created_at',
         'updated_at',
     )
 
-    list_filter = ('created_at',)
+    list_filter = (
+        'gender',
+        ('birthday', DateRangeFilter),
+        ('height_cm', SliderNumericFilter),
+        ('weight_kg', SliderNumericFilter),
+        ('chronic_kidney_disease_years', SliderNumericFilter),
+        'chronic_kidney_disease_stage',
+        'dialysis_type',
+        ('diabetes_years', SliderNumericFilter),
+        'diabetes_type', 'diabetes_complications',
+        'created_at',
+    )
 
 
 @admin.register(models.Intake)

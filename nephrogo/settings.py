@@ -38,6 +38,9 @@ USE_X_FORWARDED_HOST = True
 
 # Application definition
 INSTALLED_APPS = [
+    'admin_numeric_filter',
+    'rangefilter',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
