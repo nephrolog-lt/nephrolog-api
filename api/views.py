@@ -27,7 +27,7 @@ from core import models
 class ProductListView(ListAPIView):
     queryset = models.Product.objects.all()
     serializer_class = serializers.ProductSerializer
-    _limit = 15
+    _limit = 20
 
     def get_queryset(self):
         query = self.request.query_params.get('query', None)
