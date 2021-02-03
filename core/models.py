@@ -119,7 +119,7 @@ class BaseUserProfile(models.Model):
         choices=Gender.choices,
     )
     # TODO remove birthday in the future. Change made 02-03
-    birthday = models.DateField()
+    birthday = models.DateField(null=True, blank=True)
     year_of_birth = models.PositiveSmallIntegerField(
         null=True, blank=True, validators=[validators.MinValueValidator(1920), validators.MaxValueValidator(2003)]
     )
