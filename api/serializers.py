@@ -24,6 +24,7 @@ class ReadOnlySerializer(serializers.Serializer):
         raise RuntimeError("ReadOnlySerializer can not perform create")
 
 
+@extend_schema_serializer(exclude_fields=['weight_kg'])
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 

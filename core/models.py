@@ -120,7 +120,9 @@ class BaseUserProfile(models.Model):
     )
     birthday = models.DateField()
     height_cm = models.PositiveSmallIntegerField()
-    weight_kg = models.DecimalField(max_digits=4, decimal_places=1, validators=[MinValueValidator(Decimal('10'))])
+    # TODO remove in the future. Change made 02-03
+    weight_kg = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True,
+                                    validators=[MinValueValidator(Decimal('10'))])
 
     chronic_kidney_disease_years = models.PositiveSmallIntegerField()
     chronic_kidney_disease_stage = models.CharField(
