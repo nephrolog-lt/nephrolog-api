@@ -26,8 +26,9 @@ class UserAdmin(BaseUserAdmin):
     list_filter = (('profile', EmptyFieldListFilter),
                    'last_login', 'date_joined', 'is_staff', 'is_superuser', 'is_active',)
 
+    # noinspection PyUnresolvedReferences
     def get_queryset(self, request):
-        return models.User.get_annotated_with_statistics()
+        return super().get_queryset(request).get_annotated_with_statistics()
 
     def intakes_count(self, obj):
         return obj.intakes_count
@@ -86,7 +87,8 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ('name_lt', 'name_en', 'name_search_lt')
 
     def get_queryset(self, request):
-        return models.Product.objects.annotate_with_popularity()
+        # noinspection PyUnresolvedReferences
+        return super().get_queryset(request).annotate_with_popularity()
 
     def popularity(self, obj):
         return obj.popularity
@@ -165,15 +167,16 @@ class UserProfileAdmin(BaseUserProfileAdminMixin):
 @admin.register(models.Intake)
 class IntakeAdmin(admin.ModelAdmin):
     list_display = (
-        'id',
-        'user',
         'product',
+        'user',
         'consumed_at',
         'amount_g',
+        'amount_ml',
+        'id',
         'created_at',
         'updated_at',
     )
-    list_select_related = ('user', 'product', 'daily_report')
+    list_select_related = ('user', 'product')
     raw_id_fields = ('product', 'user', 'daily_report')
     search_fields = ('user__pk', 'user__email', 'user__username', 'product__name_lt')
     list_filter = ('consumed_at',)
@@ -189,7 +192,14 @@ class DailyHealthStatusAdmin(admin.ModelAdmin):
         'systolic_blood_pressure',
         'diastolic_blood_pressure',
         'weight_kg',
+        'glucose',
         'urine_ml',
+        'all_swellings',
+        'swelling_difficulty',
+        'well_feeling',
+        'appetite',
+        'shortness_of_breath',
+
         'created_at',
         'updated_at',
     )
@@ -197,6 +207,15 @@ class DailyHealthStatusAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
     list_select_related = ('user',)
     search_fields = ('user__pk', 'user__email', 'user__username',)
+
+    def get_queryset(self, request):
+        # noinspection PyUnresolvedReferences
+        return super().get_queryset(request).prefetch_swellings()
+
+    def all_swellings(self, obj):
+        return ','.join(map(lambda s: str(s), obj.swellings.all()))
+
+    all_swellings.short_description = "swellings"
 
 
 @admin.register(models.DailyIntakesReport)
@@ -223,7 +242,8 @@ class DailyIntakesReportAdmin(admin.ModelAdmin):
     actions = ('export_data_csv',)
 
     def get_queryset(self, request):
-        return models.DailyIntakesReport.objects.annotate_with_intakes_count()
+        # noinspection PyUnresolvedReferences
+        return super().get_queryset(request).annotate_with_intakes_count()
 
     def intakes_count(self, obj):
         return obj.intakes_count
