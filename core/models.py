@@ -12,7 +12,6 @@ from django.contrib.postgres.indexes import GinIndex, GistIndex
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core import validators
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Prefetch, QuerySet, functions
 from django.db.models.aggregates import Max, Min
@@ -127,7 +126,7 @@ class BaseUserProfile(models.Model):
     height_cm = models.PositiveSmallIntegerField()
     # TODO remove in the future. Change made 02-03
     weight_kg = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True,
-                                    validators=[MinValueValidator(Decimal('10'))])
+                                    validators=[validators.MinValueValidator(Decimal('10'))])
 
     chronic_kidney_disease_years = models.PositiveSmallIntegerField()
     chronic_kidney_disease_stage = models.CharField(
@@ -357,15 +356,18 @@ class Product(models.Model):
         editable=False
     )
 
-    potassium_mg = models.DecimalField(max_digits=7, decimal_places=2, validators=[MinValueValidator(Decimal('0'))])
-    sodium_mg = models.DecimalField(max_digits=7, decimal_places=2, validators=[MinValueValidator(Decimal('0'))])
-    phosphorus_mg = models.DecimalField(max_digits=7, decimal_places=2, validators=[MinValueValidator(Decimal('0'))])
+    potassium_mg = models.DecimalField(max_digits=7, decimal_places=2,
+                                       validators=[validators.MinValueValidator(Decimal('0'))])
+    sodium_mg = models.DecimalField(max_digits=7, decimal_places=2,
+                                    validators=[validators.MinValueValidator(Decimal('0'))])
+    phosphorus_mg = models.DecimalField(max_digits=7, decimal_places=2,
+                                        validators=[validators.MinValueValidator(Decimal('0'))])
     proteins_mg = models.PositiveIntegerField()
     energy_kcal = models.PositiveSmallIntegerField()
     liquids_g = models.PositiveSmallIntegerField()
 
     density_g_ml = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True,
-                                       validators=[MinValueValidator(Decimal('0.01'))])
+                                       validators=[validators.MinValueValidator(Decimal('0.01'))])
 
     raw_id = models.CharField(max_length=64, null=True, blank=True, editable=False, unique=True)
 
@@ -619,8 +621,8 @@ class Intake(models.Model):
     daily_report = models.ForeignKey(DailyIntakesReport, on_delete=models.CASCADE, related_name='intakes')
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='intakes')
     consumed_at = models.DateTimeField()
-    amount_g = models.PositiveSmallIntegerField(validators=(MinValueValidator(1),))
-    amount_ml = models.PositiveSmallIntegerField(null=True, blank=True, validators=(MinValueValidator(1),))
+    amount_g = models.PositiveSmallIntegerField(validators=(validators.MinValueValidator(1),))
+    amount_ml = models.PositiveSmallIntegerField(null=True, blank=True, validators=(validators.MinValueValidator(1),))
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -747,10 +749,10 @@ class DailyHealthStatus(models.Model):
     diastolic_blood_pressure = models.PositiveSmallIntegerField(null=True, blank=True)
 
     weight_kg = models.DecimalField(null=True, blank=True, max_digits=4, decimal_places=1,
-                                    validators=[MinValueValidator(Decimal('10'))])
+                                    validators=[validators.MinValueValidator(Decimal('10'))])
 
     glucose = models.DecimalField(null=True, blank=True, max_digits=7, decimal_places=2,
-                                  validators=[MinValueValidator(Decimal('0'))])
+                                  validators=[validators.MinValueValidator(Decimal('0'))])
     urine_ml = models.PositiveSmallIntegerField(null=True, blank=True)
 
     swellings = models.ManyToManyField(Swelling, blank=True)
