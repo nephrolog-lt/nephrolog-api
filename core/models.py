@@ -10,6 +10,7 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.indexes import GinIndex, GistIndex
 from django.contrib.postgres.search import TrigramSimilarity
+from django.core import validators
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -118,7 +119,11 @@ class BaseUserProfile(models.Model):
         max_length=8,
         choices=Gender.choices,
     )
+    # TODO remove birthday in the future. Change made 02-03
     birthday = models.DateField()
+    year_of_birth = models.PositiveSmallIntegerField(
+        null=True, blank=True, validators=[validators.MinValueValidator(1920), validators.MaxValueValidator(2003)]
+    )
     height_cm = models.PositiveSmallIntegerField()
     # TODO remove in the future. Change made 02-03
     weight_kg = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True,
@@ -166,6 +171,9 @@ class BaseUserProfile(models.Model):
         if self.diabetes_type in (DiabetesType.Unknown, DiabetesType.No):
             self.diabetes_complications = DiabetesComplications.Unknown
             self.diabetes_years = None
+
+        if self.birthday and self.year_of_birth is None:
+            self.year_of_birth = self.birthday.year
 
         super().save(force_insert, force_update, using, update_fields)
 
@@ -289,6 +297,7 @@ class HistoricalUserProfile(BaseUserProfile):
             defaults={
                 'gender': user_profile.gender,
                 'birthday': user_profile.birthday,
+                'year_of_birth': user_profile.year_of_birth,
                 'height_cm': user_profile.height_cm,
                 'weight_kg': user_profile.weight_kg,
                 'chronic_kidney_disease_years': user_profile.chronic_kidney_disease_years,
