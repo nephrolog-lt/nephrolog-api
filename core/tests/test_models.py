@@ -2,7 +2,7 @@ from datetime import date
 
 from django.test import TestCase
 
-from core.models import DailyIntakesReport, Product, UserProfile
+from core.models import DailyIntakesReport, UserProfile
 from core.tests.factories import DailyIntakesReportFactory, IntakeFactory, ProductFactory, UserFactory, \
     UserProfileFactory
 
@@ -11,8 +11,8 @@ class UserProfileTests(TestCase):
 
     def test_age_calculation(self):
         user = UserFactory()
-        user_profile = UserProfileFactory(user=user)
-        expected_age = (date.today() - user_profile.birthday).days / 365.25
+        UserProfileFactory(user=user, year_of_birth=1960)
+        expected_age = (date.today().year - 1960)
 
         queryset = UserProfile.objects.annotate_with_age()
 

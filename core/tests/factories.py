@@ -22,6 +22,7 @@ class UserProfileFactory(DjangoModelFactory):
 
     gender = factory.Iterator(models.Gender.Female, models.Gender.Male)
     birthday = factory.Faker('date_of_birth')
+    year_of_birth = 1960
     height_cm = 185
     weight_kg = 188.8
     chronic_kidney_disease_years = 2
