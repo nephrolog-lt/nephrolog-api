@@ -16,6 +16,7 @@ from django.db import models
 from django.db.models import Prefetch, QuerySet, functions
 from django.db.models.aggregates import Max, Min
 from django.db.transaction import atomic
+from django.utils.timezone import now
 
 from core.utils import str_to_ascii
 from nephrogo import settings
@@ -244,12 +245,10 @@ class BaseUserProfile(models.Model):
 
 class UserProfileQuerySet(models.QuerySet):
     def annotate_with_age(self) -> QuerySet[UserProfile]:
+        current_year = now().year
         return self.annotate(
             age=models.ExpressionWrapper(
-                functions.Extract(
-                    models.Value(datetime.date.today(), output_field=models.DateField()) - models.F('birthday'),
-                    'DAY'
-                ) / models.Value(365.25, output_field=models.FloatField()),
+                models.Value(current_year, output_field=models.IntegerField()) - models.F('year_of_birth'),
                 output_field=models.IntegerField()
             )
         )

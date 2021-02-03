@@ -1,9 +1,8 @@
-from admin_numeric_filter.admin import NumericFilterModelAdmin, SliderNumericFilter
+from admin_numeric_filter.admin import NumericFilterModelAdmin, RangeNumericFilter
 from csv_export.views import CSVExportView
 from django.contrib import admin
 from django.contrib.admin import EmptyFieldListFilter
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from rangefilter.filter import DateRangeFilter
 
 from core import models
 
@@ -133,6 +132,7 @@ class UserProfileAdmin(BaseUserProfileAdminMixin):
     list_display = (
         'user',
         'gender',
+        'year_of_birth',
         'birthday',
         'height_cm',
         'weight_kg',
@@ -150,13 +150,13 @@ class UserProfileAdmin(BaseUserProfileAdminMixin):
 
     list_filter = (
         'gender',
-        ('birthday', DateRangeFilter),
-        ('height_cm', SliderNumericFilter),
-        ('weight_kg', SliderNumericFilter),
-        ('chronic_kidney_disease_years', SliderNumericFilter),
+        ('year_of_birth', RangeNumericFilter),
+        ('height_cm', RangeNumericFilter),
+        ('weight_kg', RangeNumericFilter),
+        ('chronic_kidney_disease_years', RangeNumericFilter),
         'chronic_kidney_disease_stage',
         'dialysis_type',
-        ('diabetes_years', SliderNumericFilter),
+        ('diabetes_years', RangeNumericFilter),
         'diabetes_type', 'diabetes_complications',
         'created_at',
     )
