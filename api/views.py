@@ -110,7 +110,7 @@ class UserProfileView(CreateAPIView, RetrieveUpdateAPIView):
 
 
 @extend_schema(tags=['user'])
-class UserView(UpdateAPIView):
+class UserView(RetrieveAPIView, UpdateAPIView):
     serializer_class = serializers.UserSerializer
 
     def get_object(self):
