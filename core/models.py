@@ -6,8 +6,7 @@ from decimal import Decimal
 from itertools import chain
 from typing import Optional
 
-from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager as AbstractUserManager
 from django.contrib.postgres.indexes import GinIndex, GistIndex
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core import validators
@@ -75,7 +74,7 @@ class UserQuerySet(models.QuerySet):
         )
 
 
-class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
+class UserManager(AbstractUserManager.from_queryset(UserQuerySet)):
     use_in_migrations = False
 
 
