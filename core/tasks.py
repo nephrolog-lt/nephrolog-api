@@ -58,7 +58,7 @@ def sync_product_metrics():
             datadog.gauge(f'product.users.profiles.{field_name}', total,
                           tags=[f'{field_name}:{group[0]}_{group[1]}'])
 
-    user_with_statistics_queryset = User.get_annotated_with_statistics()
+    user_with_statistics_queryset = User.objects.annotate_with_statistics()
     user_with_statistics_and_profile_queryset = user_with_statistics_queryset.exclude(profile_count=0)
 
     datadog.gauge('product.users.total', User.objects.count())

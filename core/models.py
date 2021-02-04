@@ -6,7 +6,7 @@ from decimal import Decimal
 from itertools import chain
 from typing import Optional
 
-from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.indexes import GinIndex, GistIndex
 from django.contrib.postgres.search import TrigramSimilarity
@@ -28,12 +28,8 @@ class DailyNutrientConsumption:
     norm: Optional[int]
 
 
-class User(AbstractUser):
-    def __str__(self):
-        return self.get_username() or self.get_full_name() or self.email
-
-    @staticmethod
-    def get_annotated_with_statistics() -> QuerySet[User]:
+class UserQuerySet(models.QuerySet):
+    def annotate_with_statistics(self) -> QuerySet[User]:
         intakes_count = User.objects.annotate(
             intakes_count=models.Count('daily_intakes_reports__intakes')
         ).filter(pk=models.OuterRef('pk'))
@@ -54,7 +50,7 @@ class User(AbstractUser):
             historical_profiles_count=models.Count('historical_profiles')
         ).filter(pk=models.OuterRef('pk'))
 
-        return User.objects.annotate(
+        return self.annotate(
             intakes_count=models.Subquery(
                 intakes_count.values('intakes_count'),
                 output_field=models.IntegerField()
@@ -77,6 +73,17 @@ class User(AbstractUser):
             ),
 
         )
+
+
+class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
+    use_in_migrations = False
+
+
+class User(AbstractUser):
+    objects = UserManager()
+
+    def __str__(self):
+        return self.get_username() or self.get_full_name() or self.email
 
 
 class Gender(models.TextChoices):

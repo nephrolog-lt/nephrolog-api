@@ -28,7 +28,7 @@ class UserAdmin(BaseUserAdmin):
 
     # noinspection PyUnresolvedReferences
     def get_queryset(self, request):
-        return super().get_queryset(request).get_annotated_with_statistics()
+        return super().get_queryset(request).annotate_with_statistics()
 
     def intakes_count(self, obj):
         return obj.intakes_count
