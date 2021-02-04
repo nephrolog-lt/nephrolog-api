@@ -5,7 +5,7 @@ from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from core.models import DailyHealthStatus, DailyIntakesReport, Intake, Product, Swelling, UserProfile
+from core.models import DailyHealthStatus, DailyIntakesReport, Intake, Product, Swelling, UserProfile, User
 
 logger = getLogger()
 
@@ -33,6 +33,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = ('user', 'gender', 'birthday', 'year_of_birth', 'height_cm', 'weight_kg',
                   'chronic_kidney_disease_years', 'chronic_kidney_disease_stage', 'dialysis_type',
                   'diabetes_type', 'diabetes_years', 'diabetes_complications',)
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('is_marketing_allowed',)
 
 
 class ProductSerializer(serializers.ModelSerializer):

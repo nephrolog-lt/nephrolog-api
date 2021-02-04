@@ -5,6 +5,7 @@ from api import views
 
 urlpatterns = [
     path('user/profile/', views.UserProfileView.as_view(), name="api-user-profile"),
+    path('user/', views.UserView.as_view(), name="api-user"),
 
     path('nutrition/products/', views.ProductListView.as_view(), name="api-products"),
     path('nutrition/intake/', views.IntakeCreateView.as_view(), name="api-intake"),

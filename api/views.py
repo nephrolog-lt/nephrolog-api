@@ -109,6 +109,14 @@ class UserProfileView(CreateAPIView, RetrieveUpdateAPIView):
         return get_object_or_404(self.filter_queryset(self.get_queryset()), user=self.request.user)
 
 
+@extend_schema(tags=['user'])
+class UserView(UpdateAPIView):
+    serializer_class = serializers.UserSerializer
+
+    def get_object(self):
+        return models.User.objects.filter(pk=self.request.user.pk).get()
+
+
 @extend_schema(
     tags=['health-status'],
     parameters=[

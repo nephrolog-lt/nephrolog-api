@@ -75,10 +75,12 @@ class UserQuerySet(models.QuerySet):
 
 
 class UserManager(AbstractUserManager.from_queryset(UserQuerySet)):
-    use_in_migrations = False
+    pass
 
 
 class User(AbstractUser):
+    is_marketing_allowed = models.BooleanField(null=True, blank=True)
+
     objects = UserManager()
 
     def __str__(self):

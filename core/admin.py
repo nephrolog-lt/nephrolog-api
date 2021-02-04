@@ -12,7 +12,7 @@ admin.site.site_title = admin.site.site_header
 
 @admin.register(models.User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ('username', 'id', 'email', 'first_name', 'last_name', 'is_staff',
+    list_display = ('username', 'id', 'email', 'first_name', 'last_name', 'is_marketing_allowed', 'is_staff',
                     'profile_count',
                     'intakes_count', 'daily_intakes_reports_count',
                     'daily_health_statuses_count',
@@ -23,7 +23,7 @@ class UserAdmin(BaseUserAdmin):
     search_fields = ('username', 'first_name', 'last_name', 'email', 'pk')
 
     date_hierarchy = 'last_login'
-    list_filter = (('profile', EmptyFieldListFilter),
+    list_filter = (('profile', EmptyFieldListFilter), 'is_marketing_allowed',
                    'last_login', 'date_joined', 'is_staff', 'is_superuser', 'is_active',)
 
     # noinspection PyUnresolvedReferences
