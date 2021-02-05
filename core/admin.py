@@ -11,7 +11,7 @@ admin.site.site_header = 'NephroGo Administration'
 admin.site.site_title = admin.site.site_header
 
 
-class UserProfileInlineAdmin(admin.StackedInline):
+class UserProfileAdminInline(admin.StackedInline):
     model = models.UserProfile
     extra = 0
 
@@ -36,7 +36,7 @@ class UserAdmin(BaseUserAdmin):
         }),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
-    inlines = (UserProfileInlineAdmin,)
+    inlines = (UserProfileAdminInline,)
 
     ordering = ('-last_login',)
     search_fields = ('username', 'first_name', 'last_name', 'email', 'pk')
@@ -238,6 +238,13 @@ class DailyHealthStatusAdmin(admin.ModelAdmin):
     all_swellings.short_description = "swellings"
 
 
+class IntakeAdminInline(admin.StackedInline):
+    model = models.Intake
+    extra = 0
+    raw_id_fields = ('product', 'user',)
+    ordering = ('-consumed_at',)
+
+
 @admin.register(models.DailyIntakesReport)
 class DailyIntakesReportAdmin(admin.ModelAdmin):
     list_display = (
@@ -258,7 +265,7 @@ class DailyIntakesReportAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
     raw_id_fields = ('user',)
     search_fields = ('user__pk', 'user__email', 'user__username',)
-
+    inlines = (IntakeAdminInline,)
     actions = ('export_data_csv',)
 
     def get_queryset(self, request):
