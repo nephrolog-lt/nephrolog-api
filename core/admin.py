@@ -3,6 +3,7 @@ from csv_export.views import CSVExportView
 from django.contrib import admin
 from django.contrib.admin import EmptyFieldListFilter
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.utils.translation import gettext_lazy as _
 
 from core import models
 
@@ -10,21 +11,40 @@ admin.site.site_header = 'NephroGo Administration'
 admin.site.site_title = admin.site.site_header
 
 
+class UserProfileInlineAdmin(admin.StackedInline):
+    model = models.UserProfile
+    extra = 0
+
+
 @admin.register(models.User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ('username', 'id', 'email', 'first_name', 'last_name', 'is_marketing_allowed', 'is_staff',
-                    'profile_count',
-                    'intakes_count', 'daily_intakes_reports_count',
-                    'daily_health_statuses_count',
-                    'historical_profiles_count',
-                    'last_login', 'date_joined')
+    list_display = (
+        'username', 'id', 'email', 'first_name', 'last_name', 'is_marketing_allowed', 'last_app_review_dialog_showed',
+        'is_staff',
+        'profile_count',
+        'intakes_count', 'daily_intakes_reports_count',
+        'daily_health_statuses_count',
+        'historical_profiles_count',
+        'last_login', 'date_joined')
+
+    fieldsets = (
+        (None, {'fields': ('username', 'password')}),
+        (_('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
+        (_('NephroGo info'), {'fields': ('is_marketing_allowed', 'last_app_review_dialog_showed',)}),
+        (_('Permissions'), {
+            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
+        }),
+        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
+    )
+    inlines = (UserProfileInlineAdmin,)
 
     ordering = ('-last_login',)
     search_fields = ('username', 'first_name', 'last_name', 'email', 'pk')
 
     date_hierarchy = 'last_login'
     list_filter = (('profile', EmptyFieldListFilter), 'is_marketing_allowed',
-                   'last_login', 'date_joined', 'is_staff', 'is_superuser', 'is_active',)
+                   'last_login', 'date_joined', 'last_app_review_dialog_showed', 'is_staff', 'is_superuser',
+                   'is_active',)
 
     # noinspection PyUnresolvedReferences
     def get_queryset(self, request):

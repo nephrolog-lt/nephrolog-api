@@ -80,11 +80,30 @@ class UserManager(AbstractUserManager.from_queryset(UserQuerySet)):
 
 class User(AbstractUser):
     is_marketing_allowed = models.BooleanField(null=True, blank=True)
+    last_app_review_dialog_showed = models.DateTimeField(null=True, blank=True)
 
     objects = UserManager()
 
     def __str__(self):
         return self.get_username() or self.get_full_name() or self.email
+
+    def _should_show_app_review_dialog(self) -> bool:
+        if self.last_app_review_dialog_showed is None and (now() - self.date_joined).days > 7:
+            return DailyIntakesReport.filter_for_user(self).count() > 7
+
+        return False
+
+    def show_app_review_dialog_if_needed(self) -> bool:
+        print("show_app_review_dialog_if_needed")
+
+        if not self._should_show_app_review_dialog():
+            return False
+
+
+        self.last_app_review_dialog_showed = now()
+        self.save(update_fields=('last_app_review_dialog_showed',))
+
+        return True
 
 
 class Gender(models.TextChoices):

@@ -6,6 +6,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.generics import CreateAPIView, DestroyAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView, \
     RetrieveUpdateDestroyAPIView, UpdateAPIView, get_object_or_404
+from rest_framework.serializers import BaseSerializer
 
 from api import serializers
 from api.models import HealthStatusScreenResponse, HealthStatusWeeklyResponse, NutrientScreenResponse, \
@@ -115,6 +116,14 @@ class UserView(RetrieveAPIView, UpdateAPIView):
 
     def get_object(self):
         return models.User.objects.filter(pk=self.request.user.pk).get()
+
+
+@extend_schema(tags=['user'])
+class UserAppReview(RetrieveAPIView):
+    serializer_class = serializers.UserAppReviewSerializer
+
+    def get_object(self):
+        return models.User.objects.get(pk=self.request.user.pk)
 
 
 @extend_schema(

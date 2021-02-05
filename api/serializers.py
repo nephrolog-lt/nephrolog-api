@@ -1,5 +1,5 @@
 from logging import getLogger
-from typing import Dict
+from typing import Any, Dict
 
 from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
@@ -39,6 +39,14 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('is_marketing_allowed',)
+
+
+class UserAppReviewSerializer(serializers.ModelSerializer):
+    show_app_review_dialog = serializers.BooleanField(read_only=True, source='show_app_review_dialog_if_needed')
+
+    class Meta:
+        model = User
+        fields = ('show_app_review_dialog',)
 
 
 class ProductSerializer(serializers.ModelSerializer):
