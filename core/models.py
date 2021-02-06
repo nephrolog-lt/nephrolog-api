@@ -457,7 +457,7 @@ class Product(models.Model):
 
 
 class ProductSearchLog(models.Model):
-    query = models.CharField(max_length=128)
+    query = models.CharField(max_length=32)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_index=False, related_name='+')
 
     product1 = models.ForeignKey(Product, on_delete=models.CASCADE, db_index=False, null=True, blank=True,
@@ -483,7 +483,7 @@ class ProductSearchLog(models.Model):
         product2 = products[1] if results_count >= 2 else None
         product3 = products[2] if results_count >= 3 else None
 
-        ProductSearchLog.objects.create(query=query[:128], user=user, product1=product1, product2=product2,
+        ProductSearchLog.objects.create(query=query[:32], user=user, product1=product1, product2=product2,
                                         product3=product3, results_count=results_count, submit=submit)
 
     def __str__(self):
