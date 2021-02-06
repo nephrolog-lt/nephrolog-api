@@ -9,6 +9,7 @@ urlpatterns = [
     path('user/', views.UserView.as_view(), name="api-user"),
 
     path('nutrition/products/', views.ProductListView.as_view(), name="api-products"),
+    path('nutrition/products/search/', views.ProductSearchView.as_view(), name="api-products-search"),
     path('nutrition/intake/', views.IntakeCreateView.as_view(), name="api-intake"),
     path('nutrition/intake/<int:id>/', views.IntakeView.as_view(), name="api-intake"),
     path('nutrition/screen/', views.NutritionScreenView.as_view(), name="api-nutrition-screen"),

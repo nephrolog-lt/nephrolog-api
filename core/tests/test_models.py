@@ -53,3 +53,17 @@ class IntakeTests(TestCase):
         self.assertEqual(annotated_daily_report.total_proteins_mg, 65574)
         self.assertEqual(annotated_daily_report.total_energy_kcal, 65584)
         self.assertEqual(annotated_daily_report.total_liquids_g, 65594)
+
+    def test_annotating_with_total_norms_empty(self):
+        user = UserFactory()
+
+        DailyIntakesReportFactory(user=user)
+
+        annotated_daily_report = DailyIntakesReport.filter_for_user(user).annotate_with_nutrient_totals().first()
+
+        self.assertEqual(annotated_daily_report.total_potassium_mg, 0)
+        self.assertEqual(annotated_daily_report.total_sodium_mg, 0)
+        self.assertEqual(annotated_daily_report.total_phosphorus_mg, 0)
+        self.assertEqual(annotated_daily_report.total_proteins_mg, 0)
+        self.assertEqual(annotated_daily_report.total_energy_kcal, 0)
+        self.assertEqual(annotated_daily_report.total_liquids_g, 0)

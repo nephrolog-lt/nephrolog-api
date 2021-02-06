@@ -28,6 +28,16 @@ class DailyNutrientConsumption:
     norm: Optional[int]
 
 
+@dataclass(frozen=True)
+class DailyNutrientNormsAndTotals:
+    potassium_mg: DailyNutrientConsumption
+    proteins_mg: DailyNutrientConsumption
+    sodium_mg: DailyNutrientConsumption
+    phosphorus_mg: DailyNutrientConsumption
+    energy_kcal: DailyNutrientConsumption
+    liquids_g: DailyNutrientConsumption
+
+
 class UserQuerySet(models.QuerySet):
     def annotate_with_statistics(self) -> QuerySet[User]:
         intakes_count = User.objects.annotate(
@@ -502,42 +512,45 @@ class DailyIntakesReportQuerySet(models.QuerySet):
 
     def annotate_with_nutrient_totals(self) -> QuerySet[DailyIntakesReport]:
         return self.annotate(
-            total_potassium_mg=models.Sum(
-                models.ExpressionWrapper(
-                    models.F("intakes__product__potassium_mg") *
-                    models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField()),
-                    output_field=models.IntegerField()
-                ),
-            ),
-            total_sodium_mg=models.Sum(
-                models.ExpressionWrapper(
-                    models.F("intakes__product__sodium_mg") *
-                    models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField()),
-                    output_field=models.IntegerField()
-                ),
-            ),
-            total_phosphorus_mg=models.Sum(
-                models.ExpressionWrapper(
-                    models.F("intakes__product__phosphorus_mg") *
-                    (models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField())),
-                    output_field=models.IntegerField()
-                ),
-            ),
-            total_proteins_mg=models.Sum(
+            total_potassium_mg=functions.Coalesce(
+                models.Sum(
+                    models.ExpressionWrapper(
+                        models.F("intakes__product__potassium_mg") *
+                        models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField()),
+                        output_field=models.IntegerField()
+                    ),
+                ), 0),
+            total_sodium_mg=functions.Coalesce(
+                models.Sum(
+                    models.ExpressionWrapper(
+                        models.F("intakes__product__sodium_mg") *
+                        models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField()),
+                        output_field=models.IntegerField()
+                    ),
+                ), 0),
+            total_phosphorus_mg=functions.Coalesce(
+                models.Sum(
+                    models.ExpressionWrapper(
+                        models.F("intakes__product__phosphorus_mg") *
+                        (models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField())),
+                        output_field=models.IntegerField()
+                    ),
+                ), 0),
+            total_proteins_mg=functions.Coalesce(models.Sum(
                 models.ExpressionWrapper(
                     functions.Cast(models.F("intakes__product__proteins_mg"), output_field=models.IntegerField()) *
                     models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField()),
                     output_field=models.IntegerField()
                 ),
-            ),
-            total_energy_kcal=models.Sum(
+            ), 0),
+            total_energy_kcal=functions.Coalesce(models.Sum(
                 models.ExpressionWrapper(
                     functions.Cast(models.F("intakes__product__energy_kcal"), output_field=models.IntegerField()) *
                     models.F("intakes__amount_g") / models.Value(100, output_field=models.IntegerField()),
                     output_field=models.IntegerField()
                 ),
-            ),
-            total_liquids_g=models.Sum(
+            ), 0),
+            total_liquids_g=functions.Coalesce(models.Sum(
                 models.ExpressionWrapper(
                     functions.Cast(models.F("intakes__product__liquids_g"), output_field=models.IntegerField()) *
                     models.ExpressionWrapper(models.F("intakes__amount_g"),
@@ -545,7 +558,7 @@ class DailyIntakesReportQuerySet(models.QuerySet):
                                              ) / models.Value(100, output_field=models.IntegerField()),
                     output_field=models.IntegerField()
                 ),
-            ),
+            ), 0),
         )
 
 
@@ -604,27 +617,56 @@ class DailyIntakesReport(models.Model):
         return self.liquids_g
 
     @property
+    def daily_nutrient_norms_and_totals(self) -> DailyNutrientNormsAndTotals:
+        return DailyNutrientNormsAndTotals(
+            potassium_mg=self.potassium_mg,
+            proteins_mg=self.proteins_mg,
+            sodium_mg=self.sodium_mg,
+            phosphorus_mg=self.phosphorus_mg,
+            energy_kcal=self.energy_kcal,
+            liquids_g=self.liquids_g,
+        )
+
+    @property
     def _total_potassium_mg(self):
+        if hasattr(self, 'total_potassium_mg'):
+            return self.total_potassium_mg
+
         return sum(intake.potassium_mg for intake in self.intakes.all())
 
     @property
     def _total_proteins_mg(self):
+        if hasattr(self, 'total_proteins_mg'):
+            return self.total_proteins_mg
+
         return sum(intake.proteins_mg for intake in self.intakes.all())
 
     @property
     def _total_sodium_mg(self):
+        if hasattr(self, 'total_sodium_mg'):
+            return self.total_sodium_mg
+
         return sum(intake.sodium_mg for intake in self.intakes.all())
 
     @property
     def _total_phosphorus_mg(self):
+        if hasattr(self, 'total_phosphorus_mg'):
+            return self.total_phosphorus_mg
+
         return sum(intake.phosphorus_mg for intake in self.intakes.all())
 
     @property
     def _total_energy_kcal(self):
+        if hasattr(self, 'total_energy_kcal'):
+            return self.total_energy_kcal
+
         return sum(intake.energy_kcal for intake in self.intakes.all())
 
     @property
     def _total_liquids_g(self):
+        if hasattr(self, 'total_liquids_g'):
+            return self.total_liquids_g
+
         return sum(intake.liquids_g for intake in self.intakes.all())
 
     def recalculate_daily_norms(self):
@@ -672,6 +714,16 @@ class DailyIntakesReport(models.Model):
                 report.recalculate_daily_norms()
 
         return report
+
+    @staticmethod
+    def get_latest_daily_nutrient_norms_and_totals(user: AbstractBaseUser) -> DailyNutrientNormsAndTotals:
+        report = DailyIntakesReport.filter_for_user(user).annotate_with_nutrient_totals().order_by('-date').first()
+
+        if report is None:
+            raise ValueError(
+                'Unable to get latest nutrient norms and totals. Make sure at least one report is created.')
+
+        return report.daily_nutrient_norms_and_totals
 
     @staticmethod
     def get_for_user_between_dates(user: AbstractBaseUser, date_from: datetime.date,

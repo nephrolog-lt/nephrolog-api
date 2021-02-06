@@ -8,7 +8,8 @@ from rest_framework.request import Request
 
 from api import utils
 from api.utils import parse_date_query_params
-from core.models import DailyHealthStatus, DailyIntakesReport, Intake, UserProfile
+from core.models import DailyHealthStatus, DailyIntakesReport, Intake, UserProfile, Product, \
+    DailyNutrientNormsAndTotals, ProductSearchLog
 
 
 @dataclass(frozen=True)
@@ -99,4 +100,37 @@ class HealthStatusWeeklyResponse:
         return HealthStatusWeeklyResponse(
             earliest_health_status_date=earliest_health_status_date,
             daily_health_statuses=daily_health_statuses
+        )
+
+
+@dataclass(frozen=True)
+class ProductSearchResponse:
+    products: List[Product]
+    query: str
+    daily_nutrient_norms_and_totals: DailyNutrientNormsAndTotals
+
+    @staticmethod
+    # noinspection DuplicatedCode
+    def from_api_request(request: Request, limit: int) -> ProductSearchResponse:
+        query = request.query_params.get('query', '')
+        user = request.user
+
+        products = Product.filter_by_user_and_query(user, query, limit)
+        daily_nutrient_norms_and_totals = DailyIntakesReport.get_latest_daily_nutrient_norms_and_totals(user)
+
+        if query:
+            submit_str = request.query_params.get('submit', None)
+
+            submit = None
+            if submit_str in ('0', 'false'):
+                submit = False
+            elif submit_str in ('1', 'true'):
+                submit = True
+
+            ProductSearchLog.insert_from_product_search(query, products, user, submit)
+
+        return ProductSearchResponse(
+            products=products,
+            query=query,
+            daily_nutrient_norms_and_totals=daily_nutrient_norms_and_totals,
         )

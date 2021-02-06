@@ -10,13 +10,37 @@ from rest_framework.serializers import BaseSerializer
 
 from api import serializers
 from api.models import HealthStatusScreenResponse, HealthStatusWeeklyResponse, NutrientScreenResponse, \
-    NutrientWeeklyScreenResponse
+    NutrientWeeklyScreenResponse, ProductSearchResponse
 from api.utils import datetime_to_date, parse_date_or_validation_error, parse_time_zone
 from core import models
 
 
 @extend_schema(
     tags=['nutrition'],
+    parameters=[
+        OpenApiParameter(
+            name='query',
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.QUERY,
+        ),
+        OpenApiParameter(
+            name='submit',
+            type=OpenApiTypes.BOOL,
+            location=OpenApiParameter.QUERY
+        ),
+    ],
+)
+class ProductSearchView(RetrieveAPIView):
+    serializer_class = serializers.ProductSearchResponseSerializer
+    _limit = 20
+
+    def get_object(self):
+        return ProductSearchResponse.from_api_request(self.request, self._limit)
+
+
+@extend_schema(
+    tags=['nutrition'],
+    deprecated=True,
     parameters=[
         OpenApiParameter(
             name='query',
