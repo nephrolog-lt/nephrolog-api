@@ -9,7 +9,6 @@ from functools import reduce
 
 from django.contrib.auth.models import AbstractUser, UserManager as AbstractUserManager
 from django.contrib.postgres.indexes import GinIndex, GistIndex
-from django.contrib.postgres.search import TrigramSimilarity
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.db import models
