@@ -12,7 +12,7 @@ def str_to_ascii(s: str) -> str:
     return unidecode(s)
 
 
-def remove_non_alpha_numeric_or_space(s: str) -> str:
+def only_alphanumeric_or_spaces(s: str) -> str:
     return re.sub(r'[^a-zA-Z0-9 ]+', '', s)
 
 

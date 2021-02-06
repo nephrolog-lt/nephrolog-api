@@ -18,7 +18,7 @@ from django.db.transaction import atomic
 from django.utils.timezone import now
 import re
 
-from core.utils import str_to_ascii, remove_non_alpha_numeric_or_space
+from core.utils import str_to_ascii, only_alphanumeric_or_spaces
 from nephrogo import settings
 
 
@@ -414,13 +414,13 @@ class Product(models.Model):
         self.name_lt = self.name_lt.strip()
         self.name_en = self.name_en.strip()
 
-        self.name_search_lt = remove_non_alpha_numeric_or_space(str_to_ascii(self.name_lt).lower())
+        self.name_search_lt = only_alphanumeric_or_spaces(str_to_ascii(self.name_lt).lower())
 
         super().save(force_insert, force_update, using, update_fields)
 
     @staticmethod
     def filter_by_user_and_query(user: AbstractBaseUser, query: Optional[str], limit: int) -> QuerySet[Product]:
-        query = remove_non_alpha_numeric_or_space(str_to_ascii(query.strip()).lower()) if query else None
+        query = only_alphanumeric_or_spaces(str_to_ascii(query.strip()).lower()) if query else None
 
         if query:
             query_words = query.split(' ')
