@@ -83,7 +83,7 @@ class UserAdmin(BaseUserAdmin):
 
 
 @admin.register(models.ProductSearchLog)
-class ProductSearchLogAdmin(admin.ModelAdmin):
+class ProductSearchLogAdmin(NumericFilterModelAdmin):
     list_display = (
         'query',
         'user',
