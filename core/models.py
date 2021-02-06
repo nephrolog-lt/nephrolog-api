@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from itertools import chain
 from typing import Optional
+from functools import reduce
 
 from django.contrib.auth.models import AbstractUser, UserManager as AbstractUserManager
 from django.contrib.postgres.indexes import GinIndex, GistIndex
@@ -16,8 +17,9 @@ from django.db.models import Prefetch, QuerySet, functions
 from django.db.models.aggregates import Max, Min
 from django.db.transaction import atomic
 from django.utils.timezone import now
+import re
 
-from core.utils import str_to_ascii
+from core.utils import str_to_ascii, remove_non_alpha_numeric_or_space
 from nephrogo import settings
 
 
@@ -98,7 +100,6 @@ class User(AbstractUser):
 
         if not self._should_show_app_review_dialog():
             return False
-
 
         self.last_app_review_dialog_showed = now()
         self.save(update_fields=('last_app_review_dialog_showed',))
@@ -411,17 +412,30 @@ class Product(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
-        self.name_search_lt = str_to_ascii(self.name_lt).lower()
+        self.name_lt = self.name_lt.strip()
+        self.name_en = self.name_en.strip()
+
+        self.name_search_lt = remove_non_alpha_numeric_or_space(str_to_ascii(self.name_lt).lower())
 
         super().save(force_insert, force_update, using, update_fields)
 
     @staticmethod
     def filter_by_user_and_query(user: AbstractBaseUser, query: Optional[str], limit: int) -> QuerySet[Product]:
-        query = str_to_ascii(query.strip()).lower() if query else None
+        query = remove_non_alpha_numeric_or_space(str_to_ascii(query.strip()).lower()) if query else None
 
         if query:
-            return Product.objects.annotate(similarity=TrigramSimilarity('name_search_lt', query)).filter(
-                similarity__gt=0.1).order_by('-similarity')[:limit]
+            query_words = query.split(' ')
+            query_filters = map(lambda q: models.Q(name_search_lt__contains=q), query_words)
+            query_filter = reduce(lambda a, b: a & b, query_filters)
+
+            first_word = query_words[0]
+
+            return Product.objects.filter(query_filter).annotate(
+                starts_with_word=models.ExpressionWrapper(
+                    models.Q(name_search_lt__startswith=first_word),
+                    output_field=models.BooleanField()
+                )
+            ).order_by('-starts_with_word')[:limit]
 
         last_consumed_products: QuerySet[Product] = Product.last_consumed_products_by_user(user)[:limit]
 
