@@ -86,12 +86,12 @@ class UserAdmin(BaseUserAdmin):
 class ProductSearchLogAdmin(NumericFilterModelAdmin):
     list_display = (
         'query',
-        'user',
         'results_count',
         'product1',
         'product2',
         'product3',
         'submit',
+        'user',
         'created_at',
     )
     list_select_related = ('user', 'product1', 'product2', 'product3')
