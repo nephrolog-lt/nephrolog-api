@@ -22,10 +22,10 @@ class ProductSearchViewTests(APITestCase):
     def login_user(self):
         self.client.login(username='test', password='test')
 
-    def test_product_search_unauthenticated(self):
-        response = self.client.get(reverse('api-products-search'), data={'query': 'apple', 'submit': '1'})
-
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    # def test_product_search_unauthenticated(self):
+    #     response = self.client.get(reverse('api-products-search'), data={'query': 'apple', 'submit': '1'})
+    #
+    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_product_search_empty_query(self):
         product1 = ProductFactory(
