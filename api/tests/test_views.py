@@ -7,16 +7,14 @@ from rest_framework import status
 from core.models import DailyIntakesReport, UserProfile, User
 from core.tests.factories import DailyIntakesReportFactory, IntakeFactory, ProductFactory, UserFactory, \
     UserProfileFactory
-from rest_framework.test import APIRequestFactory, APIClient
-from nephrogo import settings
+from rest_framework.test import APIClient, APIRequestFactory
 
 
 class ProductSearchViewTests(APITestCase):
-
     def setUp(self):
-        settings.REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = [
-            'rest_framework.authentication.SessionAuthentication'
-        ]
+        self.modify_settings(REST_FRAMEWORK={
+            'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework.authentication.SessionAuthentication'],
+        })
 
         self.factory = APIRequestFactory()
         self.user = User.objects.create_user('test', email='test@test.com', password='test')
