@@ -22,7 +22,12 @@ from core import models
             name='query',
             type=OpenApiTypes.STR,
             location=OpenApiParameter.QUERY,
-        )
+        ),
+        OpenApiParameter(
+            name='submit',
+            type=OpenApiTypes.BOOL,
+            location=OpenApiParameter.QUERY
+        ),
     ],
 )
 class ProductListView(ListAPIView):
@@ -33,7 +38,20 @@ class ProductListView(ListAPIView):
     def get_queryset(self):
         query = self.request.query_params.get('query', None)
 
-        return models.Product.filter_by_user_and_query(self.request.user, query, self._limit)
+        products = models.Product.filter_by_user_and_query(self.request.user, query, self._limit)
+
+        if query:
+            submit_str = self.request.query_params.get('submit', None)
+
+            submit = None
+            if submit_str in ('0', 'false'):
+                submit = False
+            elif submit_str in ('1', 'true'):
+                submit = True
+
+            models.ProductSearchLog.insert_from_product_search(query, products, self.request.user, submit)
+
+        return products
 
 
 @extend_schema(tags=['nutrition'])
