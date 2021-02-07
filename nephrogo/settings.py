@@ -1,5 +1,6 @@
 from datetime import timedelta
 from pathlib import Path
+import sys
 
 import django
 import environ
@@ -308,6 +309,11 @@ REST_FRAMEWORK = {
 
     'COERCE_DECIMAL_TO_STRING': False,
 }
+
+if 'test' in sys.argv:
+    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = (
+        'rest_framework.authentication.SessionAuthentication',
+    )
 
 DRF_FIREBASE_TOKEN_AUTH = {
     'FIREBASE_SERVICE_ACCOUNT_KEY_FILE_PATH': 'secrets/firebase.json',
