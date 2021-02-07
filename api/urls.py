@@ -10,6 +10,13 @@ urlpatterns = [
 
     path('nutrition/products/', views.ProductListView.as_view(), name="api-products"),
     path('nutrition/products/search/', views.ProductSearchView.as_view(), name="api-products-search"),
+
+    path('nutrition/daily-intakes-reports/light/', views.DailyIntakesReportsLightView.as_view(),
+         name="api-daily-intakes-reports"),
+
+    path('nutrition/daily-intakes-reports/<str:date>/', views.DailyIntakesReportView.as_view(),
+         name="api-daily-intakes-report"),
+
     path('nutrition/intake/', views.IntakeCreateView.as_view(), name="api-intake"),
     path('nutrition/intake/<int:id>/', views.IntakeView.as_view(), name="api-intake"),
     path('nutrition/screen/', views.NutritionScreenView.as_view(), name="api-nutrition-screen"),

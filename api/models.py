@@ -13,6 +13,25 @@ from core.models import DailyHealthStatus, DailyIntakesReport, Intake, UserProfi
 
 
 @dataclass(frozen=True)
+class DailyIntakesReportsLightResponse:
+    daily_intakes_light_reports: List[DailyIntakesReport]
+
+    @staticmethod
+    def from_api_request(request: Request) -> DailyIntakesReportsLightResponse:
+        daily_intakes_reports = DailyIntakesReport.filter_for_user(
+            request.user).annotate_with_nutrient_totals().exclude_empty_intakes().order_by('-id')[:365]
+
+        return DailyIntakesReportsLightResponse(
+            daily_intakes_light_reports=daily_intakes_reports
+        )
+
+
+@dataclass(frozen=True)
+class DailyIntakesReportResponse:
+    daily_intakes_report: DailyIntakesReport
+
+
+@dataclass(frozen=True)
 class NutrientScreenResponse:
     today_intakes_report: DailyIntakesReport
     latest_intakes: List[Intake]

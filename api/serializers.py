@@ -129,6 +129,31 @@ class DailyIntakesReportSerializer(serializers.ModelSerializer):
         )
 
 
+class DailyIntakesLightReportSerializer(serializers.ModelSerializer):
+    date = serializers.DateField(read_only=True)
+    nutrient_norms_and_totals = DailyNutrientNormsWithTotalsSerializer(source='daily_nutrient_norms_and_totals')
+
+    class Meta:
+        model = DailyIntakesReport
+        fields = (
+            'date', 'nutrient_norms_and_totals',
+        )
+
+
+class DailyIntakesReportsResponseSerializer(ReadOnlySerializer):
+    daily_intakes_light_reports = DailyIntakesLightReportSerializer(read_only=True, many=True)
+
+    class Meta:
+        fields = ('daily_intakes_light_reports',)
+
+
+class DailyIntakesReportResponseSerializer(ReadOnlySerializer):
+    daily_intakes_report = DailyIntakesReportSerializer(source='*')
+
+    class Meta:
+        fields = ('daily_intakes_report',)
+
+
 class NutrientScreenResponseSerializer(ReadOnlySerializer):
     today_intakes_report = DailyIntakesReportSerializer(read_only=True)
     daily_intakes_reports = DailyIntakesReportSerializer(read_only=True, many=True)

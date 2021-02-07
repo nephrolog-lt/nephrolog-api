@@ -10,7 +10,7 @@ from rest_framework.serializers import BaseSerializer
 
 from api import serializers
 from api.models import HealthStatusScreenResponse, HealthStatusWeeklyResponse, NutrientScreenResponse, \
-    NutrientWeeklyScreenResponse, ProductSearchResponse
+    NutrientWeeklyScreenResponse, ProductSearchResponse, DailyIntakesReportsLightResponse
 from api.utils import datetime_to_date, parse_date_or_validation_error, parse_time_zone
 from core import models
 
@@ -117,6 +117,27 @@ class NutritionScreenView(RetrieveAPIView):
 
     def get_object(self) -> NutrientScreenResponse:
         return NutrientScreenResponse.from_api_request(self.request)
+
+
+@extend_schema(
+    tags=['nutrition']
+)
+class DailyIntakesReportsLightView(RetrieveAPIView):
+    serializer_class = serializers.DailyIntakesReportsResponseSerializer
+
+    def get_object(self) -> DailyIntakesReportsLightResponse:
+        return DailyIntakesReportsLightResponse.from_api_request(self.request)
+
+
+@extend_schema(
+    tags=['nutrition']
+)
+class DailyIntakesReportView(RetrieveAPIView):
+    serializer_class = serializers.DailyIntakesReportResponseSerializer
+    lookup_field = 'date'
+
+    def get_queryset(self):
+        return models.DailyIntakesReport.filter_for_user(self.request.user).prefetch_intakes()
 
 
 @extend_schema(
