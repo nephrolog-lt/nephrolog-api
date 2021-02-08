@@ -430,7 +430,8 @@ class Product(models.Model):
 
     @staticmethod
     def filter_by_user_and_query(user: AbstractBaseUser, query: Optional[str], limit: int) -> QuerySet[Product]:
-        query = only_alphanumeric_or_spaces(str_to_ascii(query.strip()).lower()) if query else None
+        original_query = (query or '').strip().lower()
+        query = only_alphanumeric_or_spaces(str_to_ascii(original_query))
 
         if query:
             query_words = query.split(' ')
@@ -443,8 +444,16 @@ class Product(models.Model):
                 starts_with_word=models.ExpressionWrapper(
                     models.Q(name_search_lt__startswith=first_word),
                     output_field=models.BooleanField()
+                ),
+                starts_with_original_query=models.ExpressionWrapper(
+                    models.Q(name_lt__istartswith=original_query),
+                    output_field=models.BooleanField()
                 )
-            ).order_by('-starts_with_word')[:limit]
+            ).annotate_with_popularity().order_by(
+                '-starts_with_original_query',
+                '-starts_with_word',
+                '-popularity'
+            )[:limit]
 
         last_consumed_products: QuerySet[Product] = Product.last_consumed_products_by_user(user)[:limit]
 
