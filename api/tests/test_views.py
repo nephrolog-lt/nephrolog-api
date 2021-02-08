@@ -21,16 +21,16 @@ class BaseApiText(APITestCase):
 
 class DailyIntakesReportViewTests(BaseApiText):
     def test_daily_intakes_report_unauthenticated(self):
-        response = self.client.get(reverse('api-daily-intakes-report', kwargs={'date': '2020-01-01'}))
+        response = self.client.get(reverse('api-daily-report', kwargs={'date': '2020-01-01'}))
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_daily_intakes_report_not_existing_date(self):
         user = UserFactory()
-        daily_report = DailyIntakesReportFactory(user=user, date=date(2020, 1, 1))
+        DailyIntakesReportFactory(user=user, date=date(2020, 1, 1))
 
         self.login_user()
-        response = self.client.get(reverse('api-daily-intakes-report', kwargs={'date': '2020-01-01'}))
+        response = self.client.get(reverse('api-daily-report', kwargs={'date': '2020-01-01'}))
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -38,7 +38,7 @@ class DailyIntakesReportViewTests(BaseApiText):
         DailyIntakesReportFactory(user=self.user, date=date(2020, 1, 1))
 
         self.login_user()
-        response = self.client.get(reverse('api-daily-intakes-report', kwargs={'date': '2020-01-01'}))
+        response = self.client.get(reverse('api-daily-report', kwargs={'date': '2020-01-01'}))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(response.data.get('daily_intakes_report'))
@@ -46,7 +46,7 @@ class DailyIntakesReportViewTests(BaseApiText):
 
 class DailyIntakesReportsViewTests(BaseApiText):
     def test_daily_reports_unauthenticated(self):
-        response = self.client.get(reverse('api-daily-intakes-reports'))
+        response = self.client.get(reverse('api-daily-reports'))
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -57,13 +57,13 @@ class DailyIntakesReportsViewTests(BaseApiText):
 
         daily_report1 = DailyIntakesReportFactory(user=self.user, date=date(2020, 2, 7))
         daily_report2 = DailyIntakesReportFactory(user=self.user, date=date(2020, 2, 8))
-        intake1 = IntakeFactory(user=self.user, daily_report=daily_report1, product=product, amount_g=100)
-        intake2 = IntakeFactory(user=self.user, daily_report=daily_report2, product=product, amount_g=100)
+        IntakeFactory(user=self.user, daily_report=daily_report1, product=product, amount_g=100)
+        IntakeFactory(user=self.user, daily_report=daily_report2, product=product, amount_g=100)
 
         # Empty should be excluded
         DailyIntakesReportFactory(user=self.user, date=date(2020, 2, 5))
 
-        response = self.client.get(reverse('api-daily-intakes-reports'))
+        response = self.client.get(reverse('api-daily-reports'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -79,7 +79,7 @@ class ProductSearchViewTests(BaseApiText):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_product_search_empty_query(self):
-        product1 = ProductFactory(
+        ProductFactory(
             potassium_mg=10,
             sodium_mg=20,
             phosphorus_mg=30,
@@ -87,6 +87,7 @@ class ProductSearchViewTests(BaseApiText):
             energy_kcal=50,
             liquids_g=60,
         )
+
         product2 = ProductFactory(
             potassium_mg=15,
             sodium_mg=25,
@@ -95,7 +96,7 @@ class ProductSearchViewTests(BaseApiText):
             energy_kcal=32767,
             liquids_g=32767,
         )
-        product3 = ProductFactory(
+        ProductFactory(
             potassium_mg=1,
             sodium_mg=2,
             phosphorus_mg=3,
@@ -126,7 +127,7 @@ class ProductSearchViewTests(BaseApiText):
             energy_kcal=32767,
             liquids_g=32767,
         )
-        product2 = ProductFactory(
+        ProductFactory(
             name_lt='orange',
             potassium_mg=1,
             sodium_mg=2,
