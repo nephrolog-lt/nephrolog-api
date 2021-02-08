@@ -448,9 +448,14 @@ class Product(models.Model):
                 starts_with_original_query=models.ExpressionWrapper(
                     models.Q(name_lt__istartswith=original_query),
                     output_field=models.BooleanField()
+                ),
+                contains_original_query=models.ExpressionWrapper(
+                    models.Q(name_lt__icontains=original_query),
+                    output_field=models.BooleanField()
                 )
             ).annotate_with_popularity().order_by(
                 '-starts_with_original_query',
+                '-contains_original_query',
                 '-starts_with_word',
                 '-popularity'
             )[:limit]
