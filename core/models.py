@@ -105,8 +105,6 @@ class User(AbstractUser):
         return False
 
     def show_app_review_dialog_if_needed(self) -> bool:
-        print("show_app_review_dialog_if_needed")
-
         if not self._should_show_app_review_dialog():
             return False
 
