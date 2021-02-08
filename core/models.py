@@ -99,8 +99,8 @@ class User(AbstractUser):
         return self.get_username() or self.get_full_name() or self.email
 
     def _should_show_app_review_dialog(self) -> bool:
-        if self.last_app_review_dialog_showed is None and (now() - self.date_joined).days > 7:
-            return DailyIntakesReport.filter_for_user(self).count() > 7
+        if self.last_app_review_dialog_showed is None and (now() - self.date_joined).days > 3:
+            return DailyIntakesReport.filter_for_user(self).count() > 3
 
         return False
 
