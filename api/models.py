@@ -43,6 +43,7 @@ class NutrientScreenResponse:
     today_intakes_report: DailyIntakesReport
     latest_intakes: List[Intake]
     daily_intakes_reports: List[DailyIntakesReport]
+    current_month_daily_reports: List[DailyIntakesReport]
 
     @staticmethod
     def from_api_request(request: Request) -> NutrientScreenResponse:
@@ -51,10 +52,18 @@ class NutrientScreenResponse:
 
         now = datetime.datetime.now(tz)
 
+        month_start, month_end = utils.get_month_day_range(now.date())
+
         from_date = (now - datetime.timedelta(days=6)).date()
         to_date = now.date()
 
         DailyIntakesReport.get_or_create_for_user_and_date(user, to_date)
+
+        current_month_daily_reports = DailyIntakesReport.get_for_user_between_dates(
+            request.user,
+            month_start,
+            month_end
+        ).annotate_with_nutrient_totals().exclude_empty_intakes()
 
         daily_intakes_reports = DailyIntakesReport.get_for_user_between_dates(request.user, from_date,
                                                                               to_date).prefetch_intakes()
@@ -64,7 +73,8 @@ class NutrientScreenResponse:
         return NutrientScreenResponse(
             today_intakes_report=today_intakes_report,
             daily_intakes_reports=daily_intakes_reports,
-            latest_intakes=latest_intakes
+            latest_intakes=latest_intakes,
+            current_month_daily_reports=current_month_daily_reports,
         )
 
 

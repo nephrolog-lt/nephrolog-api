@@ -6,7 +6,6 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.generics import CreateAPIView, DestroyAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView, \
     RetrieveUpdateDestroyAPIView, UpdateAPIView, get_object_or_404
-from rest_framework.serializers import BaseSerializer
 
 from api import serializers
 from api.models import HealthStatusScreenResponse, HealthStatusWeeklyResponse, NutrientScreenResponse, \

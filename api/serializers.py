@@ -168,9 +168,10 @@ class NutrientScreenResponseSerializer(ReadOnlySerializer):
     today_intakes_report = DailyIntakesReportSerializer(read_only=True)
     daily_intakes_reports = DailyIntakesReportSerializer(read_only=True, many=True)
     latest_intakes = IntakeSerializer(read_only=True, many=True)
+    current_month_daily_reports = DailyIntakesLightReportSerializer(read_only=True, many=True)
 
     class Meta:
-        fields = ('today_intakes_report', 'latest_intakes', 'daily_intakes',)
+        fields = ('today_intakes_report', 'latest_intakes', 'daily_intakes', 'current_month_daily_reports')
 
 
 class NutrientWeeklyScreenResponseSerializer(ReadOnlySerializer):
