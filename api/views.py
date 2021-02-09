@@ -119,8 +119,23 @@ class NutritionScreenView(RetrieveAPIView):
         return NutrientScreenResponse.from_api_request(self.request)
 
 
+# TODO make into required in the near future. Written 02-09
 @extend_schema(
-    tags=['nutrition']
+    tags=['nutrition'],
+    parameters=[
+        OpenApiParameter(
+            name='from',
+            type=OpenApiTypes.DATE,
+            required=False,
+            location=OpenApiParameter.QUERY,
+        ),
+        OpenApiParameter(
+            name='to',
+            type=OpenApiTypes.DATE,
+            required=False,
+            location=OpenApiParameter.QUERY,
+        ),
+    ],
 )
 class DailyIntakesReportsLightView(RetrieveAPIView):
     serializer_class = serializers.DailyIntakesReportsResponseSerializer

@@ -3,10 +3,11 @@ from __future__ import annotations
 import datetime
 from dataclasses import dataclass
 from decimal import Decimal
+from functools import reduce
 from itertools import chain
 from typing import Optional
-from functools import reduce
 
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AbstractUser, UserManager as AbstractUserManager
 from django.contrib.postgres.indexes import GinIndex, GistIndex
 from django.core import validators
@@ -16,9 +17,8 @@ from django.db.models import Prefetch, QuerySet, functions
 from django.db.models.aggregates import Max, Min
 from django.db.transaction import atomic
 from django.utils.timezone import now
-import re
 
-from core.utils import str_to_ascii, only_alphanumeric_or_spaces
+from core.utils import only_alphanumeric_or_spaces, str_to_ascii
 from nephrogo import settings
 
 
@@ -741,7 +741,7 @@ class DailyIntakesReport(models.Model):
     def get_for_user_between_dates(user: AbstractBaseUser, date_from: datetime.date,
                                    date_to: datetime.date):
         return DailyIntakesReport.filter_for_user(user=user).filter(
-            date__range=(date_from, date_to)).prefetch_intakes().order_by('date')
+            date__range=(date_from, date_to)).order_by('date')
 
     @staticmethod
     def filter_for_user(user: AbstractBaseUser):

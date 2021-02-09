@@ -18,8 +18,15 @@ class DailyIntakesReportsLightResponse:
 
     @staticmethod
     def from_api_request(request: Request) -> DailyIntakesReportsLightResponse:
-        daily_intakes_reports = DailyIntakesReport.filter_for_user(
-            request.user).annotate_with_nutrient_totals().exclude_empty_intakes().order_by('-id')[:365]
+        date_from, date_to = parse_date_query_params(request, required=False)
+
+        daily_intakes_reports = DailyIntakesReport.get_for_user_between_dates(request.user, date_from, date_to)
+
+        # TODO this is for backward compatability. Remove in the future 02-09
+        if date_from is None or date_to is None:
+            daily_intakes_reports = DailyIntakesReport.filter_for_user(request.user)
+
+        daily_intakes_reports = daily_intakes_reports.annotate_with_nutrient_totals().exclude_empty_intakes()
 
         return DailyIntakesReportsLightResponse(
             daily_intakes_light_reports=daily_intakes_reports
@@ -49,7 +56,8 @@ class NutrientScreenResponse:
 
         DailyIntakesReport.get_or_create_for_user_and_date(user, to_date)
 
-        daily_intakes_reports = DailyIntakesReport.get_for_user_between_dates(request.user, from_date, to_date)
+        daily_intakes_reports = DailyIntakesReport.get_for_user_between_dates(request.user, from_date,
+                                                                              to_date).prefetch_intakes()
         today_intakes_report = max(daily_intakes_reports, key=lambda r: r.date)
         latest_intakes = Intake.get_latest_user_intakes(user)[:3]
 
@@ -70,7 +78,8 @@ class NutrientWeeklyScreenResponse:
         user = request.user
         date_from, date_to = parse_date_query_params(request)
 
-        daily_intakes_reports = DailyIntakesReport.get_for_user_between_dates(user, date_from, date_to)
+        daily_intakes_reports = DailyIntakesReport.get_for_user_between_dates(user, date_from,
+                                                                              date_to).prefetch_intakes()
         earliest_report_date = DailyIntakesReport.get_earliest_report_date(user)
 
         return NutrientWeeklyScreenResponse(

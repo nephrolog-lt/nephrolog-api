@@ -20,9 +20,12 @@ def parse_date_or_validation_error(date_str: Optional[str]) -> date:
         raise ValidationError("Invalid date")
 
 
-def parse_date_query_params(request: Request) -> (date, date):
+def parse_date_query_params(request: Request, required: bool = True) -> (date, date):
     date_from: str = request.query_params.get('from')
     date_to: str = request.query_params.get('to')
+
+    if not required and date_from is None and date_to is None:
+        return None, None
 
     try:
         parsed_date_from: date = parse_date_or_validation_error(date_from)
