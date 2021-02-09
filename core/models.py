@@ -601,7 +601,7 @@ class DailyIntakesReport(models.Model):
 
     @staticmethod
     def summarize_for_user(user: AbstractBaseUser) -> dict:
-        return DailyIntakesReport.filter_for_user(user).aggregate(
+        return DailyIntakesReport.filter_for_user(user).exclude_empty_intakes().aggregate(
             min_report_date=models.Min('date'),
             max_report_date=models.Max('date')
         )

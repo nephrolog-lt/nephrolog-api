@@ -66,8 +66,14 @@ class UserViewTests(BaseApiText):
     def test_response(self):
         self.login_user()
 
-        DailyIntakesReportFactory(user=self.user, date=date(2020, 1, 1))
-        DailyIntakesReportFactory(user=self.user, date=date(2020, 1, 6))
+        product = ProductFactory()
+
+        daily_report1 = DailyIntakesReportFactory(user=self.user, date=date(2020, 1, 1))
+        daily_report2 = DailyIntakesReportFactory(user=self.user, date=date(2020, 1, 6))
+        DailyIntakesReportFactory(user=self.user, date=date(2020, 1, 7))
+
+        IntakeFactory(user=self.user, daily_report=daily_report1, product=product, amount_g=100)
+        IntakeFactory(user=self.user, daily_report=daily_report2, product=product, amount_g=100)
 
         response = self.client.get(reverse('api-user'))
 
