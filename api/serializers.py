@@ -35,10 +35,20 @@ class UserProfileSerializer(serializers.ModelSerializer):
                   'diabetes_type', 'diabetes_years', 'diabetes_complications',)
 
 
+class UserNutritionSummarySerializer(ReadOnlySerializer):
+    min_report_date = serializers.DateField(allow_null=True)
+    max_report_date = serializers.DateField(allow_null=True)
+
+    class Meta:
+        fields = ('min_report_date', 'max_report_date')
+
+
 class UserSerializer(serializers.ModelSerializer):
+    nutrition_summary = UserNutritionSummarySerializer()
+
     class Meta:
         model = User
-        fields = ('is_marketing_allowed',)
+        fields = ('is_marketing_allowed', 'nutrition_summary')
 
 
 class UserAppReviewSerializer(serializers.ModelSerializer):

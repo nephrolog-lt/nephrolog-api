@@ -113,6 +113,9 @@ class User(AbstractUser):
 
         return True
 
+    def nutrition_summary(self):
+        return DailyIntakesReport.summarize_for_user(self)
+
 
 class Gender(models.TextChoices):
     Male = "Male"
@@ -595,6 +598,13 @@ class DailyIntakesReport(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['user', 'date'], name='unique_user_date_daily_intakes_report')
         ]
+
+    @staticmethod
+    def summarize_for_user(user: AbstractBaseUser) -> dict:
+        return DailyIntakesReport.filter_for_user(user).aggregate(
+            min_report_date=models.Min('date'),
+            max_report_date=models.Max('date')
+        )
 
     @staticmethod
     def get_earliest_report_date(user: AbstractBaseUser) -> Optional[datetime.date]:

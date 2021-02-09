@@ -19,6 +19,35 @@ class BaseApiText(APITestCase):
         self.client.login(username='test', password='test')
 
 
+class UserViewTests(BaseApiText):
+    def test_unauthenticated(self):
+        response = self.client.get(reverse('api-user'))
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_response_without_summary(self):
+        self.login_user()
+        response = self.client.get(reverse('api-user'))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertIsNone(response.data['is_marketing_allowed'])
+        self.assertIsNone(response.data['nutrition_summary']['min_report_date'])
+        self.assertIsNone(response.data['nutrition_summary']['max_report_date'])
+
+    def test_response(self):
+        self.login_user()
+
+        DailyIntakesReportFactory(user=self.user, date=date(2020, 1, 1))
+        DailyIntakesReportFactory(user=self.user, date=date(2020, 1, 6))
+
+        response = self.client.get(reverse('api-user'))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['nutrition_summary']['min_report_date'], '2020-01-01')
+        self.assertEqual(response.data['nutrition_summary']['max_report_date'], '2020-01-06')
+
+
 class DailyIntakesReportViewTests(BaseApiText):
     def test_daily_intakes_report_unauthenticated(self):
         response = self.client.get(reverse('api-daily-report', kwargs={'date': '2020-01-01'}))
