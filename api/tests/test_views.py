@@ -207,6 +207,24 @@ class ProductSearchViewTests(BaseApiText):
             energy_kcal=32767,
             liquids_g=32767,
         )
+        product2 = ProductFactory(
+            name_lt='apple other',
+            potassium_mg=15,
+            sodium_mg=25,
+            phosphorus_mg=35,
+            proteins_mg=32767,
+            energy_kcal=32767,
+            liquids_g=32767,
+        )
+        product3 = ProductFactory(
+            name_lt='apple other 3',
+            potassium_mg=15,
+            sodium_mg=25,
+            phosphorus_mg=35,
+            proteins_mg=32767,
+            energy_kcal=32767,
+            liquids_g=32767,
+        )
         ProductFactory(
             name_lt='orange',
             potassium_mg=1,
@@ -217,13 +235,19 @@ class ProductSearchViewTests(BaseApiText):
             liquids_g=6,
         )
 
-        DailyIntakesReportFactory(user=self.user)
+        report1 = DailyIntakesReportFactory(user=self.user)
+        IntakeFactory(user=self.user, daily_report=report1, product=product2, amount_g=100,
+                      consumed_at=datetime(2021, 2, 10, 10))
+        IntakeFactory(user=self.user, daily_report=report1, product=product3, amount_g=100,
+                      consumed_at=datetime(2021, 2, 10, 9))
 
         self.login_user()
         response = self.client.get(reverse('api-products-search'), data={'query': 'apple', 'submit': '0'})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['query'], 'apple')
-        self.assertEqual(len(response.data['products']), 1)
-        self.assertEqual(response.data['products'][0]['id'], product1.id)
+        self.assertEqual(len(response.data['products']), 3)
+        self.assertEqual(response.data['products'][0]['name'], product2.name_lt)
+        self.assertEqual(response.data['products'][1]['name'], product3.name_lt)
+        self.assertEqual(response.data['products'][2]['name'], product1.name_lt)
         self.assertIsNotNone(response.data['daily_nutrient_norms_and_totals'])

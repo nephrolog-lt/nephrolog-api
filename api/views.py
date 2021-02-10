@@ -61,7 +61,7 @@ class ProductListView(ListAPIView):
     def get_queryset(self):
         query = self.request.query_params.get('query', None)
 
-        products = models.Product.filter_by_user_and_query(self.request.user, query, self._limit)
+        products = models.Product.filter_by_user_and_query(self.request.user, query)[:self._limit]
 
         if query:
             submit_str = self.request.query_params.get('submit', None)

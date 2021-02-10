@@ -17,6 +17,7 @@ from django.db.models import Prefetch, QuerySet, functions
 from django.db.models.aggregates import Max, Min
 from django.db.transaction import atomic
 from django.utils.timezone import now
+from sql_util.aggregates import SubqueryCount, SubqueryMax
 
 from core.utils import only_alphanumeric_or_spaces, str_to_ascii
 from nephrogo import settings
@@ -371,7 +372,15 @@ class ProductSource(models.TextChoices):
 
 class ProductQuerySet(models.QuerySet):
     def annotate_with_popularity(self) -> QuerySet[Product]:
-        return self.annotate(popularity=models.Count('intakes'))
+        return self.annotate(popularity=SubqueryCount('intakes'))
+
+    def annotate_with_last_consumed_by_user(self, user: AbstractBaseUser) -> QuerySet[Product]:
+        return self.annotate(
+            last_consumed_by_user=SubqueryMax(
+                'intakes__consumed_at',
+                filter=models.Q(user=user)
+            )
+        )
 
 
 class Product(models.Model):
@@ -430,52 +439,43 @@ class Product(models.Model):
         super().save(force_insert, force_update, using, update_fields)
 
     @staticmethod
-    def filter_by_user_and_query(user: AbstractBaseUser, query: Optional[str], limit: int) -> QuerySet[Product]:
+    def filter_by_user_and_query(user: AbstractBaseUser, query: Optional[str]) -> QuerySet[Product]:
         original_query = (query or '').strip().lower()
         query = only_alphanumeric_or_spaces(str_to_ascii(original_query))
 
-        if query:
-            query_words = query.split(' ')
-            query_filters = map(lambda q: models.Q(name_search_lt__contains=q), query_words)
-            query_filter = reduce(lambda a, b: a & b, query_filters)
-
-            first_word = query_words[0]
-
-            return Product.objects.filter(query_filter).annotate(
-                starts_with_word=models.ExpressionWrapper(
-                    models.Q(name_search_lt__startswith=first_word),
-                    output_field=models.BooleanField()
-                ),
-                starts_with_original_query=models.ExpressionWrapper(
-                    models.Q(name_lt__istartswith=original_query),
-                    output_field=models.BooleanField()
-                ),
-                contains_original_query=models.ExpressionWrapper(
-                    models.Q(name_lt__icontains=original_query),
-                    output_field=models.BooleanField()
-                )
-            ).annotate_with_popularity().order_by(
-                '-starts_with_original_query',
-                '-contains_original_query',
-                '-starts_with_word',
+        if not query:
+            return Product.objects.annotate_with_popularity() \
+                       .annotate_with_last_consumed_by_user(user).order_by(
+                models.F('last_consumed_by_user').desc(nulls_last=True),
                 '-popularity'
-            )[:limit]
+            )
 
-        last_consumed_products: QuerySet[Product] = Product.last_consumed_products_by_user(user)[:limit]
+        query_words = query.split(' ')
+        query_filters = map(lambda q: models.Q(name_search_lt__contains=q), query_words)
+        query_filter = reduce(lambda a, b: a & b, query_filters)
 
-        remaining = max(0, limit - len(last_consumed_products))
-        if remaining == 0:
-            return last_consumed_products
+        first_word = query_words[0]
 
-        popular_products = Product.objects.exclude(pk__in=last_consumed_products) \
-                               .annotate_with_popularity().order_by('-popularity')[:remaining]
-
-        return chain(last_consumed_products, popular_products)
-
-    @staticmethod
-    def last_consumed_products_by_user(user: AbstractBaseUser):
-        return Product.objects.filter(intakes__user=user).annotate(
-            max_consumed_at=Max('intakes__consumed_at')).order_by('-max_consumed_at')
+        return Product.objects.filter(query_filter).annotate(
+            starts_with_word=models.ExpressionWrapper(
+                models.Q(name_search_lt__startswith=first_word),
+                output_field=models.BooleanField()
+            ),
+            starts_with_original_query=models.ExpressionWrapper(
+                models.Q(name_lt__istartswith=original_query),
+                output_field=models.BooleanField()
+            ),
+            contains_original_query=models.ExpressionWrapper(
+                models.Q(name_lt__icontains=original_query),
+                output_field=models.BooleanField()
+            )
+        ).annotate_with_popularity().annotate_with_last_consumed_by_user(user).order_by(
+            '-starts_with_original_query',
+            '-contains_original_query',
+            '-starts_with_word',
+            models.F('last_consumed_by_user').desc(nulls_last=True),
+            '-popularity'
+        )
 
     def __str__(self):
         return self.name_lt

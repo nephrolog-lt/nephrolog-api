@@ -153,7 +153,7 @@ class ProductSearchResponse:
         query = request.query_params.get('query', '')
         user = request.user
 
-        products = Product.filter_by_user_and_query(user, query, limit)
+        products = Product.filter_by_user_and_query(user, query)[:limit]
         daily_nutrient_norms_and_totals = DailyIntakesReport.get_latest_daily_nutrient_norms_and_totals(user)
 
         if query:
