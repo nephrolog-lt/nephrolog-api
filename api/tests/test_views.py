@@ -203,7 +203,9 @@ class ProductSearchViewTests(BaseApiText):
             data={
                 'query': '',
                 'submit': '1',
-                'exclude_products': f"{excluded_product.id}", }
+                'exclude_products': f"{excluded_product.id}",
+                'meal_type': 'Lunch',
+            }
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

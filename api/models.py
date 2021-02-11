@@ -8,7 +8,7 @@ from rest_framework.request import Request
 
 from api import utils
 from api.utils import parse_date_query_params
-from core.models import DailyHealthStatus, DailyIntakesReport, Intake, UserProfile, Product, \
+from core.models import DailyHealthStatus, DailyIntakesReport, Intake, MealType, UserProfile, Product, \
     DailyNutrientNormsAndTotals, ProductSearchLog
 
 
@@ -151,6 +151,11 @@ class ProductSearchResponse:
     # noinspection DuplicatedCode
     def from_api_request(request: Request, limit: int) -> ProductSearchResponse:
         query = request.query_params.get('query', '')
+
+        meal_type_str = request.query_params.get('meal_type')
+
+        meal_type = next(iter([e for e in MealType.values if str(e) == meal_type_str]), MealType.Unknown)
+
         exclude_product_str_ids = request.query_params.get('exclude_products', '').split(',')
         exclude_product_ids = list(
             filter(
@@ -165,7 +170,7 @@ class ProductSearchResponse:
 
         if query:
             submit_str = request.query_params.get('submit', None)
-            excluded_products_count= len(exclude_product_ids)
+            excluded_products_count = len(exclude_product_ids)
 
             submit = None
             if submit_str in ('0', 'false'):
@@ -173,7 +178,8 @@ class ProductSearchResponse:
             elif submit_str in ('1', 'true'):
                 submit = True
 
-            ProductSearchLog.insert_from_product_search(query, products, user, submit, excluded_products_count)
+            ProductSearchLog.insert_from_product_search(query, products, user, submit, excluded_products_count,
+                                                        meal_type)
 
         return ProductSearchResponse(
             products=products,

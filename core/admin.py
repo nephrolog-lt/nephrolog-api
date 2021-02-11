@@ -92,6 +92,7 @@ class ProductSearchLogAdmin(NumericFilterModelAdmin):
         'product3',
         'excluded_products_count',
         'submit',
+        'meal_type',
         'user',
         'created_at',
     )
@@ -100,6 +101,7 @@ class ProductSearchLogAdmin(NumericFilterModelAdmin):
         'submit',
         ('results_count', RangeNumericFilter),
         ('excluded_products_count', RangeNumericFilter),
+        'meal_type',
         'created_at'
     )
     search_fields = ('product1__name_lt', 'product2__name_lt', 'product3__name_lt', 'user__email', 'user__username')

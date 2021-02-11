@@ -485,42 +485,6 @@ class Product(models.Model):
         return self.name_lt
 
 
-class ProductSearchLog(models.Model):
-    query = models.CharField(max_length=32)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_index=False, related_name='+')
-
-    product1 = models.ForeignKey(Product, on_delete=models.CASCADE, db_index=False, null=True, blank=True,
-                                 related_name='+')
-    product2 = models.ForeignKey(Product, on_delete=models.CASCADE, db_index=False, null=True, blank=True,
-                                 related_name='+')
-    product3 = models.ForeignKey(Product, on_delete=models.CASCADE, db_index=False, null=True, blank=True,
-                                 related_name='+')
-    results_count = models.PositiveSmallIntegerField()
-
-    submit = models.BooleanField(null=True, blank=True)
-    excluded_products_count = models.SmallIntegerField(default=0)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ("-pk",)
-
-    @staticmethod
-    def insert_from_product_search(query: str, products: QuerySet[Product], user: AbstractBaseUser,
-                                   submit: Optional[bool], excluded_products_count: int = 0):
-        results_count = len(products)
-        product1 = products[0] if results_count >= 1 else None
-        product2 = products[1] if results_count >= 2 else None
-        product3 = products[2] if results_count >= 3 else None
-
-        ProductSearchLog.objects.create(query=query[:32], user=user, product1=product1, product2=product2,
-                                        product3=product3, results_count=results_count, submit=submit,
-                                        excluded_products_count=excluded_products_count)
-
-    def __str__(self):
-        return f"{self.user} {self.query}"
-
-
 class DailyIntakesReportQuerySet(models.QuerySet):
     def prefetch_intakes(self) -> DailyIntakesReportQuerySet:
         return self.prefetch_related(Prefetch('intakes', queryset=Intake.objects.select_related_product()))
@@ -994,3 +958,49 @@ class DailyHealthStatus(models.Model):
 
     def __str__(self):
         return f"{self.user} {self.date}"
+
+
+class ProductSearchLog(models.Model):
+    query = models.CharField(max_length=32)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_index=False, related_name='+')
+
+    product1 = models.ForeignKey(Product, on_delete=models.CASCADE, db_index=False, null=True, blank=True,
+                                 related_name='+')
+    product2 = models.ForeignKey(Product, on_delete=models.CASCADE, db_index=False, null=True, blank=True,
+                                 related_name='+')
+    product3 = models.ForeignKey(Product, on_delete=models.CASCADE, db_index=False, null=True, blank=True,
+                                 related_name='+')
+    results_count = models.PositiveSmallIntegerField()
+
+    meal_type = models.CharField(
+        max_length=16,
+        choices=MealType.choices,
+        default=MealType.Unknown,
+    )
+
+    submit = models.BooleanField(null=True, blank=True)
+    excluded_products_count = models.SmallIntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-pk",)
+
+    @staticmethod
+    def insert_from_product_search(
+            query: str, products: QuerySet[Product], user: AbstractBaseUser,
+            submit: Optional[bool], excluded_products_count: int = 0,
+            meal_type: Optional[MealType] = None
+    ):
+        meal_type = meal_type or MealType.Unknown
+        results_count = len(products)
+        product1 = products[0] if results_count >= 1 else None
+        product2 = products[1] if results_count >= 2 else None
+        product3 = products[2] if results_count >= 3 else None
+
+        ProductSearchLog.objects.create(query=query[:32], user=user, product1=product1, product2=product2,
+                                        product3=product3, results_count=results_count, submit=submit,
+                                        excluded_products_count=excluded_products_count, meal_type=meal_type)
+
+    def __str__(self):
+        return f"{self.user} {self.query}"
