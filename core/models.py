@@ -4,8 +4,7 @@ import datetime
 from dataclasses import dataclass
 from decimal import Decimal
 from functools import reduce
-from itertools import chain
-from typing import Optional
+from typing import List, Optional
 
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AbstractUser, UserManager as AbstractUserManager
@@ -14,7 +13,7 @@ from django.core import validators
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Prefetch, QuerySet, functions
-from django.db.models.aggregates import Max, Min
+from django.db.models.aggregates import Min
 from django.db.transaction import atomic
 from django.utils.timezone import now
 from sql_util.aggregates import SubqueryCount, SubqueryMax
@@ -439,12 +438,17 @@ class Product(models.Model):
         super().save(force_insert, force_update, using, update_fields)
 
     @staticmethod
-    def filter_by_user_and_query(user: AbstractBaseUser, query: Optional[str]) -> QuerySet[Product]:
+    def filter_by_user_and_query(
+            user: AbstractBaseUser,
+            query: Optional[str],
+            exclude_product_ids: Optional[List[int]] = None
+    ) -> QuerySet[Product]:
+        exclude_product_ids = exclude_product_ids or []
         original_query = (query or '').strip().lower()
         query = only_alphanumeric_or_spaces(str_to_ascii(original_query))
 
         if not query:
-            return Product.objects.annotate_with_popularity() \
+            return Product.objects.exclude(pk__in=exclude_product_ids).annotate_with_popularity() \
                 .annotate_with_last_consumed_by_user(user).order_by(
                 models.F('last_consumed_by_user').desc(nulls_last=True),
                 '-popularity'
@@ -456,7 +460,7 @@ class Product(models.Model):
 
         first_word = query_words[0]
 
-        return Product.objects.filter(query_filter).annotate(
+        return Product.objects.filter(query_filter).exclude(pk__in=exclude_product_ids).annotate(
             starts_with_word=models.ExpressionWrapper(
                 models.Q(name_search_lt__startswith=first_word),
                 output_field=models.BooleanField()
@@ -494,6 +498,7 @@ class ProductSearchLog(models.Model):
     results_count = models.PositiveSmallIntegerField()
 
     submit = models.BooleanField(null=True, blank=True)
+    excluded_products_count = models.SmallIntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -502,14 +507,15 @@ class ProductSearchLog(models.Model):
 
     @staticmethod
     def insert_from_product_search(query: str, products: QuerySet[Product], user: AbstractBaseUser,
-                                   submit: Optional[bool]):
+                                   submit: Optional[bool], excluded_products_count: int = 0):
         results_count = len(products)
         product1 = products[0] if results_count >= 1 else None
         product2 = products[1] if results_count >= 2 else None
         product3 = products[2] if results_count >= 3 else None
 
         ProductSearchLog.objects.create(query=query[:32], user=user, product1=product1, product2=product2,
-                                        product3=product3, results_count=results_count, submit=submit)
+                                        product3=product3, results_count=results_count, submit=submit,
+                                        excluded_products_count=excluded_products_count)
 
     def __str__(self):
         return f"{self.user} {self.query}"

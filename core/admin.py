@@ -90,12 +90,18 @@ class ProductSearchLogAdmin(NumericFilterModelAdmin):
         'product1',
         'product2',
         'product3',
+        'excluded_products_count',
         'submit',
         'user',
         'created_at',
     )
     list_select_related = ('user', 'product1', 'product2', 'product3')
-    list_filter = ('submit', ('results_count', RangeNumericFilter), 'created_at')
+    list_filter = (
+        'submit',
+        ('results_count', RangeNumericFilter),
+        ('excluded_products_count', RangeNumericFilter),
+        'created_at'
+    )
     search_fields = ('product1__name_lt', 'product2__name_lt', 'product3__name_lt', 'user__email', 'user__username')
     date_hierarchy = 'created_at'
 

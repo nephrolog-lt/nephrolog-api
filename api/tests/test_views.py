@@ -184,18 +184,68 @@ class ProductSearchViewTests(BaseApiText):
             energy_kcal=5,
             liquids_g=6,
         )
+        excluded_product = ProductFactory(
+            name_lt='apple excluded',
+            potassium_mg=15,
+            sodium_mg=25,
+            phosphorus_mg=35,
+            proteins_mg=32767,
+            energy_kcal=32767,
+            liquids_g=32767,
+        )
 
         daily_report = DailyIntakesReportFactory(user=self.user)
         IntakeFactory(user=self.user, daily_report=daily_report, product=product2, amount_g=100)
 
         self.login_user()
-        response = self.client.get(reverse('api-products-search'), data={'query': '', 'submit': '1'})
+        response = self.client.get(
+            reverse('api-products-search'),
+            data={
+                'query': '',
+                'submit': '1',
+                'exclude_products': f"{excluded_product.id}", }
+        )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['query'], '')
         self.assertEqual(len(response.data['products']), 3)
         self.assertEqual(response.data['products'][0]['id'], product2.id)
         self.assertIsNotNone(response.data['daily_nutrient_norms_and_totals'])
+
+    def test_product_search_without_exclude_param(self):
+        ProductFactory()
+        DailyIntakesReportFactory(user=self.user)
+
+        self.login_user()
+
+        response_without_exclude = self.client.get(
+            reverse('api-products-search'),
+            data={
+                'query': '',
+                'submit': '1'
+            }
+        )
+
+        self.assertEqual(response_without_exclude.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response_without_exclude.data['products']), 1)
+
+    def test_product_search_wit_illegal_exclude_products(self):
+        ProductFactory()
+        DailyIntakesReportFactory(user=self.user)
+
+        self.login_user()
+
+        response_without_exclude = self.client.get(
+            reverse('api-products-search'),
+            data={
+                'query': '',
+                'submit': '1',
+                'exclude_products': f"1,2,something,,5",
+            }
+        )
+
+        self.assertEqual(response_without_exclude.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response_without_exclude.data['products']), 1)
 
     def test_product_search(self):
         product1 = ProductFactory(
@@ -225,6 +275,15 @@ class ProductSearchViewTests(BaseApiText):
             energy_kcal=32767,
             liquids_g=32767,
         )
+        excluded_product = ProductFactory(
+            name_lt='apple excluded',
+            potassium_mg=15,
+            sodium_mg=25,
+            phosphorus_mg=35,
+            proteins_mg=32767,
+            energy_kcal=32767,
+            liquids_g=32767,
+        )
         ProductFactory(
             name_lt='orange',
             potassium_mg=1,
@@ -242,7 +301,12 @@ class ProductSearchViewTests(BaseApiText):
                       consumed_at=datetime(2021, 2, 10, 9))
 
         self.login_user()
-        response = self.client.get(reverse('api-products-search'), data={'query': 'apple', 'submit': '0'})
+        response = self.client.get(reverse('api-products-search'),
+                                   data={
+                                       'query': 'apple',
+                                       'submit': '0',
+                                       'exclude_products': f"{excluded_product.id}",
+                                   })
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['query'], 'apple')

@@ -20,6 +20,7 @@ from core import models
         OpenApiParameter(
             name='query',
             type=OpenApiTypes.STR,
+            default='',
             location=OpenApiParameter.QUERY,
         ),
         OpenApiParameter(
@@ -27,11 +28,21 @@ from core import models
             type=OpenApiTypes.BOOL,
             location=OpenApiParameter.QUERY
         ),
+        OpenApiParameter(
+            name='meal_type',
+            enum=models.MealType,
+            default=models.MealType.Unknown,
+            location=OpenApiParameter.QUERY
+        ),
+        OpenApiParameter(
+            name='exclude_products',
+            location=OpenApiParameter.QUERY
+        ),
     ],
 )
 class ProductSearchView(RetrieveAPIView):
     serializer_class = serializers.ProductSearchResponseSerializer
-    _limit = 20
+    _limit = 30
 
     def get_object(self):
         return ProductSearchResponse.from_api_request(self.request, self._limit)

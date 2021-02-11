@@ -71,3 +71,10 @@ def parse_time_zone(request: Request) -> datetime.timezone:
 
 def datetime_to_date(dt: datetime.datetime, tz: datetime.timezone) -> datetime.date:
     return dt.astimezone(tz).date()
+
+
+def try_parse_int(s: str) -> Optional[int]:
+    try:
+        return int(s)
+    except ValueError:
+        return None

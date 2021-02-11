@@ -151,13 +151,21 @@ class ProductSearchResponse:
     # noinspection DuplicatedCode
     def from_api_request(request: Request, limit: int) -> ProductSearchResponse:
         query = request.query_params.get('query', '')
+        exclude_product_str_ids = request.query_params.get('exclude_products', '').split(',')
+        exclude_product_ids = list(
+            filter(
+                lambda i: i is not None,
+                [utils.try_parse_int(x) for x in exclude_product_str_ids]
+            )
+        )
         user = request.user
 
-        products = Product.filter_by_user_and_query(user, query)[:limit]
+        products = Product.filter_by_user_and_query(user, query, exclude_product_ids)[:limit]
         daily_nutrient_norms_and_totals = DailyIntakesReport.get_latest_daily_nutrient_norms_and_totals(user)
 
         if query:
             submit_str = request.query_params.get('submit', None)
+            excluded_products_count= len(exclude_product_ids)
 
             submit = None
             if submit_str in ('0', 'false'):
@@ -165,7 +173,7 @@ class ProductSearchResponse:
             elif submit_str in ('1', 'true'):
                 submit = True
 
-            ProductSearchLog.insert_from_product_search(query, products, user, submit)
+            ProductSearchLog.insert_from_product_search(query, products, user, submit, excluded_products_count)
 
         return ProductSearchResponse(
             products=products,
