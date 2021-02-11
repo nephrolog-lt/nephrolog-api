@@ -207,6 +207,7 @@ class IntakeAdmin(admin.ModelAdmin):
     list_display = (
         'product',
         'user',
+        'meal_type',
         'consumed_at',
         'amount_g',
         'amount_ml',
@@ -217,7 +218,7 @@ class IntakeAdmin(admin.ModelAdmin):
     list_select_related = ('user', 'product')
     raw_id_fields = ('product', 'user', 'daily_report')
     search_fields = ('user__pk', 'user__email', 'user__username', 'product__name_lt')
-    list_filter = ('consumed_at',)
+    list_filter = ('consumed_at', 'meal_type')
     date_hierarchy = 'consumed_at'
 
 

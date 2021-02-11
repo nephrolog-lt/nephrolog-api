@@ -445,7 +445,7 @@ class Product(models.Model):
 
         if not query:
             return Product.objects.annotate_with_popularity() \
-                       .annotate_with_last_consumed_by_user(user).order_by(
+                .annotate_with_last_consumed_by_user(user).order_by(
                 models.F('last_consumed_by_user').desc(nulls_last=True),
                 '-popularity'
             )
@@ -758,6 +758,14 @@ class DailyIntakesReport(models.Model):
         return DailyIntakesReport.objects.filter(user=user)
 
 
+class MealType(models.TextChoices):
+    Unknown = "Unknown"
+    Breakfast = "Breakfast"
+    Lunch = "Lunch"
+    Dinner = "Dinner"
+    Snack = "Snack"
+
+
 class IntakeQuerySet(models.QuerySet):
     def select_related_product(self) -> IntakeQuerySet:
         return self.select_related('product')
@@ -767,6 +775,13 @@ class Intake(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
     daily_report = models.ForeignKey(DailyIntakesReport, on_delete=models.CASCADE, related_name='intakes')
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='intakes')
+
+    meal_type = models.CharField(
+        max_length=16,
+        choices=MealType.choices,
+        default=MealType.Unknown,
+    )
+
     consumed_at = models.DateTimeField()
     amount_g = models.PositiveSmallIntegerField(validators=(validators.MinValueValidator(1),))
     amount_ml = models.PositiveSmallIntegerField(null=True, blank=True, validators=(validators.MinValueValidator(1),))

@@ -86,7 +86,7 @@ class IntakeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Intake
         fields = (
-            'id', 'user', 'product_id', 'consumed_at', 'amount_g', 'amount_ml',
+            'id', 'user', 'product_id', 'meal_type', 'consumed_at', 'amount_g', 'amount_ml',
             'potassium_mg', 'proteins_mg', 'sodium_mg', 'phosphorus_mg', 'energy_kcal', 'liquids_g', 'liquids_ml',
             'product',
         )
