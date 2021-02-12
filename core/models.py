@@ -113,7 +113,7 @@ class User(AbstractUser):
 
         return True
 
-    def nutrition_summary(self):
+    def nutrition_summary_statistics(self):
         return DailyIntakesReport.summarize_for_user(self)
 
 

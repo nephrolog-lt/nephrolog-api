@@ -35,7 +35,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
                   'diabetes_type', 'diabetes_years', 'diabetes_complications',)
 
 
-class UserNutritionSummarySerializer(ReadOnlySerializer):
+class NutritionSummaryStatisticsSerializer(ReadOnlySerializer):
     min_report_date = serializers.DateField(allow_null=True)
     max_report_date = serializers.DateField(allow_null=True)
 
@@ -44,7 +44,7 @@ class UserNutritionSummarySerializer(ReadOnlySerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    nutrition_summary = UserNutritionSummarySerializer()
+    nutrition_summary = NutritionSummaryStatisticsSerializer(source='nutrition_summary_statistics')
 
     class Meta:
         model = User
@@ -164,14 +164,16 @@ class DailyIntakesReportResponseSerializer(ReadOnlySerializer):
         fields = ('daily_intakes_report',)
 
 
-class NutrientScreenResponseSerializer(ReadOnlySerializer):
+class NutritionScreenResponseSerializer(ReadOnlySerializer):
     today_intakes_report = DailyIntakesReportSerializer(read_only=True)
     daily_intakes_reports = DailyIntakesReportSerializer(read_only=True, many=True)
     latest_intakes = IntakeSerializer(read_only=True, many=True)
     current_month_daily_reports = DailyIntakesLightReportSerializer(read_only=True, many=True)
+    nutrition_summary_statistics = NutritionSummaryStatisticsSerializer(read_only=True)
 
     class Meta:
-        fields = ('today_intakes_report', 'latest_intakes', 'daily_intakes', 'current_month_daily_reports')
+        fields = ('today_intakes_report', 'latest_intakes', 'daily_intakes', 'current_month_daily_reports',
+                  'nutrition_summary_statistics')
 
 
 class NutrientWeeklyScreenResponseSerializer(ReadOnlySerializer):

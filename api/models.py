@@ -39,14 +39,15 @@ class DailyIntakesReportResponse:
 
 
 @dataclass(frozen=True)
-class NutrientScreenResponse:
+class NutritionScreenResponse:
     today_intakes_report: DailyIntakesReport
     latest_intakes: List[Intake]
     daily_intakes_reports: List[DailyIntakesReport]
     current_month_daily_reports: List[DailyIntakesReport]
+    nutrition_summary_statistics: dict
 
     @staticmethod
-    def from_api_request(request: Request) -> NutrientScreenResponse:
+    def from_api_request(request: Request) -> NutritionScreenResponse:
         user = request.user
         tz = utils.parse_time_zone(request)
 
@@ -65,16 +66,18 @@ class NutrientScreenResponse:
             month_end
         ).annotate_with_nutrient_totals().exclude_empty_intakes()
 
-        daily_intakes_reports = DailyIntakesReport.get_for_user_between_dates(request.user, from_date,
+        daily_intakes_reports = DailyIntakesReport.get_for_user_between_dates(user, from_date,
                                                                               to_date).prefetch_intakes()
         today_intakes_report = max(daily_intakes_reports, key=lambda r: r.date)
         latest_intakes = Intake.get_latest_user_intakes(user)[:3]
+        nutrition_summary_statistics = DailyIntakesReport.summarize_for_user(user)
 
-        return NutrientScreenResponse(
+        return NutritionScreenResponse(
             today_intakes_report=today_intakes_report,
             daily_intakes_reports=daily_intakes_reports,
             latest_intakes=latest_intakes,
             current_month_daily_reports=current_month_daily_reports,
+            nutrition_summary_statistics=nutrition_summary_statistics,
         )
 
 
