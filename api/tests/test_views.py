@@ -74,7 +74,7 @@ class NutritionScreenV2ViewTests(BaseApiText):
         self.assertEqual(len(response.data['latest_intakes']), 2)
         self.assertIsNotNone(response.data['today_light_nutrition_report'])
         self.assertIsNotNone(response.data['nutrition_summary_statistics'])
-        self.assertIsNone(response.data.get('current_month_daily_reports'))
+        self.assertEqual(len(response.data.get('current_month_nutrition_reports')), 2)
 
 
 class UserViewTests(BaseApiText):

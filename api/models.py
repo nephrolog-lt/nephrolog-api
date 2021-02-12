@@ -42,6 +42,7 @@ class DailyIntakesReportResponse:
 class NutritionScreenV2Response:
     today_light_nutrition_report: DailyIntakesReport
     last_week_light_nutrition_reports: List[DailyIntakesReport]
+    current_month_nutrition_reports: List[DailyIntakesReport]
     latest_intakes: List[Intake]
     nutrition_summary_statistics: dict
 
@@ -51,6 +52,8 @@ class NutritionScreenV2Response:
         tz = utils.parse_time_zone(request)
 
         now = datetime.datetime.now(tz)
+
+        month_start, month_end = utils.get_month_day_range(now.date())
 
         from_date = (now - datetime.timedelta(days=6)).date()
         to_date = now.date()
@@ -63,6 +66,12 @@ class NutritionScreenV2Response:
             to_date
         ).annotate_with_nutrient_totals()
 
+        current_month_nutrition_reports = DailyIntakesReport.get_for_user_between_dates(
+            request.user,
+            month_start,
+            month_end
+        ).annotate_with_nutrient_totals().exclude_empty_intakes()
+
         today_light_nutrition_report = max(last_week_light_nutrition_reports, key=lambda r: r.date)
         latest_intakes = Intake.get_latest_user_intakes(user)[:3]
         nutrition_summary_statistics = DailyIntakesReport.summarize_for_user(user)
@@ -72,6 +81,7 @@ class NutritionScreenV2Response:
             last_week_light_nutrition_reports=last_week_light_nutrition_reports,
             latest_intakes=latest_intakes,
             nutrition_summary_statistics=nutrition_summary_statistics,
+            current_month_nutrition_reports=current_month_nutrition_reports,
         )
 
 
