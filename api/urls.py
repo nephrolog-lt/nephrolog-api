@@ -20,6 +20,7 @@ urlpatterns = [
     path('nutrition/intake/', views.IntakeCreateView.as_view(), name="api-intake"),
     path('nutrition/intake/<int:id>/', views.IntakeView.as_view(), name="api-intake"),
     path('nutrition/screen/', views.NutritionScreenView.as_view(), name="api-nutrition-screen"),
+    path('nutrition/screen/v2/', views.NutritionScreenV2View.as_view(), name="api-nutrition-screen-v2"),
     path('nutrition/weekly/', views.NutritionWeeklyScreenView.as_view(), name="api-nutrition-weekly-screen"),
 
     path('health-status/screen/', views.HealthStatusScreenView.as_view(), name="api-health-status-screen"),

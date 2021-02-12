@@ -48,6 +48,35 @@ class NutritionScreenViewTests(BaseApiText):
         self.assertIsNotNone(response.data['nutrition_summary_statistics'])
 
 
+class NutritionScreenV2ViewTests(BaseApiText):
+    def test_unauthenticated(self):
+        response = self.client.get(reverse('api-nutrition-screen-v2'))
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_response(self):
+        self.login_user()
+
+        product = ProductFactory()
+
+        daily_report1 = DailyIntakesReportFactory(user=self.user, date=(datetime.now() - timedelta(days=1)).date())
+        daily_report2 = DailyIntakesReportFactory(user=self.user, date=(datetime.now() - timedelta(days=3)).date())
+        IntakeFactory(user=self.user, daily_report=daily_report1, product=product, amount_g=100)
+        IntakeFactory(user=self.user, daily_report=daily_report2, product=product, amount_g=200)
+
+        DailyIntakesReportFactory(user=self.user, date=(datetime.now() - timedelta(days=2)).date())
+
+        response = self.client.get(reverse('api-nutrition-screen-v2'))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(len(response.data['last_week_light_nutrition_reports']), 4)
+        self.assertEqual(len(response.data['latest_intakes']), 2)
+        self.assertIsNotNone(response.data['today_light_nutrition_report'])
+        self.assertIsNotNone(response.data['nutrition_summary_statistics'])
+        self.assertIsNone(response.data.get('current_month_daily_reports'))
+
+
 class UserViewTests(BaseApiText):
     def test_unauthenticated(self):
         response = self.client.get(reverse('api-user'))

@@ -9,7 +9,7 @@ from rest_framework.generics import CreateAPIView, DestroyAPIView, ListAPIView, 
 
 from api import serializers
 from api.models import HealthStatusScreenResponse, HealthStatusWeeklyResponse, NutritionScreenResponse, \
-    NutrientWeeklyScreenResponse, ProductSearchResponse, DailyIntakesReportsLightResponse
+    NutrientWeeklyScreenResponse, NutritionScreenV2Response, ProductSearchResponse, DailyIntakesReportsLightResponse
 from api.utils import datetime_to_date, parse_date_or_validation_error, parse_time_zone
 from core import models
 
@@ -120,13 +120,24 @@ class IntakeCreateView(CreateAPIView):
 
 
 @extend_schema(
-    tags=['nutrition']
+    tags=['nutrition'],
+    deprecated=True,
 )
 class NutritionScreenView(RetrieveAPIView):
     serializer_class = serializers.NutritionScreenResponseSerializer
 
     def get_object(self) -> NutritionScreenResponse:
         return NutritionScreenResponse.from_api_request(self.request)
+
+
+@extend_schema(
+    tags=['nutrition']
+)
+class NutritionScreenV2View(RetrieveAPIView):
+    serializer_class = serializers.NutritionScreenV2ResponseSerializer
+
+    def get_object(self) -> NutritionScreenV2Response:
+        return NutritionScreenV2Response.from_api_request(self.request)
 
 
 # TODO make into required in the near future. Written 02-09

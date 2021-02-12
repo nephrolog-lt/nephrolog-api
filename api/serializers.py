@@ -176,6 +176,17 @@ class NutritionScreenResponseSerializer(ReadOnlySerializer):
                   'nutrition_summary_statistics')
 
 
+class NutritionScreenV2ResponseSerializer(ReadOnlySerializer):
+    today_light_nutrition_report = DailyIntakesLightReportSerializer(read_only=True)
+    last_week_light_nutrition_reports = DailyIntakesLightReportSerializer(read_only=True, many=True)
+    latest_intakes = IntakeSerializer(read_only=True, many=True)
+    nutrition_summary_statistics = NutritionSummaryStatisticsSerializer(read_only=True)
+
+    class Meta:
+        fields = ('last_week_light_nutrition_reports', 'latest_intakes', 'daily_intakes',
+                  'nutrition_summary_statistics')
+
+
 class NutrientWeeklyScreenResponseSerializer(ReadOnlySerializer):
     earliest_report_date = serializers.DateField(read_only=True, allow_null=True)
     daily_intakes_reports = DailyIntakesReportSerializer(read_only=True, many=True)

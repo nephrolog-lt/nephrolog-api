@@ -39,6 +39,44 @@ class DailyIntakesReportResponse:
 
 
 @dataclass(frozen=True)
+class NutritionScreenV2Response:
+    today_light_nutrition_report: DailyIntakesReport
+    last_week_light_nutrition_reports: List[DailyIntakesReport]
+    latest_intakes: List[Intake]
+    nutrition_summary_statistics: dict
+
+    @staticmethod
+    def from_api_request(request: Request) -> NutritionScreenV2Response:
+        user = request.user
+        tz = utils.parse_time_zone(request)
+
+        now = datetime.datetime.now(tz)
+
+        from_date = (now - datetime.timedelta(days=6)).date()
+        to_date = now.date()
+
+        DailyIntakesReport.get_or_create_for_user_and_date(user, to_date)
+
+        last_week_light_nutrition_reports = DailyIntakesReport.get_for_user_between_dates(
+            user,
+            from_date,
+            to_date
+        ).annotate_with_nutrient_totals()
+
+        today_light_nutrition_report = max(last_week_light_nutrition_reports, key=lambda r: r.date)
+        latest_intakes = Intake.get_latest_user_intakes(user)[:3]
+        nutrition_summary_statistics = DailyIntakesReport.summarize_for_user(user)
+
+        return NutritionScreenV2Response(
+            today_light_nutrition_report=today_light_nutrition_report,
+            last_week_light_nutrition_reports=last_week_light_nutrition_reports,
+            latest_intakes=latest_intakes,
+            nutrition_summary_statistics=nutrition_summary_statistics,
+        )
+
+
+# Deprecated 02-12
+@dataclass(frozen=True)
 class NutritionScreenResponse:
     today_intakes_report: DailyIntakesReport
     latest_intakes: List[Intake]
