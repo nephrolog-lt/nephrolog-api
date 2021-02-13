@@ -121,6 +121,10 @@ class ProductAdmin(admin.ModelAdmin):
         'proteins_mg',
         'sodium_mg',
         'phosphorus_mg',
+
+        'carbohydrates_mg',
+        'fat_mg',
+
         'energy_kcal',
         'liquids_g',
         'product_source',
@@ -129,7 +133,15 @@ class ProductAdmin(admin.ModelAdmin):
         'updated_at',
     )
     readonly_fields = ('product_source', 'name_search_lt',)
-    list_filter = (('density_g_ml', EmptyFieldListFilter), 'product_kind', 'product_source', 'created_at', 'updated_at')
+    list_filter = (
+        ('density_g_ml', EmptyFieldListFilter),
+        ('carbohydrates_mg', EmptyFieldListFilter),
+        ('fat_mg', EmptyFieldListFilter),
+        'product_kind',
+        'product_source',
+        'created_at',
+        'updated_at'
+    )
     search_fields = ('name_lt', 'name_en', 'name_search_lt')
 
     def get_queryset(self, request):

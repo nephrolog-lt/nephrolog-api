@@ -408,8 +408,12 @@ class Product(models.Model):
     phosphorus_mg = models.DecimalField(max_digits=7, decimal_places=2,
                                         validators=[validators.MinValueValidator(Decimal('0'))])
     proteins_mg = models.PositiveIntegerField()
+
     energy_kcal = models.PositiveSmallIntegerField()
     liquids_g = models.PositiveSmallIntegerField()
+
+    carbohydrates_mg = models.PositiveIntegerField(null=True)
+    fat_mg = models.PositiveIntegerField(null=True)
 
     density_g_ml = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True,
                                        validators=[validators.MinValueValidator(Decimal('0.01'))])
