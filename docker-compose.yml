@@ -73,7 +73,7 @@ services:
       - datadog_network
 
   postgres:
-    image: postgres:13.1
+    image: postgres:13.2
     env_file:
       - secrets/.env
     networks:
