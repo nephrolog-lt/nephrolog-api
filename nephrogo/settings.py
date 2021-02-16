@@ -56,6 +56,8 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'drf_firebase_token_auth',
 
+    'adminsortable2',
+
     'core.apps.CoreConfig',
     'api.apps.ApiConfig',
 

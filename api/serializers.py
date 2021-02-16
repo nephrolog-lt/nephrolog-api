@@ -5,7 +5,9 @@ from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from core.models import DailyHealthStatus, DailyIntakesReport, Intake, Product, Swelling, UserProfile, User
+from core.models import DailyHealthStatus, DailyIntakesReport, GeneralRecommendation, GeneralRecommendationCategory, \
+    Intake, Product, Swelling, \
+    UserProfile, User
 
 logger = getLogger()
 
@@ -266,3 +268,28 @@ class ProductSearchResponseSerializer(serializers.Serializer):
 
     class Meta:
         fields = ('query', 'daily_nutrient_norms_and_totals', 'products')
+
+
+class GeneralRecommendationSerializer(serializers.ModelSerializer):
+    question = serializers.CharField(source='question_lt')
+    answer = serializers.CharField(source='answer_lt')
+
+    class Meta:
+        model = GeneralRecommendation
+        fields = ('id', 'question', 'answer', 'order')
+
+
+class GeneralRecommendationCategorySerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='name_lt')
+    recommendations = GeneralRecommendationSerializer(many=True)
+
+    class Meta:
+        model = GeneralRecommendationCategory
+        fields = ('id', 'name', 'order', 'recommendations')
+
+
+class GeneralRecommendationsResponseSerializer(ReadOnlySerializer):
+    categories = GeneralRecommendationCategorySerializer(many=True, source='*')
+
+    class Meta:
+        fields = ('categories',)

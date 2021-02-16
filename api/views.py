@@ -289,3 +289,11 @@ class HealthStatusWeeklyScreenView(RetrieveAPIView):
 
     def get_object(self) -> HealthStatusWeeklyResponse:
         return HealthStatusWeeklyResponse.from_api_request(self.request)
+
+
+@extend_schema(tags=['general-recommendations'])
+class GeneralRecommendationsView(RetrieveAPIView):
+    serializer_class = serializers.GeneralRecommendationsResponseSerializer
+
+    def get_object(self) -> HealthStatusScreenResponse:
+        return models.GeneralRecommendationCategory.objects.prefetch_related('recommendations')

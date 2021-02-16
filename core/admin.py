@@ -1,4 +1,5 @@
 from admin_numeric_filter.admin import NumericFilterModelAdmin, RangeNumericFilter
+from adminsortable2.admin import SortableAdminMixin, SortableInlineAdminMixin
 from csv_export.views import CSVExportView
 from django.contrib import admin
 from django.contrib.admin import EmptyFieldListFilter
@@ -323,3 +324,22 @@ class DailyIntakesReportAdmin(admin.ModelAdmin):
         return view.get(request)
 
     export_data_csv.short_description = 'Export CSV'
+
+
+class GeneralRecommendationsInline(SortableInlineAdminMixin, admin.StackedInline):
+    model = models.GeneralRecommendation
+    readonly_fields = (
+        'created_at',
+        'updated_at',
+    )
+
+
+@admin.register(models.GeneralRecommendationCategory)
+class GeneralRecommendationCategoryAdmin(SortableAdminMixin, admin.ModelAdmin):
+    list_display = (
+        'name_lt',
+        'created_at',
+        'updated_at',
+    )
+    search_fields = ('name_lt', 'questions__question_lt',)
+    inlines = (GeneralRecommendationsInline,)
