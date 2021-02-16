@@ -136,8 +136,6 @@ class ProductAdmin(admin.ModelAdmin):
     readonly_fields = ('product_source', 'name_search_lt',)
     list_filter = (
         ('density_g_ml', EmptyFieldListFilter),
-        ('carbohydrates_mg', EmptyFieldListFilter),
-        ('fat_mg', EmptyFieldListFilter),
         'product_kind',
         'product_source',
         'created_at',
