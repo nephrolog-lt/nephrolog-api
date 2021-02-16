@@ -109,9 +109,20 @@ class DailyNutrientNormsWithTotalsSerializer(ReadOnlySerializer):
     phosphorus_mg = DailyNutrientConsumptionSerializer(read_only=True)
     energy_kcal = DailyNutrientConsumptionSerializer(read_only=True)
     liquids_g = DailyNutrientConsumptionSerializer(read_only=True)
+    carbohydrates_mg = DailyNutrientConsumptionSerializer(read_only=True)
+    fat_mg = DailyNutrientConsumptionSerializer(read_only=True)
 
     class Meta:
-        fields = ('potassium_mg', 'proteins_mg', 'sodium_mg', 'phosphorus_mg', 'energy_kcal', 'liquids_g',)
+        fields = (
+            'potassium_mg',
+            'proteins_mg',
+            'sodium_mg',
+            'phosphorus_mg',
+            'energy_kcal',
+            'liquids_g',
+            'carbohydrates_mg',
+            'fat_mg',
+        )
 
 
 @extend_schema_serializer(

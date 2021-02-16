@@ -43,6 +43,8 @@ class ProductFactory(DjangoModelFactory):
     proteins_mg = 40
     energy_kcal = 50
     liquids_g = 60
+    fat_mg = 70
+    carbohydrates_mg = 80
 
 
 class IntakeFactory(DjangoModelFactory):

@@ -36,6 +36,8 @@ class DailyNutrientNormsAndTotals:
     phosphorus_mg: DailyNutrientConsumption
     energy_kcal: DailyNutrientConsumption
     liquids_g: DailyNutrientConsumption
+    fat_mg: DailyNutrientConsumption
+    carbohydrates_mg: DailyNutrientConsumption
 
 
 class UserQuerySet(models.QuerySet):
@@ -548,6 +550,24 @@ class DailyIntakesReportQuerySet(models.QuerySet):
                     output_field=models.IntegerField()
                 ),
             ), 0),
+            total_fat_mg=functions.Coalesce(models.Sum(
+                models.ExpressionWrapper(
+                    functions.Cast(models.F("intakes__product__fat_mg"), output_field=models.IntegerField()) *
+                    models.ExpressionWrapper(models.F("intakes__amount_g"),
+                                             output_field=models.IntegerField()
+                                             ) / models.Value(100, output_field=models.IntegerField()),
+                    output_field=models.IntegerField()
+                ),
+            ), 0),
+            total_carbohydrates_mg=functions.Coalesce(models.Sum(
+                models.ExpressionWrapper(
+                    functions.Cast(models.F("intakes__product__carbohydrates_mg"), output_field=models.IntegerField()) *
+                    models.ExpressionWrapper(models.F("intakes__amount_g"),
+                                             output_field=models.IntegerField()
+                                             ) / models.Value(100, output_field=models.IntegerField()),
+                    output_field=models.IntegerField()
+                ),
+            ), 0),
         )
 
 
@@ -561,6 +581,8 @@ class DailyIntakesReport(models.Model):
     daily_norm_phosphorus_mg = models.PositiveIntegerField(null=True, blank=True)
     daily_norm_energy_kcal = models.PositiveIntegerField(null=True, blank=True)
     daily_norm_liquids_g = models.PositiveIntegerField(null=True, blank=True)
+    daily_norm_carbohydrates_mg = models.PositiveIntegerField(null=True, blank=True)
+    daily_norm_fat_mg = models.PositiveIntegerField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -609,6 +631,14 @@ class DailyIntakesReport(models.Model):
         return DailyNutrientConsumption(total=self._total_liquids_g, norm=self.daily_norm_liquids_g)
 
     @property
+    def carbohydrates_mg(self) -> DailyNutrientConsumption:
+        return DailyNutrientConsumption(total=self._total_carbohydrates_mg, norm=self.daily_norm_liquids_g)
+
+    @property
+    def fat_mg(self) -> DailyNutrientConsumption:
+        return DailyNutrientConsumption(total=self._total_fat_mg, norm=self.daily_norm_liquids_g)
+
+    @property
     def liquids_ml(self) -> DailyNutrientConsumption:
         return self.liquids_g
 
@@ -621,6 +651,8 @@ class DailyIntakesReport(models.Model):
             phosphorus_mg=self.phosphorus_mg,
             energy_kcal=self.energy_kcal,
             liquids_g=self.liquids_g,
+            fat_mg=self.fat_mg,
+            carbohydrates_mg=self.carbohydrates_mg,
         )
 
     @property
@@ -664,6 +696,20 @@ class DailyIntakesReport(models.Model):
             return self.total_liquids_g
 
         return sum(intake.liquids_g for intake in self.intakes.all())
+
+    @property
+    def _total_carbohydrates_mg(self):
+        if hasattr(self, 'total_carbohydrates_mg'):
+            return self.total_carbohydrates_mg
+
+        return sum(intake.carbohydrates_mg for intake in self.intakes.all())
+
+    @property
+    def _total_fat_mg(self):
+        if hasattr(self, 'total_fat_mg'):
+            return self.total_fat_mg
+
+        return sum(intake.fat_mg for intake in self.intakes.all())
 
     def recalculate_daily_norms(self):
         profile = HistoricalUserProfile.get_nearest_historical_profile_for_date(self.user, self.date)
@@ -808,6 +854,14 @@ class Intake(models.Model):
     @property
     def liquids_g(self) -> int:
         return int(self.product.liquids_g * self._amount_nutrient_ratio)
+
+    @property
+    def fat_mg(self) -> int:
+        return int(self.product.fat_mg * self._amount_nutrient_ratio)
+
+    @property
+    def carbohydrates_mg(self) -> int:
+        return int(self.product.carbohydrates_mg * self._amount_nutrient_ratio)
 
     def __str__(self):
         return str(self.product)
@@ -1025,7 +1079,8 @@ class GeneralRecommendationCategory(models.Model):
 
 
 class GeneralRecommendation(models.Model):
-    category = models.ForeignKey(GeneralRecommendationCategory, on_delete=models.PROTECT, related_name='recommendations')
+    category = models.ForeignKey(GeneralRecommendationCategory, on_delete=models.PROTECT,
+                                 related_name='recommendations')
     question_lt = models.CharField(max_length=256)
     answer_lt = models.TextField()
 
