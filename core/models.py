@@ -412,8 +412,8 @@ class Product(models.Model):
     energy_kcal = models.PositiveSmallIntegerField()
     liquids_g = models.PositiveSmallIntegerField()
 
-    carbohydrates_mg = models.PositiveIntegerField(null=True)
-    fat_mg = models.PositiveIntegerField(null=True)
+    carbohydrates_mg = models.PositiveIntegerField()
+    fat_mg = models.PositiveIntegerField()
 
     density_g_ml = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True,
                                        validators=[validators.MinValueValidator(Decimal('0.01'))])
