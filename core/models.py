@@ -632,11 +632,11 @@ class DailyIntakesReport(models.Model):
 
     @property
     def carbohydrates_mg(self) -> DailyNutrientConsumption:
-        return DailyNutrientConsumption(total=self._total_carbohydrates_mg, norm=self.daily_norm_liquids_g)
+        return DailyNutrientConsumption(total=self._total_carbohydrates_mg, norm=self.daily_norm_carbohydrates_mg)
 
     @property
     def fat_mg(self) -> DailyNutrientConsumption:
-        return DailyNutrientConsumption(total=self._total_fat_mg, norm=self.daily_norm_liquids_g)
+        return DailyNutrientConsumption(total=self._total_fat_mg, norm=self.daily_norm_fat_mg)
 
     @property
     def liquids_ml(self) -> DailyNutrientConsumption:
