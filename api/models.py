@@ -203,9 +203,9 @@ class ProductSearchResponse:
     def from_api_request(request: Request, limit: int) -> ProductSearchResponse:
         query = request.query_params.get('query', '')
 
-        meal_type_str = request.query_params.get('meal_type')
+        meal_type_str = request.query_params.get('meal_type', '').lower()
 
-        meal_type = next(iter([e for e in MealType.values if str(e) == meal_type_str]), MealType.Unknown)
+        meal_type = next(iter([e for e in MealType.values if str(e).lower() == meal_type_str]), MealType.Unknown)
 
         exclude_product_str_ids = request.query_params.get('exclude_products', '').split(',')
         exclude_product_ids = list(
