@@ -7,7 +7,7 @@ from rest_framework.validators import UniqueTogetherValidator
 
 from core.models import BloodPressure, DailyHealthStatus, DailyIntakesReport, GeneralRecommendation, \
     GeneralRecommendationCategory, \
-    Intake, Product, Swelling, \
+    Intake, Product, Pulse, Swelling, \
     UserProfile, User
 
 logger = getLogger()
@@ -249,16 +249,26 @@ class BloodPressureSerializer(serializers.ModelSerializer):
         )
 
 
+class PulseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pulse
+        fields = (
+            'pulse', 'measured_at',
+        )
+
+
 class DailyHealthStatusSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     swellings = SwellingSerializer(many=True)
     blood_pressures = BloodPressureSerializer(many=True, read_only=True)
+    pulses = PulseSerializer(many=True, read_only=True)
 
     class Meta:
         model = DailyHealthStatus
         fields = (
             'date', 'user', 'systolic_blood_pressure', 'diastolic_blood_pressure', 'weight_kg', 'glucose', 'urine_ml',
             'swelling_difficulty', 'well_feeling', 'appetite', 'shortness_of_breath', 'swellings', 'blood_pressures',
+            'pulses',
         )
         validators = (
             UniqueTogetherValidator(

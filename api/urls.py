@@ -29,6 +29,9 @@ urlpatterns = [
     path('health-status/blood-pressure/<int:id>/', views.BloodPressureUpdateView.as_view(),
          name="api-blood-pressure-update"),
 
+    path('health-status/pulse/', views.PulseCreateView.as_view(), name="api-pulse-create"),
+    path('health-status/pulse/<int:id>/', views.PulseUpdateView.as_view(), name="api-pulse-update"),
+
     path('health-status/screen/', views.HealthStatusScreenView.as_view(), name="api-health-status-screen"),
     path('health-status/weekly/', views.HealthStatusWeeklyScreenView.as_view(), name="api-health-status-weekly"),
     path('health-status/<str:date>/', views.DailyHealthStatusByDateView.as_view(), name="api-health-status-by-date"),

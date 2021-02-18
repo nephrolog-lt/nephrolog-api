@@ -436,7 +436,7 @@ class HealthStatusCreateViewTests(BaseApiTest):
         self.assertEqual(len(response.data['swellings']), 2)
 
 
-class BloodPreasureCreateViewTests(BaseApiTest):
+class BloodPressureCreateViewTests(BaseApiTest):
 
     def test_unauthenticated(self):
         response = self.client.post(reverse('api-blood-pressure-create'), data={})
@@ -464,3 +464,31 @@ class BloodPreasureCreateViewTests(BaseApiTest):
         self.assertEqual(response.data['diastolic_blood_pressure'], 80)
         self.assertIsNotNone(health_status)
         self.assertEqual(health_status.blood_pressures.count(), 1)
+
+
+class PulseCreateViewTests(BaseApiTest):
+
+    def test_unauthenticated(self):
+        response = self.client.post(reverse('api-pulse-create'), data={})
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_health_status_creation(self):
+        self.login_user()
+
+        request_data = {
+            "pulse": 50,
+            "measured_at": "2021-02-18T15:12:22.129Z"
+        }
+
+        response = self.client.post(
+            reverse('api-pulse-create'),
+            data=request_data,
+        )
+
+        health_status = DailyHealthStatus.filter_for_user(self.user).first()
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['pulse'], 50)
+        self.assertIsNotNone(health_status)
+        self.assertEqual(health_status.pulses.count(), 1)

@@ -274,12 +274,35 @@ class BloodPressureCreateView(CreateAPIView):
 
 
 @extend_schema(tags=['health-status'])
-class BloodPressureUpdateView(UpdateAPIView):
+class BloodPressureUpdateView(UpdateAPIView, DestroyAPIView):
     serializer_class = serializers.BloodPressureSerializer
     lookup_field = 'id'
 
     def get_queryset(self):
         return models.BloodPressure.objects.filter(daily_health_status__user=self.request.user)
+
+
+@extend_schema(tags=['health-status'])
+class PulseCreateView(CreateAPIView):
+    serializer_class = serializers.PulseSerializer
+
+    def perform_create(self, serializer):
+        measured_at: datetime.datetime = serializer.validated_data['measured_at']
+        tz = parse_time_zone(self.request)
+        date = datetime_to_date(measured_at, tz)
+
+        daily_health_status = models.DailyHealthStatus.get_or_create_for_user_and_date(self.request.user, date)
+
+        serializer.save(daily_health_status=daily_health_status)
+
+
+@extend_schema(tags=['health-status'])
+class PulseUpdateView(UpdateAPIView, DestroyAPIView):
+    serializer_class = serializers.PulseSerializer
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        return models.Pulse.objects.filter(daily_health_status__user=self.request.user)
 
 
 @extend_schema(tags=['health-status'])

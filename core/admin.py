@@ -269,8 +269,39 @@ class BloodPressureAdmin(admin.ModelAdmin):
         return str(obj.daily_health_status.user)
 
 
+@admin.register(models.Pulse)
+class BloodPressureAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+
+        'pulse',
+        'measured_at',
+
+        'user',
+
+        'created_at',
+        'updated_at',
+    )
+    raw_id_fields = ('daily_health_status',)
+    date_hierarchy = 'measured_at'
+    list_filter = ('measured_at',)
+    list_select_related = ('daily_health_status', 'daily_health_status__user')
+    search_fields = (
+        'daily_health_status__user__pk',
+        'daily_health_status__user__email',
+        'daily_health_status__user__username',
+    )
+
+    def user(self, obj):
+        return str(obj.daily_health_status.user)
+
+
 class BloodPressureAdminInline(admin.StackedInline):
     model = models.BloodPressure
+
+
+class PulseAdminInline(admin.StackedInline):
+    model = models.Pulse
 
 
 @admin.register(models.DailyHealthStatus)
@@ -297,7 +328,7 @@ class DailyHealthStatusAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
     list_select_related = ('user',)
     search_fields = ('user__pk', 'user__email', 'user__username',)
-    inlines = (BloodPressureAdminInline,)
+    inlines = (BloodPressureAdminInline, PulseAdminInline)
 
     def get_queryset(self, request):
         # noinspection PyUnresolvedReferences
