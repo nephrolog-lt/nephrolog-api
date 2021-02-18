@@ -4,12 +4,12 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIRequestFactory, APITestCase
 
-from core.models import User
+from core.models import DailyHealthStatus, DailyIntakesReport, User
 from core.tests.factories import DailyIntakesReportFactory, IntakeFactory, ProductFactory, UserFactory, \
     UserProfileFactory
 
 
-class BaseApiText(APITestCase):
+class BaseApiTest(APITestCase):
     def setUp(self):
         self.factory = APIRequestFactory()
         self.user = User.objects.create_user('test', email='test@test.com', password='test')
@@ -19,7 +19,7 @@ class BaseApiText(APITestCase):
         self.client.login(username='test', password='test')
 
 
-class NutritionScreenViewTests(BaseApiText):
+class NutritionScreenViewTests(BaseApiTest):
     def test_unauthenticated(self):
         response = self.client.get(reverse('api-nutrition-screen'))
 
@@ -48,7 +48,7 @@ class NutritionScreenViewTests(BaseApiText):
         self.assertIsNotNone(response.data['nutrition_summary_statistics'])
 
 
-class NutritionScreenV2ViewTests(BaseApiText):
+class NutritionScreenV2ViewTests(BaseApiTest):
     def test_unauthenticated(self):
         response = self.client.get(reverse('api-nutrition-screen-v2'))
 
@@ -77,7 +77,7 @@ class NutritionScreenV2ViewTests(BaseApiText):
         self.assertEqual(len(response.data.get('current_month_nutrition_reports')), 2)
 
 
-class UserViewTests(BaseApiText):
+class UserViewTests(BaseApiTest):
     def test_unauthenticated(self):
         response = self.client.get(reverse('api-user'))
 
@@ -112,7 +112,7 @@ class UserViewTests(BaseApiText):
         self.assertEqual(response.data['nutrition_summary']['max_report_date'], '2020-01-06')
 
 
-class DailyIntakesReportViewTests(BaseApiText):
+class DailyIntakesReportViewTests(BaseApiTest):
     def test_daily_intakes_report_unauthenticated(self):
         response = self.client.get(reverse('api-daily-report', kwargs={'date': '2020-01-01'}))
 
@@ -137,7 +137,7 @@ class DailyIntakesReportViewTests(BaseApiText):
         self.assertIsNotNone(response.data.get('daily_intakes_report'))
 
 
-class DailyIntakesReportsViewTests(BaseApiText):
+class DailyIntakesReportsViewTests(BaseApiTest):
     def test_daily_reports_unauthenticated(self):
         response = self.client.get(reverse('api-daily-reports'))
 
@@ -181,7 +181,7 @@ class DailyIntakesReportsViewTests(BaseApiText):
         self.assertEqual(response.data['daily_intakes_light_reports'][0].get('date'), '2020-02-08')
 
 
-class ProductSearchViewTests(BaseApiText):
+class ProductSearchViewTests(BaseApiTest):
 
     def test_product_search_unauthenticated(self):
         response = self.client.get(reverse('api-products-search'), data={'query': 'apple', 'submit': '1'})
@@ -347,3 +347,120 @@ class ProductSearchViewTests(BaseApiText):
         self.assertEqual(response.data['products'][1]['name'], product3.name_lt)
         self.assertEqual(response.data['products'][2]['name'], product1.name_lt)
         self.assertIsNotNone(response.data['daily_nutrient_norms_and_totals'])
+
+
+class DailyIntakesReportsViewTests(BaseApiTest):
+    def test_daily_reports_unauthenticated(self):
+        response = self.client.get(reverse('api-daily-reports'))
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_daily_reports_retrieving_without_arguments(self):
+        self.login_user()
+
+        product = ProductFactory()
+
+        daily_report1 = DailyIntakesReportFactory(user=self.user, date=date(2020, 2, 7))
+        daily_report2 = DailyIntakesReportFactory(user=self.user, date=date(2020, 2, 8))
+        IntakeFactory(user=self.user, daily_report=daily_report1, product=product, amount_g=100)
+        IntakeFactory(user=self.user, daily_report=daily_report2, product=product, amount_g=100)
+
+        # Empty should be excluded
+        DailyIntakesReportFactory(user=self.user, date=date(2020, 2, 5))
+
+        response = self.client.get(reverse('api-daily-reports'))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(len(response.data['daily_intakes_light_reports']), 2)
+        self.assertIsNotNone(response.data['daily_intakes_light_reports'][0].get('nutrient_norms_and_totals'))
+
+    def test_daily_reports_retrieving(self):
+        self.login_user()
+
+        product = ProductFactory()
+
+        daily_report1 = DailyIntakesReportFactory(user=self.user, date=date(2020, 1, 7))
+        daily_report2 = DailyIntakesReportFactory(user=self.user, date=date(2020, 2, 8))
+        IntakeFactory(user=self.user, daily_report=daily_report1, product=product, amount_g=100)
+        IntakeFactory(user=self.user, daily_report=daily_report2, product=product, amount_g=100)
+
+        response = self.client.get(reverse('api-daily-reports'), data={'from': '2020-02-01', 'to': '2020-02-08'})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(len(response.data['daily_intakes_light_reports']), 1)
+        self.assertEqual(response.data['daily_intakes_light_reports'][0].get('date'), '2020-02-08')
+
+
+class HealthStatusCreateViewTests(BaseApiTest):
+
+    def test_unauthenticated(self):
+        response = self.client.post(reverse('api-health-status'), data={})
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_health_status_creation(self):
+        self.login_user()
+
+        request_data = {
+            "$": "DailyHealthStatusRequest",
+            "date": "2021-02-18",
+            "systolic_blood_pressure": 180,
+            "diastolic_blood_pressure": 60,
+            "weight_kg": 70.0,
+            "glucose": 24.8,
+            "urine_ml": 1000,
+            "swelling_difficulty": "1+",
+            "well_feeling": "Average",
+            "appetite": "Bad",
+            "shortness_of_breath": "Severe",
+            "swellings": [
+                {
+                    "swelling": "Knees"
+                },
+                {
+                    "swelling": "Foot"
+                }
+            ]
+        }
+
+        response = self.client.post(
+            reverse('api-health-status'),
+            data=request_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['systolic_blood_pressure'], 180)
+        self.assertEqual(response.data['diastolic_blood_pressure'], 60)
+        self.assertEqual(len(response.data['swellings']), 2)
+
+
+class BloodPreasureCreateViewTests(BaseApiTest):
+
+    def test_unauthenticated(self):
+        response = self.client.post(reverse('api-blood-pressure-create'), data={})
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_health_status_creation(self):
+        self.login_user()
+
+        request_data = {
+            "systolic_blood_pressure": 100,
+            "diastolic_blood_pressure": 80,
+            "measured_at": "2021-02-18T15:12:22.129Z"
+        }
+
+        response = self.client.post(
+            reverse('api-blood-pressure-create'),
+            data=request_data,
+        )
+
+        health_status = DailyHealthStatus.filter_for_user(self.user).first()
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['systolic_blood_pressure'], 100)
+        self.assertEqual(response.data['diastolic_blood_pressure'], 80)
+        self.assertIsNotNone(health_status)
+        self.assertEqual(health_status.blood_pressures.count(), 1)

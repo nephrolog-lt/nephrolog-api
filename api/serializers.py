@@ -5,7 +5,8 @@ from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from core.models import DailyHealthStatus, DailyIntakesReport, GeneralRecommendation, GeneralRecommendationCategory, \
+from core.models import BloodPressure, DailyHealthStatus, DailyIntakesReport, GeneralRecommendation, \
+    GeneralRecommendationCategory, \
     Intake, Product, Swelling, \
     UserProfile, User
 
@@ -240,15 +241,24 @@ class SwellingSerializer(serializers.ModelSerializer):
         fields = ('swelling',)
 
 
+class BloodPressureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BloodPressure
+        fields = (
+            'systolic_blood_pressure', 'diastolic_blood_pressure', 'measured_at',
+        )
+
+
 class DailyHealthStatusSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     swellings = SwellingSerializer(many=True)
+    blood_pressures = BloodPressureSerializer(many=True, read_only=True)
 
     class Meta:
         model = DailyHealthStatus
         fields = (
             'date', 'user', 'systolic_blood_pressure', 'diastolic_blood_pressure', 'weight_kg', 'glucose', 'urine_ml',
-            'swelling_difficulty', 'well_feeling', 'appetite', 'shortness_of_breath', 'swellings',
+            'swelling_difficulty', 'well_feeling', 'appetite', 'shortness_of_breath', 'swellings', 'blood_pressures',
         )
         validators = (
             UniqueTogetherValidator(

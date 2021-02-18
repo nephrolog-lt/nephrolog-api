@@ -1009,6 +1009,12 @@ class DailyHealthStatus(models.Model):
         return DailyHealthStatus.filter_for_user(user).filter(date=date).first()
 
     @staticmethod
+    def get_or_create_for_user_and_date(user: AbstractBaseUser, date: datetime.date) -> DailyHealthStatus:
+        health_status, _ = DailyHealthStatus.objects.get_or_create(user=user, date=date)
+
+        return health_status
+
+    @staticmethod
     def get_between_dates_for_user(user: AbstractBaseUser, date_from: datetime.date,
                                    date_to: datetime.date) -> DailyHealthStatusQuerySet:
         return DailyHealthStatus.filter_for_user(user).filter(
@@ -1016,6 +1022,61 @@ class DailyHealthStatus(models.Model):
 
     def __str__(self):
         return f"{self.user} {self.date}"
+
+
+# class Pulse(models.Model):
+#     # user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
+#     daily_health_status = models.ForeignKey(DailyHealthStatus, on_delete=models.CASCADE, related_name='+')
+#     systolic_blood_pressure = models.PositiveSmallIntegerField(
+#         null=True, blank=True,
+#         validators=[
+#             validators.MinValueValidator(1),
+#             validators.MaxValueValidator(350),
+#         ]
+#     )
+#     diastolic_blood_pressure = models.PositiveSmallIntegerField(
+#         null=True, blank=True, validators=[
+#             validators.MinValueValidator(1),
+#             validators.MaxValueValidator(200),
+#         ],
+#     )
+#
+#     measured_at = models.DateTimeField()
+#
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+
+
+class BloodPressure(models.Model):
+    daily_health_status = models.ForeignKey(DailyHealthStatus, on_delete=models.CASCADE, related_name='blood_pressures')
+    systolic_blood_pressure = models.PositiveSmallIntegerField(
+        validators=[
+            validators.MinValueValidator(1),
+            validators.MaxValueValidator(350),
+        ]
+    )
+    diastolic_blood_pressure = models.PositiveSmallIntegerField(
+        validators=[
+            validators.MinValueValidator(1),
+            validators.MaxValueValidator(200),
+        ],
+    )
+
+    measured_at = models.DateTimeField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['daily_health_status', 'measured_at'],
+                name='unique_blood_pressure_health_status_measure_at'
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.systolic_blood_pressure} / {self.diastolic_blood_pressure} {self.daily_health_status}"
 
 
 class ProductSearchLog(models.Model):

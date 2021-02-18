@@ -25,6 +25,10 @@ urlpatterns = [
     path('nutrition/screen/v2/', views.NutritionScreenV2View.as_view(), name="api-nutrition-screen-v2"),
     path('nutrition/weekly/', views.NutritionWeeklyScreenView.as_view(), name="api-nutrition-weekly-screen"),
 
+    path('health-status/blood-pressure/', views.BloodPressureCreateView.as_view(), name="api-blood-pressure-create"),
+    path('health-status/blood-pressure/<int:id>/', views.BloodPressureUpdateView.as_view(),
+         name="api-blood-pressure-update"),
+
     path('health-status/screen/', views.HealthStatusScreenView.as_view(), name="api-health-status-screen"),
     path('health-status/weekly/', views.HealthStatusWeeklyScreenView.as_view(), name="api-health-status-weekly"),
     path('health-status/<str:date>/', views.DailyHealthStatusByDateView.as_view(), name="api-health-status-by-date"),
