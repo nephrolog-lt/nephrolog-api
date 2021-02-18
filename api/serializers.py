@@ -257,6 +257,8 @@ class PulseSerializer(serializers.ModelSerializer):
         )
 
 
+# Excluded on 02-18 remove in the future: diastolic_blood_pressure, systolic_blood_pressure
+@extend_schema_serializer(exclude_fields=['systolic_blood_pressure', 'diastolic_blood_pressure'])
 class DailyHealthStatusSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     swellings = SwellingSerializer(many=True)

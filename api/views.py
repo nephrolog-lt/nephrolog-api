@@ -276,7 +276,7 @@ class BloodPressureCreateView(CreateAPIView):
 @extend_schema(tags=['health-status'])
 class BloodPressureUpdateView(UpdateAPIView, DestroyAPIView):
     serializer_class = serializers.BloodPressureSerializer
-    lookup_field = 'id'
+    lookup_url_kwarg = 'id'
 
     def get_queryset(self):
         return models.BloodPressure.objects.filter(daily_health_status__user=self.request.user)
@@ -299,7 +299,7 @@ class PulseCreateView(CreateAPIView):
 @extend_schema(tags=['health-status'])
 class PulseUpdateView(UpdateAPIView, DestroyAPIView):
     serializer_class = serializers.PulseSerializer
-    lookup_field = 'id'
+    lookup_url_kwarg = 'id'
 
     def get_queryset(self):
         return models.Pulse.objects.filter(daily_health_status__user=self.request.user)
