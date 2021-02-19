@@ -11,7 +11,7 @@ django-allauth==0.44.0
 firebase-admin==4.5.2
 
 # Logging and monitoring
-sentry-sdk==0.20.1
+sentry-sdk==0.20.3
 ddtrace==0.46.0
 datadog==0.40.0
 
