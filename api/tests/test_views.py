@@ -446,15 +446,13 @@ class BloodPressureCreateViewTests(BaseApiTest):
     def test_health_status_creation(self):
         self.login_user()
 
-        request_data = {
-            "systolic_blood_pressure": 100,
-            "diastolic_blood_pressure": 80,
-            "measured_at": "2021-02-18T15:12:22.129Z"
-        }
-
         response = self.client.post(
             reverse('api-blood-pressure-create'),
-            data=request_data,
+            data={
+                "systolic_blood_pressure": 100,
+                "diastolic_blood_pressure": 80,
+                "measured_at": "2021-02-18T15:12:22.129Z"
+            },
         )
 
         health_status = DailyHealthStatus.filter_for_user(self.user).first()
@@ -462,6 +460,23 @@ class BloodPressureCreateViewTests(BaseApiTest):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['systolic_blood_pressure'], 100)
         self.assertEqual(response.data['diastolic_blood_pressure'], 80)
+        self.assertIsNotNone(health_status)
+        self.assertEqual(health_status.blood_pressures.count(), 1)
+
+        response2 = self.client.post(
+            reverse('api-blood-pressure-create'),
+            data={
+                "systolic_blood_pressure": 180,
+                "diastolic_blood_pressure": 50,
+                "measured_at": "2021-02-18T15:12:22.129Z"
+            },
+        )
+
+        health_status = DailyHealthStatus.filter_for_user(self.user).first()
+
+        self.assertEqual(response2.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response2.data['systolic_blood_pressure'], 180)
+        self.assertEqual(response2.data['diastolic_blood_pressure'], 50)
         self.assertIsNotNone(health_status)
         self.assertEqual(health_status.blood_pressures.count(), 1)
 

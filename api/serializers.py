@@ -248,6 +248,18 @@ class BloodPressureSerializer(serializers.ModelSerializer):
             'systolic_blood_pressure', 'diastolic_blood_pressure', 'measured_at',
         )
 
+    def create(self, validated_data):
+        daily_health_status = validated_data.pop('daily_health_status')
+        measured_at = validated_data.pop('measured_at')
+
+        instance, _ = BloodPressure.objects.update_or_create(
+            daily_health_status=daily_health_status,
+            measured_at=measured_at,
+            defaults=validated_data
+        )
+
+        return instance
+
 
 class PulseSerializer(serializers.ModelSerializer):
     class Meta:
@@ -255,6 +267,18 @@ class PulseSerializer(serializers.ModelSerializer):
         fields = (
             'pulse', 'measured_at',
         )
+
+    def create(self, validated_data):
+        daily_health_status = validated_data.pop('daily_health_status')
+        measured_at = validated_data.pop('measured_at')
+
+        instance, _ = Pulse.objects.update_or_create(
+            daily_health_status=daily_health_status,
+            measured_at=measured_at,
+            defaults=validated_data
+        )
+
+        return instance
 
 
 # Excluded on 02-18 remove in the future: diastolic_blood_pressure, systolic_blood_pressure
