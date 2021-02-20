@@ -245,7 +245,7 @@ class BloodPressureSerializer(serializers.ModelSerializer):
     class Meta:
         model = BloodPressure
         fields = (
-            'systolic_blood_pressure', 'diastolic_blood_pressure', 'measured_at',
+            'id', 'systolic_blood_pressure', 'diastolic_blood_pressure', 'measured_at',
         )
 
     def create(self, validated_data):
@@ -265,7 +265,7 @@ class PulseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pulse
         fields = (
-            'pulse', 'measured_at',
+            'id', 'pulse', 'measured_at',
         )
 
     def create(self, validated_data):
