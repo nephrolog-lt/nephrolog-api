@@ -73,6 +73,13 @@ def datetime_to_date(dt: datetime.datetime, tz: datetime.timezone) -> datetime.d
     return dt.astimezone(tz).date()
 
 
+def date_from_request_and_validated_data(request: Request, validated_data: dict, field: str) -> datetime.date:
+    measured_at: datetime.datetime = validated_data[field]
+    tz = parse_time_zone(request)
+
+    return datetime_to_date(measured_at, tz)
+
+
 def try_parse_int(s: str) -> Optional[int]:
     try:
         return int(s)

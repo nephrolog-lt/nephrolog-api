@@ -10,7 +10,8 @@ from rest_framework.generics import CreateAPIView, DestroyAPIView, ListAPIView, 
 from api import serializers
 from api.models import HealthStatusScreenResponse, HealthStatusWeeklyResponse, NutritionScreenResponse, \
     NutrientWeeklyScreenResponse, NutritionScreenV2Response, ProductSearchResponse, DailyIntakesReportsLightResponse
-from api.utils import datetime_to_date, parse_date_or_validation_error, parse_time_zone
+from api.utils import date_from_request_and_validated_data, datetime_to_date, parse_date_or_validation_error, \
+    parse_time_zone
 from core import models
 
 
@@ -264,19 +265,22 @@ class BloodPressureCreateView(CreateAPIView):
     serializer_class = serializers.BloodPressureSerializer
 
     def perform_create(self, serializer):
-        measured_at: datetime.datetime = serializer.validated_data['measured_at']
-        tz = parse_time_zone(self.request)
-        date = datetime_to_date(measured_at, tz)
-
+        date = date_from_request_and_validated_data(self.request, serializer.validated_data, 'measured_at')
         daily_health_status = models.DailyHealthStatus.get_or_create_for_user_and_date(self.request.user, date)
 
         serializer.save(daily_health_status=daily_health_status)
 
 
 @extend_schema(tags=['health-status'])
-class BloodPressureUpdateView(UpdateAPIView, DestroyAPIView):
+class BloodPressureUpdateView(UpdateAPIView):
     serializer_class = serializers.BloodPressureSerializer
     lookup_url_kwarg = 'id'
+
+    def perform_update(self, serializer):
+        date = date_from_request_and_validated_data(self.request, serializer.validated_data, 'measured_at')
+        daily_health_status = models.DailyHealthStatus.get_or_create_for_user_and_date(self.request.user, date)
+
+        serializer.save(daily_health_status=daily_health_status)
 
     def get_queryset(self):
         return models.BloodPressure.objects.filter(daily_health_status__user=self.request.user)
@@ -287,19 +291,22 @@ class PulseCreateView(CreateAPIView):
     serializer_class = serializers.PulseSerializer
 
     def perform_create(self, serializer):
-        measured_at: datetime.datetime = serializer.validated_data['measured_at']
-        tz = parse_time_zone(self.request)
-        date = datetime_to_date(measured_at, tz)
-
+        date = date_from_request_and_validated_data(self.request, serializer.validated_data, 'measured_at')
         daily_health_status = models.DailyHealthStatus.get_or_create_for_user_and_date(self.request.user, date)
 
         serializer.save(daily_health_status=daily_health_status)
 
 
 @extend_schema(tags=['health-status'])
-class PulseUpdateView(UpdateAPIView, DestroyAPIView):
+class PulseUpdateView(UpdateAPIView):
     serializer_class = serializers.PulseSerializer
     lookup_url_kwarg = 'id'
+
+    def perform_update(self, serializer):
+        date = date_from_request_and_validated_data(self.request, serializer.validated_data, 'measured_at')
+        daily_health_status = models.DailyHealthStatus.get_or_create_for_user_and_date(self.request.user, date)
+
+        serializer.save(daily_health_status=daily_health_status)
 
     def get_queryset(self):
         return models.Pulse.objects.filter(daily_health_status__user=self.request.user)
