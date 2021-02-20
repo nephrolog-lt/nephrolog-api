@@ -4,6 +4,7 @@ from csv_export.views import CSVExportView
 from django.contrib import admin
 from django.contrib.admin import EmptyFieldListFilter
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 from core import models
@@ -310,8 +311,12 @@ class DailyHealthStatusAdmin(admin.ModelAdmin):
         'id',
         'user',
         'date',
+
         'systolic_blood_pressure',
         'diastolic_blood_pressure',
+        'blood_pressures',
+        'pulses',
+
         'weight_kg',
         'glucose',
         'urine_ml',
@@ -329,6 +334,7 @@ class DailyHealthStatusAdmin(admin.ModelAdmin):
     list_select_related = ('user',)
     search_fields = ('user__pk', 'user__email', 'user__username',)
     inlines = (BloodPressureAdminInline, PulseAdminInline)
+    list_filter = (('systolic_blood_pressure', EmptyFieldListFilter), )
 
     def get_queryset(self, request):
         # noinspection PyUnresolvedReferences
@@ -338,6 +344,24 @@ class DailyHealthStatusAdmin(admin.ModelAdmin):
         return ','.join(map(lambda s: str(s), obj.swellings.all()))
 
     all_swellings.short_description = "swellings"
+
+    def blood_pressures(self, obj):
+        html = '<br>'.join(
+            map(
+                lambda x: f"{x.systolic_blood_pressure}/{x.diastolic_blood_pressure}",
+                obj.blood_pressures.all()
+            )
+        )
+        return format_html(html)
+
+    def pulses(self, obj):
+        html = '<br>'.join(
+            map(
+                lambda x: f"{x.pulse}",
+                obj.pulses.all()
+            )
+        )
+        return format_html(html)
 
 
 class IntakeAdminInline(admin.StackedInline):

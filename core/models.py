@@ -1026,6 +1026,7 @@ class DailyHealthStatus(models.Model):
     def __str__(self):
         return f"{self.user} {self.date}"
 
+
 class BloodPressure(models.Model):
     daily_health_status = models.ForeignKey(DailyHealthStatus, on_delete=models.CASCADE, related_name='blood_pressures')
     systolic_blood_pressure = models.PositiveSmallIntegerField(

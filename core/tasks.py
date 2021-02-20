@@ -7,7 +7,8 @@ from django.db.models import F, QuerySet
 from django.db.models.aggregates import Count, Sum
 from django.utils import timezone
 
-from core.models import Appetite, DailyHealthStatus, DailyIntakesReport, DiabetesType, HistoricalUserProfile, Intake, \
+from core.models import Appetite, BloodPressure, DailyHealthStatus, DailyIntakesReport, DiabetesType, \
+    HistoricalUserProfile, Intake, \
     Product, \
     ProductKind, \
     ShortnessOfBreath, SwellingDifficulty, User, \
@@ -142,3 +143,27 @@ def sync_product_metrics():
 
     datadog.gauge('product.health_status.shortness_of_breath',
                   DailyHealthStatus.objects.exclude(shortness_of_breath=ShortnessOfBreath.Unknown).count())
+
+
+@shared_task(soft_time_limit=60, autoretry_for=(Exception,), retry_backoff=True)
+def sync_legacy_blood_pressure():
+    statuses = DailyHealthStatus.objects.filter(systolic_blood_pressure__isnull=False,
+                                                diastolic_blood_pressure__isnull=False)
+
+    created = 0
+    for status in statuses:
+        _, is_created = BloodPressure.objects.get_or_create(
+            daily_health_status=status,
+            measured_at=status.created_at,
+            defaults={
+                'systolic_blood_pressure': status.systolic_blood_pressure,
+                'diastolic_blood_pressure': status.diastolic_blood_pressure,
+            }
+        )
+
+        if is_created:
+            created += 1
+
+    return {
+        'created': created
+    }
