@@ -1161,3 +1161,60 @@ class GeneralRecommendation(models.Model):
 
     def __str__(self):
         return self.question_lt
+
+
+class DialysisSolution(models.TextChoices):
+    Unknown = "Unknown"
+    Green = "Green"
+    Yellow = "Yellow"
+    Orange = "Orange"
+    Blue = "Blue"
+    Purple = "Purple"
+
+
+class DialysateColor(models.TextChoices):
+    Unknown = "Unknown"
+    Transparent = "Transparent"
+    Pink = "Pink"
+    CloudyYellowish = "CloudyYellowish"
+    Greenish = "Greenish"
+    Brown = "Brown"
+    CloudyWhite = "CloudyWhite"
+
+
+class ManualPeritonealDialysis(models.Model):
+    daily_health_status = models.ForeignKey(
+        DailyHealthStatus,
+        on_delete=models.CASCADE,
+    )
+
+    started_at = models.DateTimeField()
+
+    blood_pressure = models.OneToOneField(BloodPressure, on_delete=models.PROTECT)
+    pulse = models.OneToOneField(Pulse, on_delete=models.PROTECT)
+
+    solution = models.CharField(
+        max_length=16,
+        choices=DialysisSolution.choices,
+        default=DialysisSolution.Unknown,
+    )
+
+    solution_in_ml = models.PositiveSmallIntegerField()
+    solution_out_ml = models.PositiveSmallIntegerField(default=0)
+
+    dialysate_color = models.CharField(
+        max_length=16,
+        choices=DialysateColor.choices,
+        default=DialysateColor.Unknown,
+    )
+
+    note = models.TextField(blank=True)
+
+    finished_at = models.DateTimeField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        default_related_name = "manual_peritoneal_dialysis"
+        ordering = ("-pk",)
