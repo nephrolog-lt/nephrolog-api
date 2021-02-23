@@ -1,7 +1,7 @@
 -r requirements.txt
 
 # Required for tests
-Faker==6.0.0
+Faker==6.4.1
 factory_boy==3.2.0
 
 djangorestframework-stubs~=1.3.0
