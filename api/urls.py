@@ -37,6 +37,12 @@ urlpatterns = [
     path('health-status/<str:date>/', views.DailyHealthStatusByDateView.as_view(), name="api-health-status-by-date"),
     path('health-status/', views.DailyHealthStatusView.as_view(), name="api-health-status"),
 
+    path('peritoneal-dialysis/manual/', views.CreateManualPeritonealDialysisView.as_view(),
+         name="api-peritoneal-dialysis-manual-create"),
+
+    path('peritoneal-dialysis/manual/<int:id>/', views.UpdateManualPeritonealDialysisView.as_view(),
+         name="api-peritoneal-dialysis-manual-update"),
+
     path('schema.json/', SpectacularJSONAPIView.as_view(), name='schema'),
     # Optional UI:
     path('', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

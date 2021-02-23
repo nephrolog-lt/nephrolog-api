@@ -1055,6 +1055,10 @@ class BloodPressure(models.Model):
             )
         ]
 
+    @staticmethod
+    def filter_for_user(user: AbstractBaseUser) -> QuerySet[BloodPressure]:
+        return BloodPressure.objects.filter(daily_health_status__user=user)
+
     def __str__(self):
         return f"{self.systolic_blood_pressure} / {self.diastolic_blood_pressure} {self.daily_health_status}"
 
@@ -1080,6 +1084,10 @@ class Pulse(models.Model):
                 name='unique_pulse_health_status_measure_at'
             )
         ]
+
+    @staticmethod
+    def filter_for_user(user: AbstractBaseUser) -> QuerySet[Pulse]:
+        return Pulse.objects.filter(daily_health_status__user=user)
 
     def __str__(self):
         return f"{self.pulse} {self.daily_health_status}"
@@ -1218,3 +1226,7 @@ class ManualPeritonealDialysis(models.Model):
     class Meta:
         default_related_name = "manual_peritoneal_dialysis"
         ordering = ("-pk",)
+
+    @staticmethod
+    def filter_for_user(user: AbstractBaseUser) -> QuerySet[ManualPeritonealDialysis]:
+        return BloodPressure.objects.filter(daily_health_status__user=user)

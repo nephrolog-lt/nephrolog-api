@@ -4,9 +4,9 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIRequestFactory, APITestCase
 
-from core.models import DailyHealthStatus, DailyIntakesReport, User
-from core.tests.factories import DailyIntakesReportFactory, IntakeFactory, ProductFactory, UserFactory, \
-    UserProfileFactory
+from core.models import DailyHealthStatus, User
+from core.tests.factories import BloodPressureFactory, DailyHealthStatusFactory, DailyIntakesReportFactory, \
+    IntakeFactory, ProductFactory, PulseFactory, UserFactory, UserProfileFactory
 
 
 class BaseApiTest(APITestCase):
@@ -507,3 +507,72 @@ class PulseCreateViewTests(BaseApiTest):
         self.assertEqual(response.data['pulse'], 50)
         self.assertIsNotNone(health_status)
         self.assertEqual(health_status.pulses.count(), 1)
+
+
+class CreateManualPeritonealDialysisViewTests(BaseApiTest):
+
+    def test_unauthenticated(self):
+        response = self.client.post(reverse('api-peritoneal-dialysis-manual-create'), data={})
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_successful_creation(self):
+        self.login_user()
+
+        daily_health_status = DailyHealthStatusFactory(user=self.user, date=date(2021, 2, 23))
+
+        pulse = PulseFactory(daily_health_status=daily_health_status)
+        blood_pressure = BloodPressureFactory(daily_health_status=daily_health_status)
+
+        request_data = {
+            "started_at": "2021-02-23T09:29:04.539Z",
+            "blood_pressure_id": blood_pressure.pk,
+            "pulse_id": pulse.pk,
+            "solution": "Unknown",
+            "solution_in_ml": 0,
+            "solution_out_ml": 0,
+            "dialysate_color": "Unknown",
+            "note": "My note",
+            "finished_at": "2021-02-23T09:29:04.539Z"
+        }
+
+        response = self.client.post(
+            reverse('api-peritoneal-dialysis-manual-create'),
+            data=request_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['note'], "My note")
+        self.assertEqual(response.data['pulse_id'], pulse.pk)
+        self.assertEqual(response.data['blood_pressure_id'], blood_pressure.pk)
+
+    def test_creation_with_other_user_pulse(self):
+        self.login_user()
+
+        daily_health_status = DailyHealthStatusFactory(user=self.user, date=date(2021, 2, 23))
+
+        other_user = UserFactory()
+
+        other_user_daily_health_status = DailyHealthStatusFactory(user=other_user, date=date(2021, 2, 23))
+
+        pulse = PulseFactory(daily_health_status=other_user_daily_health_status)
+        blood_pressure = BloodPressureFactory(daily_health_status=daily_health_status)
+
+        request_data = {
+            "started_at": "2021-02-23T09:29:04.539Z",
+            "blood_pressure_id": blood_pressure.pk,
+            "pulse_id": pulse.pk,
+            "solution": "Unknown",
+            "solution_in_ml": 0,
+            "solution_out_ml": 0,
+            "dialysate_color": "Unknown",
+            "note": "My note",
+            "finished_at": "2021-02-23T09:29:04.539Z"
+        }
+
+        response = self.client.post(
+            reverse('api-peritoneal-dialysis-manual-create'),
+            data=request_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

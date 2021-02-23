@@ -1,14 +1,12 @@
 from logging import getLogger
-from typing import Any, Dict
+from typing import Dict
 
 from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from core.models import BloodPressure, DailyHealthStatus, DailyIntakesReport, GeneralRecommendation, \
-    GeneralRecommendationCategory, \
-    Intake, Product, Pulse, Swelling, \
-    UserProfile, User
+    GeneralRecommendationCategory, Intake, ManualPeritonealDialysis, Product, Pulse, Swelling, User, UserProfile
 
 logger = getLogger()
 
@@ -375,3 +373,39 @@ class GeneralRecommendationsResponseSerializer(ReadOnlySerializer):
 
     class Meta:
         fields = ('categories',)
+
+
+class UserBloodPressurePrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
+    def get_queryset(self):
+        user = self.context['request'].user
+
+        return BloodPressure.filter_for_user(user)
+
+
+class UserPulsePrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
+    def get_queryset(self):
+        user = self.context['request'].user
+
+        return Pulse.filter_for_user(user)
+
+
+class CreateManualPeritonealDialysisSerializer(serializers.ModelSerializer):
+    blood_pressure_id = UserBloodPressurePrimaryKeyRelatedField(source='blood_pressure')
+    pulse_id = UserPulsePrimaryKeyRelatedField(source='pulse')
+
+    class Meta:
+        model = ManualPeritonealDialysis
+        fields = (
+            'started_at',
+
+            'blood_pressure_id',
+            'pulse_id',
+
+            'solution',
+            'solution_in_ml',
+            'solution_out_ml',
+            'dialysate_color',
+
+            'note',
+            'finished_at'
+        )

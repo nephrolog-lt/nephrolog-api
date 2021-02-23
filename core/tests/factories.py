@@ -67,3 +67,25 @@ class DailyIntakesReportFactory(DjangoModelFactory):
     daily_norm_phosphorus_mg = 400
     daily_norm_energy_kcal = 500
     daily_norm_liquids_g = 600
+
+
+class PulseFactory(DjangoModelFactory):
+    class Meta:
+        model = models.Pulse
+
+    pulse = factory.Faker('pyint', min_value=10, max_value=200)
+    measured_at = factory.Faker('date_time_ad')
+
+
+class BloodPressureFactory(DjangoModelFactory):
+    class Meta:
+        model = models.BloodPressure
+
+    systolic_blood_pressure = factory.Faker('pyint', min_value=1, max_value=350)
+    diastolic_blood_pressure = factory.Faker('pyint', min_value=1, max_value=200)
+    measured_at = factory.Faker('date_time_ad')
+
+
+class DailyHealthStatusFactory(DjangoModelFactory):
+    class Meta:
+        model = models.DailyHealthStatus

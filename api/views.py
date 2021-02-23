@@ -350,3 +350,29 @@ class GeneralRecommendationsView(RetrieveAPIView):
 
     def get_object(self) -> HealthStatusScreenResponse:
         return models.GeneralRecommendationCategory.objects.prefetch_related('recommendations')
+
+
+@extend_schema(tags=['peritoneal-dialysis'])
+class CreateManualPeritonealDialysisView(CreateAPIView):
+    serializer_class = serializers.CreateManualPeritonealDialysisSerializer
+
+    def perform_create(self, serializer):
+        date = date_from_request_and_validated_data(self.request, serializer.validated_data, 'started_at')
+        daily_health_status = models.DailyHealthStatus.get_or_create_for_user_and_date(self.request.user, date)
+
+        serializer.save(daily_health_status=daily_health_status)
+
+
+@extend_schema(tags=['peritoneal-dialysis'])
+class UpdateManualPeritonealDialysisView(UpdateAPIView):
+    serializer_class = serializers.CreateManualPeritonealDialysisSerializer
+    lookup_url_kwarg = 'id'
+
+    def get_queryset(self):
+        return models.ManualPeritonealDialysis.objects.filter(daily_health_status__user=self.request.user)
+
+    def perform_update(self, serializer):
+        date = date_from_request_and_validated_data(self.request, serializer.validated_data, 'started_at')
+        daily_health_status = models.DailyHealthStatus.get_or_create_for_user_and_date(self.request.user, date)
+
+        serializer.save(daily_health_status=daily_health_status)
