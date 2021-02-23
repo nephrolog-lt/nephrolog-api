@@ -90,7 +90,7 @@ services:
         condition: on-failure
 
   redis:
-    image: redis:6.0
+    image: redis:6.2
     networks:
       - redis_network
       - datadog_network
