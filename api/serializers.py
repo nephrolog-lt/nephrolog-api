@@ -396,6 +396,8 @@ class CreateManualPeritonealDialysisSerializer(serializers.ModelSerializer):
     class Meta:
         model = ManualPeritonealDialysis
         fields = (
+            'id',
+
             'started_at',
 
             'blood_pressure_id',
