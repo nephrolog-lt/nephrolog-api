@@ -392,9 +392,16 @@ class UserPulsePrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
         return Pulse.filter_for_user(user)
 
 
-class CreateManualPeritonealDialysisSerializer(serializers.ModelSerializer):
-    blood_pressure_id = UserBloodPressurePrimaryKeyRelatedField(source='blood_pressure')
-    pulse_id = UserPulsePrimaryKeyRelatedField(source='pulse')
+class ManualPeritonealDialysisSerializer(serializers.ModelSerializer):
+    blood_pressure_id = UserBloodPressurePrimaryKeyRelatedField(source='blood_pressure', write_only=True)
+    pulse_id = UserPulsePrimaryKeyRelatedField(source='pulse', write_only=True)
+
+    blood_pressure = BloodPressureSerializer(read_only=True)
+    pulse = PulseSerializer(read_only=True)
+
+    urine_ml = serializers.IntegerField(source='daily_health_status.urine_ml', allow_null=True, read_only=True)
+    weight_kg = serializers.DecimalField(source='daily_health_status.weight_kg', allow_null=True, read_only=True,
+                                         max_digits=4, decimal_places=1)
 
     class Meta:
         model = ManualPeritonealDialysis
@@ -403,8 +410,13 @@ class CreateManualPeritonealDialysisSerializer(serializers.ModelSerializer):
 
             'started_at',
 
+            'blood_pressure',
             'blood_pressure_id',
+            'pulse',
             'pulse_id',
+
+            'urine_ml',
+            'weight_kg',
 
             'dialysis_solution',
             'solution_in_ml',
@@ -413,4 +425,29 @@ class CreateManualPeritonealDialysisSerializer(serializers.ModelSerializer):
 
             'notes',
             'finished_at'
+        )
+
+
+class DailyManualPeritonealDialysisReportSerializer(serializers.ModelSerializer):
+    manual_peritoneal_dialysis = ManualPeritonealDialysisSerializer(many=True)
+
+    class Meta:
+        model = DailyHealthStatus
+        fields = (
+            'date',
+
+            'manual_peritoneal_dialysis',
+
+            'urine_ml',
+            'weight_kg',
+        )
+
+
+class DailyManualPeritonealDialysisReportResponseSerializer(serializers.Serializer):
+    manual_peritoneal_dialysis_reports = DailyManualPeritonealDialysisReportSerializer(many=True)
+
+    class Meta:
+        model = DailyHealthStatus
+        fields = (
+            'manual_peritoneal_dialysis_reports',
         )

@@ -8,8 +8,28 @@ from rest_framework.request import Request
 
 from api import utils
 from api.utils import parse_date_query_params
-from core.models import DailyHealthStatus, DailyIntakesReport, Intake, MealType, UserProfile, Product, \
+from core.models import DailyHealthStatus, DailyHealthStatusQuerySet, DailyIntakesReport, Intake, MealType, UserProfile, \
+    Product, \
     DailyNutrientNormsAndTotals, ProductSearchLog
+
+
+@dataclass(frozen=True)
+class DailyManualPeritonealDialysisReportsResponse:
+    manual_peritoneal_dialysis_reports: DailyHealthStatusQuerySet
+
+    @staticmethod
+    def from_api_request(request: Request) -> DailyManualPeritonealDialysisReportsResponse:
+        date_from, date_to = parse_date_query_params(request)
+
+        daily_health_statuses = DailyHealthStatus.get_between_dates_for_user(
+            request.user,
+            date_from,
+            date_to
+        ).filter_manual_peritoneal_dialysis().prefetch_manual_peritoneal_dialysis()
+
+        return DailyManualPeritonealDialysisReportsResponse(
+            manual_peritoneal_dialysis_reports=daily_health_statuses,
+        )
 
 
 @dataclass(frozen=True)

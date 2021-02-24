@@ -933,6 +933,13 @@ class DailyHealthStatusQuerySet(models.QuerySet):
     def prefetch_blood_pressure_and_pulse(self) -> DailyHealthStatusQuerySet:
         return self.prefetch_related('blood_pressures', 'pulses')
 
+    def filter_manual_peritoneal_dialysis(self) -> DailyHealthStatusQuerySet:
+        return self.exclude(manual_peritoneal_dialysis__isnull=True)
+
+    def prefetch_manual_peritoneal_dialysis(self) -> DailyHealthStatusQuerySet:
+        return self.prefetch_related(
+            Prefetch('manual_peritoneal_dialysis', queryset=ManualPeritonealDialysis.objects.select_related_fields()))
+
 
 class DailyHealthStatus(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -1190,6 +1197,11 @@ class DialysateColor(models.TextChoices):
     CloudyWhite = "CloudyWhite"
 
 
+class ManualPeritonealDialysisQuerySet(models.QuerySet):
+    def select_related_fields(self) -> ManualPeritonealDialysisQuerySet:
+        return self.select_related('blood_pressure', 'pulse', 'daily_health_status')
+
+
 class ManualPeritonealDialysis(models.Model):
     daily_health_status = models.ForeignKey(
         DailyHealthStatus,
@@ -1222,6 +1234,8 @@ class ManualPeritonealDialysis(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = ManualPeritonealDialysisQuerySet.as_manager()
 
     class Meta:
         default_related_name = "manual_peritoneal_dialysis"

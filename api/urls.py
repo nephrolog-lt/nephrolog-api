@@ -40,6 +40,9 @@ urlpatterns = [
     path('peritoneal-dialysis/manual/', views.CreateManualPeritonealDialysisView.as_view(),
          name="api-peritoneal-dialysis-manual-create"),
 
+    path('peritoneal-dialysis/manual/reports/', views.ManualPeritonealDialysisReportsView.as_view(),
+         name="api-peritoneal-dialysis-manual-reports"),
+
     path('peritoneal-dialysis/manual/<int:id>/', views.UpdateManualPeritonealDialysisView.as_view(),
          name="api-peritoneal-dialysis-manual-update"),
 

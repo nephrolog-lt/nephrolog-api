@@ -529,8 +529,8 @@ class CreateManualPeritonealDialysisViewTests(BaseApiTest):
             "blood_pressure_id": blood_pressure.pk,
             "pulse_id": pulse.pk,
             "dialysis_solution": "Unknown",
-            "solution_in_ml": 0,
-            "solution_out_ml": 0,
+            "solution_in_ml": 2000,
+            "solution_out_ml": 2300,
             "dialysate_color": "Unknown",
             "notes": "My note",
             "finished_at": "2021-02-23T09:29:04.539Z"
@@ -540,11 +540,10 @@ class CreateManualPeritonealDialysisViewTests(BaseApiTest):
             reverse('api-peritoneal-dialysis-manual-create'),
             data=request_data,
         )
-
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['notes'], "My note")
-        self.assertEqual(response.data['pulse_id'], pulse.pk)
-        self.assertEqual(response.data['blood_pressure_id'], blood_pressure.pk)
+        self.assertEqual(response.data['pulse']['id'], pulse.pk)
+        self.assertEqual(response.data['blood_pressure']['id'], blood_pressure.pk)
 
     def test_creation_with_other_user_pulse(self):
         self.login_user()

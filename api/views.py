@@ -8,7 +8,8 @@ from rest_framework.generics import CreateAPIView, DestroyAPIView, ListAPIView, 
     RetrieveUpdateDestroyAPIView, UpdateAPIView, get_object_or_404
 
 from api import serializers
-from api.models import HealthStatusScreenResponse, HealthStatusWeeklyResponse, NutritionScreenResponse, \
+from api.models import DailyManualPeritonealDialysisReportsResponse, HealthStatusScreenResponse, \
+    HealthStatusWeeklyResponse, NutritionScreenResponse, \
     NutrientWeeklyScreenResponse, NutritionScreenV2Response, ProductSearchResponse, DailyIntakesReportsLightResponse
 from api.utils import date_from_request_and_validated_data, datetime_to_date, parse_date_or_validation_error, \
     parse_time_zone
@@ -354,7 +355,7 @@ class GeneralRecommendationsView(RetrieveAPIView):
 
 @extend_schema(tags=['peritoneal-dialysis'])
 class CreateManualPeritonealDialysisView(CreateAPIView):
-    serializer_class = serializers.CreateManualPeritonealDialysisSerializer
+    serializer_class = serializers.ManualPeritonealDialysisSerializer
 
     def perform_create(self, serializer):
         date = date_from_request_and_validated_data(self.request, serializer.validated_data, 'started_at')
@@ -363,9 +364,33 @@ class CreateManualPeritonealDialysisView(CreateAPIView):
         serializer.save(daily_health_status=daily_health_status)
 
 
+@extend_schema(
+    tags=['peritoneal-dialysis'],
+    parameters=[
+        OpenApiParameter(
+            name='from',
+            type=OpenApiTypes.DATE,
+            required=True,
+            location=OpenApiParameter.QUERY,
+        ),
+        OpenApiParameter(
+            name='to',
+            type=OpenApiTypes.DATE,
+            required=True,
+            location=OpenApiParameter.QUERY,
+        ),
+    ],
+)
+class ManualPeritonealDialysisReportsView(RetrieveAPIView):
+    serializer_class = serializers.DailyManualPeritonealDialysisReportResponseSerializer
+
+    def get_object(self) -> DailyManualPeritonealDialysisReportsResponse:
+        return DailyManualPeritonealDialysisReportsResponse.from_api_request(self.request)
+
+
 @extend_schema(tags=['peritoneal-dialysis'])
 class UpdateManualPeritonealDialysisView(UpdateAPIView):
-    serializer_class = serializers.CreateManualPeritonealDialysisSerializer
+    serializer_class = serializers.ManualPeritonealDialysisSerializer
     lookup_url_kwarg = 'id'
 
     def get_queryset(self):
