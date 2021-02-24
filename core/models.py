@@ -1201,7 +1201,7 @@ class ManualPeritonealDialysis(models.Model):
     blood_pressure = models.OneToOneField(BloodPressure, on_delete=models.PROTECT)
     pulse = models.OneToOneField(Pulse, on_delete=models.PROTECT)
 
-    solution = models.CharField(
+    dialysis_solution = models.CharField(
         max_length=16,
         choices=DialysisSolution.choices,
         default=DialysisSolution.Unknown,
@@ -1216,7 +1216,7 @@ class ManualPeritonealDialysis(models.Model):
         default=DialysateColor.Unknown,
     )
 
-    note = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
 
     finished_at = models.DateTimeField(null=True, blank=True)
 

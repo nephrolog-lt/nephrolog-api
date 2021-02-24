@@ -1,6 +1,8 @@
+from decimal import Decimal
 from logging import getLogger
 from typing import Dict
 
+from django.core import validators
 from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -403,11 +405,11 @@ class CreateManualPeritonealDialysisSerializer(serializers.ModelSerializer):
             'blood_pressure_id',
             'pulse_id',
 
-            'solution',
+            'dialysis_solution',
             'solution_in_ml',
             'solution_out_ml',
             'dialysate_color',
 
-            'note',
+            'notes',
             'finished_at'
         )

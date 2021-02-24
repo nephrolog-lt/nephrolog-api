@@ -445,12 +445,12 @@ class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
         'weight_kg',
         'urine_ml',
 
-        'solution',
+        'dialysis_solution',
         'solution_in_ml',
         'solution_out_ml',
         'dialysate_color',
 
-        'note',
+        'notes',
         'finished_at',
 
         'user',
@@ -464,7 +464,7 @@ class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
     search_fields = ('user__pk', 'user__email', 'user__username',)
     list_filter = (
         ('finished_at', EmptyFieldListFilter),
-        'solution',
+        'dialysis_solution',
         'dialysate_color',
         ('note', EmptyFieldListFilter),
     )

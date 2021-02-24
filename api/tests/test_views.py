@@ -528,11 +528,11 @@ class CreateManualPeritonealDialysisViewTests(BaseApiTest):
             "started_at": "2021-02-23T09:29:04.539Z",
             "blood_pressure_id": blood_pressure.pk,
             "pulse_id": pulse.pk,
-            "solution": "Unknown",
+            "dialysis_solution": "Unknown",
             "solution_in_ml": 0,
             "solution_out_ml": 0,
             "dialysate_color": "Unknown",
-            "note": "My note",
+            "notes": "My note",
             "finished_at": "2021-02-23T09:29:04.539Z"
         }
 
@@ -542,7 +542,7 @@ class CreateManualPeritonealDialysisViewTests(BaseApiTest):
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['note'], "My note")
+        self.assertEqual(response.data['notes'], "My note")
         self.assertEqual(response.data['pulse_id'], pulse.pk)
         self.assertEqual(response.data['blood_pressure_id'], blood_pressure.pk)
 
@@ -562,11 +562,11 @@ class CreateManualPeritonealDialysisViewTests(BaseApiTest):
             "started_at": "2021-02-23T09:29:04.539Z",
             "blood_pressure_id": blood_pressure.pk,
             "pulse_id": pulse.pk,
-            "solution": "Unknown",
+            "dialysis_solution": "Unknown",
             "solution_in_ml": 0,
             "solution_out_ml": 0,
             "dialysate_color": "Unknown",
-            "note": "My note",
+            "notes": "My note",
             "finished_at": "2021-02-23T09:29:04.539Z"
         }
 
