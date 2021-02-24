@@ -313,12 +313,13 @@ class DailyHealthStatusSerializer(serializers.ModelSerializer):
 
         health_status: DailyHealthStatus = super().update(instance, validated_data)
 
-        self._replace_swellings(health_status, swellings_data)
+        if swellings_data is not None:
+            self._replace_swellings(health_status, swellings_data)
 
         return health_status
 
     def create(self, validated_data: Dict) -> DailyHealthStatus:
-        swellings_data = validated_data.pop('swellings', None)
+        swellings_data = validated_data.pop('swellings', None) or []
 
         health_status = super().create(validated_data)
 
