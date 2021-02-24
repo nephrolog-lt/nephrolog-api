@@ -466,7 +466,7 @@ class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
         ('finished_at', EmptyFieldListFilter),
         'dialysis_solution',
         'dialysate_color',
-        ('note', EmptyFieldListFilter),
+        ('notes', EmptyFieldListFilter),
     )
 
     def is_finished(self, obj):
