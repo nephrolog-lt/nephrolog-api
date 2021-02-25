@@ -1201,6 +1201,9 @@ class ManualPeritonealDialysisQuerySet(models.QuerySet):
     def select_related_fields(self) -> ManualPeritonealDialysisQuerySet:
         return self.select_related('blood_pressure', 'pulse', 'daily_health_status')
 
+    def filter_not_completed(self) -> ManualPeritonealDialysisQuerySet:
+        return self.filter(is_completed=False)
+
 
 class ManualPeritonealDialysis(models.Model):
     daily_health_status = models.ForeignKey(
@@ -1245,4 +1248,4 @@ class ManualPeritonealDialysis(models.Model):
 
     @staticmethod
     def filter_for_user(user: AbstractBaseUser) -> QuerySet[ManualPeritonealDialysis]:
-        return BloodPressure.objects.filter(daily_health_status__user=user)
+        return ManualPeritonealDialysis.objects.filter(daily_health_status__user=user)

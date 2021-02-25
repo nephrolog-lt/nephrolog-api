@@ -448,7 +448,19 @@ class DailyManualPeritonealDialysisReportResponseSerializer(serializers.Serializ
     manual_peritoneal_dialysis_reports = DailyManualPeritonealDialysisReportSerializer(many=True)
 
     class Meta:
-        model = DailyHealthStatus
         fields = (
             'manual_peritoneal_dialysis_reports',
+        )
+
+
+class ManualPeritonealDialysisScreenResponseSerializer(ReadOnlySerializer):
+    peritoneal_dialysis_in_progress = ManualPeritonealDialysisSerializer(allow_null=True)
+    last_peritoneal_dialysis = ManualPeritonealDialysisSerializer(allow_null=True)
+    last_week_reports = DailyManualPeritonealDialysisReportSerializer(many=True)
+
+    class Meta:
+        fields = (
+            'peritoneal_dialysis_in_progress',
+            'last_peritoneal_dialysis',
+            'last_week_reports',
         )

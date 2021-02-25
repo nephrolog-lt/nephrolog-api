@@ -10,7 +10,7 @@ from rest_framework.pagination import PageNumberPagination
 
 from api import serializers
 from api.models import DailyManualPeritonealDialysisReportsResponse, HealthStatusScreenResponse, \
-    HealthStatusWeeklyResponse, NutritionScreenResponse, \
+    HealthStatusWeeklyResponse, ManualPeritonealDialysisScreenResponse, NutritionScreenResponse, \
     NutrientWeeklyScreenResponse, NutritionScreenV2Response, ProductSearchResponse, DailyIntakesReportsLightResponse
 from api.utils import date_from_request_and_validated_data, datetime_to_date, parse_date_or_validation_error, \
     parse_time_zone
@@ -364,6 +364,14 @@ class CreateManualPeritonealDialysisView(CreateAPIView):
         daily_health_status = models.DailyHealthStatus.get_or_create_for_user_and_date(self.request.user, date)
 
         serializer.save(daily_health_status=daily_health_status)
+
+
+@extend_schema(tags=['peritoneal-dialysis'])
+class ManualPeritonealDialysisScreenView(RetrieveAPIView):
+    serializer_class = serializers.ManualPeritonealDialysisScreenResponseSerializer
+
+    def get_object(self) -> ManualPeritonealDialysisScreenResponse:
+        return ManualPeritonealDialysisScreenResponse.from_api_request(self.request)
 
 
 @extend_schema(

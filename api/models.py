@@ -8,9 +8,46 @@ from rest_framework.request import Request
 
 from api import utils
 from api.utils import parse_date_query_params
-from core.models import DailyHealthStatus, DailyHealthStatusQuerySet, DailyIntakesReport, Intake, MealType, UserProfile, \
+from core.models import DailyHealthStatus, DailyHealthStatusQuerySet, DailyIntakesReport, Intake, \
+    ManualPeritonealDialysis, MealType, UserProfile, \
     Product, \
     DailyNutrientNormsAndTotals, ProductSearchLog
+
+
+@dataclass(frozen=True)
+class ManualPeritonealDialysisScreenResponse:
+    last_week_reports: DailyHealthStatusQuerySet
+    last_peritoneal_dialysis: Optional[ManualPeritonealDialysis]
+    peritoneal_dialysis_in_progress: Optional[ManualPeritonealDialysis]
+
+    @staticmethod
+    def from_api_request(request: Request) -> ManualPeritonealDialysisScreenResponse:
+        tz = utils.parse_time_zone(request)
+
+        now = datetime.datetime.now(tz)
+
+        from_date = (now - datetime.timedelta(days=6)).date()
+        to_date = now.date()
+
+        weekly_reports = DailyHealthStatus.get_between_dates_for_user(
+            request.user,
+            from_date,
+            to_date
+        ).filter_manual_peritoneal_dialysis().prefetch_manual_peritoneal_dialysis()
+
+        last_peritoneal_dialysis = ManualPeritonealDialysis.filter_for_user(request.user) \
+            .select_related_fields() \
+            .order_by('-started_at').first()
+
+        not_completed_peritoneal_dialysis = ManualPeritonealDialysis.filter_for_user(request.user) \
+            .select_related_fields() \
+            .filter_not_completed().first()
+
+        return ManualPeritonealDialysisScreenResponse(
+            last_week_reports=weekly_reports,
+            peritoneal_dialysis_in_progress=not_completed_peritoneal_dialysis,
+            last_peritoneal_dialysis=last_peritoneal_dialysis,
+        )
 
 
 @dataclass(frozen=True)
