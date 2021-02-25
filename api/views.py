@@ -15,7 +15,6 @@ from api.models import DailyManualPeritonealDialysisReportsResponse, HealthStatu
 from api.utils import date_from_request_and_validated_data, datetime_to_date, parse_date_or_validation_error, \
     parse_time_zone
 from core import models
-from models import DailyHealthStatus
 
 
 @extend_schema(
@@ -409,7 +408,7 @@ class ManualPeritonealDialysisReportsPaginatedView(ListAPIView):
     pagination_class = ManualPeritonealDialysisReportsPagination
 
     def get_queryset(self):
-        return DailyHealthStatus.filter_for_user(self.request.user) \
+        return models.DailyHealthStatus.filter_for_user(self.request.user) \
             .filter_manual_peritoneal_dialysis() \
             .prefetch_manual_peritoneal_dialysis() \
             .order_by('-date', 'pk')
