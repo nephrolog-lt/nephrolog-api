@@ -1225,7 +1225,7 @@ class ManualPeritonealDialysis(models.Model):
     )
 
     solution_in_ml = models.PositiveSmallIntegerField()
-    solution_out_ml = models.PositiveSmallIntegerField(default=0)
+    solution_out_ml = models.PositiveSmallIntegerField(null=True, blank=True)
 
     dialysate_color = models.CharField(
         max_length=16,
@@ -1245,6 +1245,13 @@ class ManualPeritonealDialysis(models.Model):
     class Meta:
         default_related_name = "manual_peritoneal_dialysis"
         ordering = ("-pk",)
+
+    def clean(self) -> None:
+        super().clean()
+
+        if self.is_completed:
+            if self.finished_at is None or self.solution_out_ml is None:
+                raise ValidationError('Make sure that by completeing dialysis all required fields are filled out')
 
     @staticmethod
     def filter_for_user(user: AbstractBaseUser) -> QuerySet[ManualPeritonealDialysis]:
