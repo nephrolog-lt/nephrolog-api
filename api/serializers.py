@@ -408,6 +408,7 @@ class ManualPeritonealDialysisSerializer(serializers.ModelSerializer):
         fields = (
             'id',
 
+            'is_completed',
             'started_at',
 
             'blood_pressure',

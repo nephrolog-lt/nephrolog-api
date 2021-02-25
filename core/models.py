@@ -1208,6 +1208,8 @@ class ManualPeritonealDialysis(models.Model):
         on_delete=models.CASCADE,
     )
 
+    is_completed = models.BooleanField(default=False)
+
     started_at = models.DateTimeField()
 
     blood_pressure = models.OneToOneField(BloodPressure, on_delete=models.PROTECT)

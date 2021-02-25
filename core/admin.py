@@ -437,7 +437,7 @@ class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
         'id',
         'daily_health_status',
         'started_at',
-        'is_finished',
+        'is_completed',
 
         'blood_pressure',
         'pulse',
@@ -463,17 +463,12 @@ class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
     list_select_related = ('daily_health_status', 'daily_health_status__user', 'blood_pressure', 'pulse')
     search_fields = ('user__pk', 'user__email', 'user__username',)
     list_filter = (
+        'is_completed',
         ('finished_at', EmptyFieldListFilter),
         'dialysis_solution',
         'dialysate_color',
         ('notes', EmptyFieldListFilter),
     )
-
-    def is_finished(self, obj):
-        return obj.finished_at is not None
-
-    is_finished.short_description = "is_finished"
-    is_finished.boolean = True
 
     def user(self, obj):
         return obj.daily_health_status.user
