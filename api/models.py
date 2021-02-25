@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Iterator, List, Optional
 
 from rest_framework.request import Request
 
@@ -16,7 +16,8 @@ from core.models import DailyHealthStatus, DailyHealthStatusQuerySet, DailyIntak
 
 @dataclass(frozen=True)
 class ManualPeritonealDialysisScreenResponse:
-    last_week_reports: DailyHealthStatusQuerySet
+    last_week_manual_dialysis_reports: Iterator[DailyHealthStatus]
+    last_week_health_statuses: DailyHealthStatusQuerySet
     last_peritoneal_dialysis: Optional[ManualPeritonealDialysis]
     peritoneal_dialysis_in_progress: Optional[ManualPeritonealDialysis]
 
@@ -29,11 +30,14 @@ class ManualPeritonealDialysisScreenResponse:
         from_date = (now - datetime.timedelta(days=6)).date()
         to_date = now.date()
 
-        weekly_reports = DailyHealthStatus.get_between_dates_for_user(
+        weekly_health_statuses = DailyHealthStatus.get_between_dates_for_user(
             request.user,
             from_date,
             to_date
-        ).filter_manual_peritoneal_dialysis().prefetch_manual_peritoneal_dialysis()
+        ).prefetch_blood_pressure_and_pulse().prefetch_swellings().prefetch_manual_peritoneal_dialysis()
+
+        last_week_manual_dialysis_reports = filter(lambda s: len(s.manual_peritoneal_dialysis.all()) > 0,
+                                                   weekly_health_statuses)
 
         last_peritoneal_dialysis = ManualPeritonealDialysis.filter_for_user(request.user) \
             .select_related_fields() \
@@ -44,7 +48,8 @@ class ManualPeritonealDialysisScreenResponse:
             .filter_not_completed().first()
 
         return ManualPeritonealDialysisScreenResponse(
-            last_week_reports=weekly_reports,
+            last_week_manual_dialysis_reports=last_week_manual_dialysis_reports,
+            last_week_health_statuses=weekly_health_statuses,
             peritoneal_dialysis_in_progress=not_completed_peritoneal_dialysis,
             last_peritoneal_dialysis=last_peritoneal_dialysis,
         )
