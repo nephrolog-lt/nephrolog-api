@@ -6,6 +6,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.generics import CreateAPIView, DestroyAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView, \
     RetrieveUpdateDestroyAPIView, UpdateAPIView, get_object_or_404
+from rest_framework.pagination import PageNumberPagination
 
 from api import serializers
 from api.models import DailyManualPeritonealDialysisReportsResponse, HealthStatusScreenResponse, \
@@ -14,6 +15,7 @@ from api.models import DailyManualPeritonealDialysisReportsResponse, HealthStatu
 from api.utils import date_from_request_and_validated_data, datetime_to_date, parse_date_or_validation_error, \
     parse_time_zone
 from core import models
+from models import DailyHealthStatus
 
 
 @extend_schema(
@@ -386,6 +388,23 @@ class ManualPeritonealDialysisReportsView(RetrieveAPIView):
 
     def get_object(self) -> DailyManualPeritonealDialysisReportsResponse:
         return DailyManualPeritonealDialysisReportsResponse.from_api_request(self.request)
+
+
+class ManualPeritonealDialysisReportsPagination(PageNumberPagination):
+    page_size = 300
+    max_page_size = 300
+
+
+@extend_schema(tags=['peritoneal-dialysis'])
+class ManualPeritonealDialysisReportsPaginatedView(ListAPIView):
+    serializer_class = serializers.DailyManualPeritonealDialysisReportSerializer
+    pagination_class = ManualPeritonealDialysisReportsPagination
+
+    def get_queryset(self):
+        return DailyHealthStatus.filter_for_user(self.request.user) \
+            .filter_manual_peritoneal_dialysis() \
+            .prefetch_manual_peritoneal_dialysis() \
+            .order_by('-date', 'pk')
 
 
 @extend_schema(tags=['peritoneal-dialysis'])
