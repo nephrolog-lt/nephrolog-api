@@ -42,7 +42,7 @@ class ManualPeritonealDialysisScreenResponse:
             request.user,
             from_date,
             to_date
-        ).annotate_with_nutrient_totals().exclude_empty_intakes()
+        ).annotate_with_nutrient_totals()
 
         last_week_manual_dialysis_reports = filter(lambda s: len(s.manual_peritoneal_dialysis.all()) > 0,
                                                    weekly_health_statuses)
