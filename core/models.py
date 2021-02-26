@@ -1210,6 +1210,10 @@ class ManualPeritonealDialysis(models.Model):
         DailyHealthStatus,
         on_delete=models.CASCADE,
     )
+    daily_intakes_report = models.ForeignKey(
+        DailyIntakesReport,
+        on_delete=models.CASCADE,
+    )
 
     is_completed = models.BooleanField(default=False)
 

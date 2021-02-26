@@ -361,8 +361,9 @@ class CreateManualPeritonealDialysisView(CreateAPIView):
     def perform_create(self, serializer):
         date = date_from_request_and_validated_data(self.request, serializer.validated_data, 'started_at')
         daily_health_status = models.DailyHealthStatus.get_or_create_for_user_and_date(self.request.user, date)
+        daily_intakes_report = models.DailyIntakesReport.get_or_create_for_user_and_date(self.request.user, date)
 
-        serializer.save(daily_health_status=daily_health_status)
+        serializer.save(daily_health_status=daily_health_status, daily_intakes_report=daily_intakes_report)
 
 
 @extend_schema(tags=['peritoneal-dialysis'])
@@ -425,5 +426,6 @@ class UpdateManualPeritonealDialysisView(UpdateAPIView):
     def perform_update(self, serializer):
         date = date_from_request_and_validated_data(self.request, serializer.validated_data, 'started_at')
         daily_health_status = models.DailyHealthStatus.get_or_create_for_user_and_date(self.request.user, date)
+        daily_intakes_report = models.DailyIntakesReport.get_or_create_for_user_and_date(self.request.user, date)
 
-        serializer.save(daily_health_status=daily_health_status)
+        serializer.save(daily_health_status=daily_health_status, daily_intakes_report=daily_intakes_report)
