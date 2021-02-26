@@ -62,8 +62,11 @@ class UserAppReviewSerializer(serializers.ModelSerializer):
         fields = ('show_app_review_dialog',)
 
 
+# liquids_g excluded on 02-26
+@extend_schema_serializer(exclude_fields=['liquids_g'])
 class ProductSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='name_lt')
+    liquids_ml = serializers.IntegerField()
 
     class Meta:
         model = Product
@@ -77,6 +80,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'phosphorus_mg',
             'energy_kcal',
             'liquids_g',
+            'liquids_ml',
             'carbohydrates_mg',
             'fat_mg',
             'density_g_ml'
@@ -128,6 +132,8 @@ class DailyNutrientConsumptionSerializer(ReadOnlySerializer):
         fields = ('norm', 'total')
 
 
+# liquids_g excluded on 02-26
+@extend_schema_serializer(exclude_fields=['liquids_g'])
 class DailyNutrientNormsWithTotalsSerializer(ReadOnlySerializer):
     potassium_mg = DailyNutrientConsumptionSerializer(read_only=True)
     proteins_mg = DailyNutrientConsumptionSerializer(read_only=True)
@@ -135,6 +141,7 @@ class DailyNutrientNormsWithTotalsSerializer(ReadOnlySerializer):
     phosphorus_mg = DailyNutrientConsumptionSerializer(read_only=True)
     energy_kcal = DailyNutrientConsumptionSerializer(read_only=True)
     liquids_g = DailyNutrientConsumptionSerializer(read_only=True)
+    liquids_ml = DailyNutrientConsumptionSerializer(read_only=True)
     carbohydrates_mg = DailyNutrientConsumptionSerializer(read_only=True)
     fat_mg = DailyNutrientConsumptionSerializer(read_only=True)
 
@@ -146,6 +153,7 @@ class DailyNutrientNormsWithTotalsSerializer(ReadOnlySerializer):
             'phosphorus_mg',
             'energy_kcal',
             'liquids_g',
+            'liquids_ml',
             'carbohydrates_mg',
             'fat_mg',
         )
