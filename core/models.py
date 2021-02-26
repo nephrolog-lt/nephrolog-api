@@ -443,6 +443,12 @@ class Product(models.Model):
 
         super().save(force_insert, force_update, using, update_fields)
 
+    @property
+    def liquids_ml(self) -> int:
+        density_g_ml = self.density_g_ml or 1
+
+        return round(self.liquids_g / density_g_ml)
+
     @staticmethod
     def filter_by_user_and_query(
             user: AbstractBaseUser,
@@ -550,6 +556,19 @@ class DailyIntakesReportQuerySet(models.QuerySet):
                     output_field=models.IntegerField()
                 ),
             ), 0),
+            total_liquids_ml=functions.Coalesce(models.Sum(
+                models.ExpressionWrapper(
+                    models.ExpressionWrapper(
+                        functions.Cast(models.F("intakes__product__liquids_g"),
+                                       output_field=models.IntegerField()) / functions.Coalesce(
+                            models.F("intakes__product__density_g_ml"), 1),
+                        output_field=models.IntegerField()) *
+                    models.ExpressionWrapper(models.F("intakes__amount_g"),
+                                             output_field=models.IntegerField()
+                                             ) / models.Value(100, output_field=models.IntegerField()),
+                    output_field=models.IntegerField()
+                ),
+            ), 0),
             total_fat_mg=functions.Coalesce(models.Sum(
                 models.ExpressionWrapper(
                     functions.Cast(models.F("intakes__product__fat_mg"), output_field=models.IntegerField()) *
@@ -640,7 +659,7 @@ class DailyIntakesReport(models.Model):
 
     @property
     def liquids_ml(self) -> DailyNutrientConsumption:
-        return self.liquids_g
+        return DailyNutrientConsumption(total=self._total_liquids_ml, norm=self.daily_norm_liquids_g)
 
     @property
     def daily_nutrient_norms_and_totals(self) -> DailyNutrientNormsAndTotals:
@@ -696,6 +715,13 @@ class DailyIntakesReport(models.Model):
             return self.total_liquids_g
 
         return sum(intake.liquids_g for intake in self.intakes.all())
+
+    @property
+    def _total_liquids_ml(self):
+        if hasattr(self, 'total_liquids_ml'):
+            return self.total_liquids_ml
+
+        return sum(intake.liquids_ml for intake in self.intakes.all())
 
     @property
     def _total_carbohydrates_mg(self):
@@ -854,6 +880,10 @@ class Intake(models.Model):
     @property
     def liquids_g(self) -> int:
         return int(self.product.liquids_g * self._amount_nutrient_ratio)
+
+    @property
+    def liquids_ml(self) -> int:
+        return int(self.product.liquids_ml * self._amount_nutrient_ratio)
 
     @property
     def fat_mg(self) -> int:

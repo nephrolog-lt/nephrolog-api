@@ -129,6 +129,8 @@ class ProductAdmin(admin.ModelAdmin):
 
         'energy_kcal',
         'liquids_g',
+        'liquids_ml',
+
         'product_source',
         'raw_id',
         'created_at',
@@ -153,6 +155,10 @@ class ProductAdmin(admin.ModelAdmin):
 
     popularity.admin_order_field = "popularity"
     popularity.short_description = "popularity"
+
+    # noinspection PyMethodMayBeStatic
+    def liquids_ml(self, obj):
+        return obj.liquids_ml
 
     # def most_similar(self, obj):
     #     return mark_safe('<br><br>'.join(map(lambda x: x.name_lt, Product.objects.annotate(

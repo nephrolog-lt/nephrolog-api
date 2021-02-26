@@ -31,6 +31,7 @@ class IntakeTests(TestCase):
             proteins_mg=40,
             energy_kcal=50,
             liquids_g=60,
+            density_g_ml=0.2,
         )
         product2 = ProductFactory(
             potassium_mg=15,
@@ -53,6 +54,7 @@ class IntakeTests(TestCase):
         self.assertEqual(annotated_daily_report.total_proteins_mg, 65574)
         self.assertEqual(annotated_daily_report.total_energy_kcal, 65584)
         self.assertEqual(annotated_daily_report.total_liquids_g, 65594)
+        self.assertEqual(annotated_daily_report.total_liquids_ml, 65834)
 
     def test_annotating_with_total_norms_empty(self):
         user = UserFactory()
@@ -67,3 +69,4 @@ class IntakeTests(TestCase):
         self.assertEqual(annotated_daily_report.total_proteins_mg, 0)
         self.assertEqual(annotated_daily_report.total_energy_kcal, 0)
         self.assertEqual(annotated_daily_report.total_liquids_g, 0)
+        self.assertEqual(annotated_daily_report.total_liquids_ml, 0)
