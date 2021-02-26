@@ -970,7 +970,8 @@ class DailyHealthStatusQuerySet(models.QuerySet):
 
     def prefetch_manual_peritoneal_dialysis(self) -> DailyHealthStatusQuerySet:
         return self.prefetch_related(
-            Prefetch('manual_peritoneal_dialysis', queryset=ManualPeritonealDialysis.objects.select_related_fields()))
+            Prefetch('manual_peritoneal_dialysis',
+                     queryset=ManualPeritonealDialysis.objects.select_related_fields().prefetch_intakes_report()))
 
 
 class DailyHealthStatus(models.Model):
@@ -1232,6 +1233,11 @@ class DialysateColor(models.TextChoices):
 class ManualPeritonealDialysisQuerySet(models.QuerySet):
     def select_related_fields(self) -> ManualPeritonealDialysisQuerySet:
         return self.select_related('blood_pressure', 'pulse', 'daily_health_status')
+
+    def prefetch_intakes_report(self) -> ManualPeritonealDialysisQuerySet:
+        return self.prefetch_related(
+            Prefetch('daily_health_status', queryset=DailyIntakesReport.objects.annotate_with_nutrient_totals())
+        )
 
     def filter_not_completed(self) -> ManualPeritonealDialysisQuerySet:
         return self.filter(is_completed=False)

@@ -1,8 +1,6 @@
-from decimal import Decimal
 from logging import getLogger
 from typing import Dict
 
-from django.core import validators
 from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -407,6 +405,7 @@ class ManualPeritonealDialysisSerializer(serializers.ModelSerializer):
     blood_pressure = BloodPressureSerializer(read_only=True)
     pulse = PulseSerializer(read_only=True)
 
+    liquids_ml = serializers.IntegerField(source='daily_intakes_report.liquids_ml.total', read_only=True)
     urine_ml = serializers.IntegerField(source='daily_health_status.urine_ml', allow_null=True, read_only=True)
     weight_kg = serializers.DecimalField(source='daily_health_status.weight_kg', allow_null=True, read_only=True,
                                          max_digits=4, decimal_places=1)
@@ -426,6 +425,7 @@ class ManualPeritonealDialysisSerializer(serializers.ModelSerializer):
 
             'urine_ml',
             'weight_kg',
+            'liquids_ml',
 
             'dialysis_solution',
             'solution_in_ml',
