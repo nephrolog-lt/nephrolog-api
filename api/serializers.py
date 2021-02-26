@@ -87,7 +87,8 @@ class ProductSerializer(serializers.ModelSerializer):
         )
 
 
-@extend_schema_serializer(exclude_fields=['liquids_ml'])
+# liquids_g excluded on 02-26
+@extend_schema_serializer(exclude_fields=['liquids_g'])
 class IntakeSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
     product_id = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), source='product', write_only=True)
@@ -98,8 +99,7 @@ class IntakeSerializer(serializers.ModelSerializer):
     phosphorus_mg = serializers.IntegerField(read_only=True)
     energy_kcal = serializers.IntegerField(read_only=True)
     liquids_g = serializers.IntegerField(read_only=True)
-    # TODO remove this one in the near future
-    liquids_ml = serializers.IntegerField(read_only=True, source='liquids_g')
+    liquids_ml = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Intake
