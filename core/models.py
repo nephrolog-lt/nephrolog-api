@@ -36,6 +36,7 @@ class DailyNutrientNormsAndTotals:
     phosphorus_mg: DailyNutrientConsumption
     energy_kcal: DailyNutrientConsumption
     liquids_g: DailyNutrientConsumption
+    liquids_ml: DailyNutrientConsumption
     fat_mg: DailyNutrientConsumption
     carbohydrates_mg: DailyNutrientConsumption
 
@@ -670,6 +671,7 @@ class DailyIntakesReport(models.Model):
             phosphorus_mg=self.phosphorus_mg,
             energy_kcal=self.energy_kcal,
             liquids_g=self.liquids_g,
+            liquids_ml=self.liquids_ml,
             fat_mg=self.fat_mg,
             carbohydrates_mg=self.carbohydrates_mg,
         )
