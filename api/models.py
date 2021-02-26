@@ -4,6 +4,7 @@ import datetime
 from dataclasses import dataclass
 from typing import Iterator, List, Optional
 
+from django.db.models import QuerySet
 from rest_framework.request import Request
 
 from api import utils
@@ -16,9 +17,10 @@ from core.models import DailyHealthStatus, DailyHealthStatusQuerySet, DailyIntak
 
 @dataclass(frozen=True)
 class ManualPeritonealDialysisScreenResponse:
+    has_manual_peritoneal_dialysis: bool
     last_week_manual_dialysis_reports: Iterator[DailyHealthStatus]
     last_week_health_statuses: DailyHealthStatusQuerySet
-    last_peritoneal_dialysis: Optional[ManualPeritonealDialysis]
+    last_week_light_nutrition_reports: QuerySet[DailyIntakesReport]
     peritoneal_dialysis_in_progress: Optional[ManualPeritonealDialysis]
 
     @staticmethod
@@ -36,12 +38,18 @@ class ManualPeritonealDialysisScreenResponse:
             to_date
         ).prefetch_blood_pressure_and_pulse().prefetch_swellings().prefetch_manual_peritoneal_dialysis()
 
+        last_week_light_nutrition_reports = DailyIntakesReport.get_for_user_between_dates(
+            request.user,
+            from_date,
+            to_date
+        ).annotate_with_nutrient_totals().exclude_empty_intakes()
+
         last_week_manual_dialysis_reports = filter(lambda s: len(s.manual_peritoneal_dialysis.all()) > 0,
                                                    weekly_health_statuses)
 
-        last_peritoneal_dialysis = ManualPeritonealDialysis.filter_for_user(request.user) \
-            .select_related_fields() \
-            .order_by('-started_at').first()
+        has_manual_peritoneal_dialysis = bool(last_week_manual_dialysis_reports)
+        if not has_manual_peritoneal_dialysis:
+            has_manual_peritoneal_dialysis = ManualPeritonealDialysis.filter_for_user(request.user).exists()
 
         not_completed_peritoneal_dialysis = ManualPeritonealDialysis.filter_for_user(request.user) \
             .select_related_fields() \
@@ -50,8 +58,9 @@ class ManualPeritonealDialysisScreenResponse:
         return ManualPeritonealDialysisScreenResponse(
             last_week_manual_dialysis_reports=last_week_manual_dialysis_reports,
             last_week_health_statuses=weekly_health_statuses,
+            last_week_light_nutrition_reports=last_week_light_nutrition_reports,
             peritoneal_dialysis_in_progress=not_completed_peritoneal_dialysis,
-            last_peritoneal_dialysis=last_peritoneal_dialysis,
+            has_manual_peritoneal_dialysis=has_manual_peritoneal_dialysis,
         )
 
 
