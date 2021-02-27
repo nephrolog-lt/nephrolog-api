@@ -399,8 +399,8 @@ class UserPulsePrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
 
 
 class ManualPeritonealDialysisSerializer(serializers.ModelSerializer):
-    blood_pressure_id = UserBloodPressurePrimaryKeyRelatedField(source='blood_pressure', write_only=True)
-    pulse_id = UserPulsePrimaryKeyRelatedField(source='pulse', write_only=True)
+    blood_pressure_id = UserBloodPressurePrimaryKeyRelatedField(source='blood_pressure', write_only=True, required=False)
+    pulse_id = UserPulsePrimaryKeyRelatedField(source='pulse', write_only=True, required=False)
 
     blood_pressure = BloodPressureSerializer(read_only=True)
     pulse = PulseSerializer(read_only=True)
