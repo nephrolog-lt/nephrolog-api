@@ -38,7 +38,7 @@ urlpatterns = [
     path('health-status/', views.DailyHealthStatusView.as_view(), name="api-health-status"),
 
 
-    path('peritoneal-dialysis/manual/dialysis/create/', views.CreateManualPeritonealDialysisLegacyView.as_view(),
+    path('peritoneal-dialysis/manual/dialysis/create/', views.CreateManualPeritonealDialysisView.as_view(),
          name="api-peritoneal-dialysis-manual-create"),
 
     path('peritoneal-dialysis/manual/dialysis/<int:id>/', views.UpdateManualPeritonealDialysisView.as_view(),
