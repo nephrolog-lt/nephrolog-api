@@ -444,6 +444,18 @@ class Product(models.Model):
 
         super().save(force_insert, force_update, using, update_fields)
 
+    def clean(self) -> None:
+        super().clean()
+
+        if self.product_kind == ProductKind.Unknown:
+            raise ValidationError('Product kind can not be unknown')
+
+        if self.product_kind == ProductKind.Food and self.density_g_ml is not None:
+            raise ValidationError('Food can not contain density')
+
+        if self.product_kind == ProductKind.Drink and self.density_g_ml is None:
+            raise ValidationError('Drink must contain density')
+
     @property
     def liquids_ml(self) -> int:
         density_g_ml = self.density_g_ml or 1
@@ -1247,7 +1259,8 @@ class ManualPeritonealDialysis(models.Model):
 
     started_at = models.DateTimeField()
 
-    blood_pressure = models.OneToOneField(BloodPressure, on_delete=models.SET_NULL, null=True, blank=True, db_index=False)
+    blood_pressure = models.OneToOneField(BloodPressure, on_delete=models.SET_NULL, null=True, blank=True,
+                                          db_index=False)
     pulse = models.OneToOneField(Pulse, on_delete=models.SET_NULL, null=True, blank=True, db_index=False)
 
     dialysis_solution = models.CharField(
