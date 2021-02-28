@@ -501,14 +501,14 @@ class ManualPeritonealDialysisLegacyScreenResponseSerializer(ReadOnlySerializer)
 
 class ManualPeritonealDialysisScreenResponseSerializer(ReadOnlySerializer):
     peritoneal_dialysis_in_progress = ManualPeritonealDialysisLegacySerializer(allow_null=True)
-    has_any_manual_peritoneal_dialysis = serializers.BooleanField()
+    last_peritoneal_dialysis = ManualPeritonealDialysisLegacySerializer(many=True, allow_empty=True)
     last_week_light_nutrition_reports = DailyIntakesLightReportSerializer(many=True)
     last_week_health_statuses = DailyHealthStatusSerializer(many=True)
 
     class Meta:
         fields = (
             'peritoneal_dialysis_in_progress',
-            'has_any_manual_peritoneal_dialysis',
+            'last_peritoneal_dialysis',
             'last_week_light_nutrition_reports',
             'last_week_health_statuses',
         )

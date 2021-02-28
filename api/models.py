@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 from dataclasses import dataclass
-from typing import Iterator, List, Optional
+from typing import Iterable, Iterator, List, Optional
 
 from django.db.models import QuerySet
 from rest_framework.request import Request
@@ -17,7 +17,7 @@ from core.models import DailyHealthStatus, DailyHealthStatusQuerySet, DailyIntak
 
 @dataclass(frozen=True)
 class ManualPeritonealDialysisScreenResponse:
-    has_any_manual_peritoneal_dialysis: bool
+    last_peritoneal_dialysis: Iterable[ManualPeritonealDialysis]
     last_week_health_statuses: DailyHealthStatusQuerySet
     last_week_light_nutrition_reports: QuerySet[DailyIntakesReport]
     peritoneal_dialysis_in_progress: Optional[ManualPeritonealDialysis]
@@ -43,12 +43,9 @@ class ManualPeritonealDialysisScreenResponse:
             to_date
         ).annotate_with_nutrient_totals()
 
-        last_week_manual_dialysis_reports = filter(lambda s: len(s.manual_peritoneal_dialysis.all()) > 0,
-                                                   weekly_health_statuses)
-
-        has_any_manual_peritoneal_dialysis = bool(last_week_manual_dialysis_reports)
-        if not has_any_manual_peritoneal_dialysis:
-            has_any_manual_peritoneal_dialysis = ManualPeritonealDialysis.filter_for_user(request.user).exists()
+        last_peritoneal_dialysis = ManualPeritonealDialysis.filter_for_user(
+            request.user
+        ).order_by('is_completed', '-started_at')[:3]
 
         not_completed_peritoneal_dialysis = ManualPeritonealDialysis.filter_for_user(request.user) \
             .filter_not_completed().first()
@@ -57,7 +54,7 @@ class ManualPeritonealDialysisScreenResponse:
             last_week_health_statuses=weekly_health_statuses,
             last_week_light_nutrition_reports=last_week_light_nutrition_reports,
             peritoneal_dialysis_in_progress=not_completed_peritoneal_dialysis,
-            has_any_manual_peritoneal_dialysis=has_any_manual_peritoneal_dialysis,
+            last_peritoneal_dialysis=last_peritoneal_dialysis,
         )
 
 
