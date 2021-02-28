@@ -275,7 +275,7 @@ class BloodPressureCreateView(CreateAPIView):
 
 
 @extend_schema(tags=['health-status'])
-class BloodPressureUpdateView(UpdateAPIView):
+class BloodPressureUpdateView(UpdateAPIView, DestroyAPIView):
     serializer_class = serializers.BloodPressureSerializer
     lookup_url_kwarg = 'id'
 
@@ -301,7 +301,7 @@ class PulseCreateView(CreateAPIView):
 
 
 @extend_schema(tags=['health-status'])
-class PulseUpdateView(UpdateAPIView):
+class PulseUpdateView(UpdateAPIView, DestroyAPIView):
     serializer_class = serializers.PulseSerializer
     lookup_url_kwarg = 'id'
 
