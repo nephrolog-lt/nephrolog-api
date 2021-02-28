@@ -500,8 +500,8 @@ class ManualPeritonealDialysisLegacyScreenResponseSerializer(ReadOnlySerializer)
 
 
 class ManualPeritonealDialysisScreenResponseSerializer(ReadOnlySerializer):
-    peritoneal_dialysis_in_progress = ManualPeritonealDialysisLegacySerializer(allow_null=True)
-    last_peritoneal_dialysis = ManualPeritonealDialysisLegacySerializer(many=True, allow_empty=True)
+    peritoneal_dialysis_in_progress = ManualPeritonealDialysisSerializer(allow_null=True)
+    last_peritoneal_dialysis = ManualPeritonealDialysisSerializer(many=True, allow_empty=True)
     last_week_light_nutrition_reports = DailyIntakesLightReportSerializer(many=True)
     last_week_health_statuses = DailyHealthStatusSerializer(many=True)
 
