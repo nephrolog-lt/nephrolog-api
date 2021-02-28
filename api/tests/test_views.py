@@ -537,7 +537,7 @@ class CreateManualPeritonealDialysisViewTests(BaseApiTest):
         }
 
         response = self.client.post(
-            reverse('api-peritoneal-dialysis-manual-create'),
+            reverse('api-peritoneal-dialysis-manual-create-deprecated'),
             data=request_data,
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -570,7 +570,7 @@ class CreateManualPeritonealDialysisViewTests(BaseApiTest):
         }
 
         response = self.client.post(
-            reverse('api-peritoneal-dialysis-manual-create'),
+            reverse('api-peritoneal-dialysis-manual-create-deprecated'),
             data=request_data,
         )
 
