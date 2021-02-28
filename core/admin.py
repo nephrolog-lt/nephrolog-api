@@ -344,7 +344,7 @@ class DailyHealthStatusAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         # noinspection PyUnresolvedReferences
-        return super().get_queryset(request).prefetch_swellings().prefetch_blood_pressure_and_pulse()
+        return super().get_queryset(request).prefetch_all_related_fields()
 
     def all_swellings(self, obj):
         return ','.join(map(lambda s: str(s), obj.swellings.all()))
