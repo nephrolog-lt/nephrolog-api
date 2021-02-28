@@ -239,7 +239,7 @@ class UserAppReview(RetrieveAPIView):
         ),
     ],
 )
-class DailyHealthStatusByDateView(RetrieveAPIView, DestroyAPIView):
+class DailyHealthStatusByDateView(RetrieveAPIView):
     queryset = models.DailyHealthStatus.objects.all()
     serializer_class = serializers.DailyHealthStatusSerializer
     lookup_field = 'date'
