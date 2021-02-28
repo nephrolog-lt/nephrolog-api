@@ -968,6 +968,7 @@ class DailyHealthStatusQuerySet(models.QuerySet):
     def filter_manual_peritoneal_dialysis(self) -> DailyHealthStatusQuerySet:
         return self.exclude(manual_peritoneal_dialysis__isnull=True)
 
+
 class DailyHealthStatus(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date = models.DateField()
@@ -1246,8 +1247,8 @@ class ManualPeritonealDialysis(models.Model):
 
     started_at = models.DateTimeField()
 
-    blood_pressure = models.OneToOneField(BloodPressure, on_delete=models.SET_NULL, null=True, blank=True)
-    pulse = models.OneToOneField(Pulse, on_delete=models.SET_NULL, null=True, blank=True)
+    blood_pressure = models.OneToOneField(BloodPressure, on_delete=models.SET_NULL, null=True, blank=True, db_index=False)
+    pulse = models.OneToOneField(Pulse, on_delete=models.SET_NULL, null=True, blank=True, db_index=False)
 
     dialysis_solution = models.CharField(
         max_length=16,

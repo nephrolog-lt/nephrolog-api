@@ -445,9 +445,6 @@ class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
         'started_at',
         'is_completed',
 
-        'blood_pressure',
-        'pulse',
-
         'weight_kg',
         'urine_ml',
 
@@ -464,9 +461,9 @@ class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
         'created_at',
         'updated_at',
     )
-    raw_id_fields = ('daily_health_status', 'blood_pressure', 'pulse')
+    raw_id_fields = ('daily_health_status',)
     date_hierarchy = 'started_at'
-    list_select_related = ('daily_health_status', 'daily_health_status__user', 'blood_pressure', 'pulse')
+    list_select_related = ('daily_health_status', 'daily_health_status__user')
     search_fields = ('user__pk', 'user__email', 'user__username',)
     list_filter = (
         'is_completed',
