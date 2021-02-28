@@ -17,8 +17,7 @@ from core.models import DailyHealthStatus, DailyHealthStatusQuerySet, DailyIntak
 
 @dataclass(frozen=True)
 class ManualPeritonealDialysisScreenResponse:
-    has_manual_peritoneal_dialysis: bool
-    last_week_manual_dialysis_reports: Iterator[DailyHealthStatus]
+    has_any_manual_peritoneal_dialysis: bool
     last_week_health_statuses: DailyHealthStatusQuerySet
     last_week_light_nutrition_reports: QuerySet[DailyIntakesReport]
     peritoneal_dialysis_in_progress: Optional[ManualPeritonealDialysis]
@@ -36,7 +35,55 @@ class ManualPeritonealDialysisScreenResponse:
             request.user,
             from_date,
             to_date
-        ).prefetch_blood_pressure_and_pulse().prefetch_swellings().prefetch_manual_peritoneal_dialysis()
+        ).prefetch_all_related_fields()
+
+        last_week_light_nutrition_reports = DailyIntakesReport.get_for_user_between_dates(
+            request.user,
+            from_date,
+            to_date
+        ).annotate_with_nutrient_totals()
+
+        last_week_manual_dialysis_reports = filter(lambda s: len(s.manual_peritoneal_dialysis.all()) > 0,
+                                                   weekly_health_statuses)
+
+        has_any_manual_peritoneal_dialysis = bool(last_week_manual_dialysis_reports)
+        if not has_any_manual_peritoneal_dialysis:
+            has_any_manual_peritoneal_dialysis = ManualPeritonealDialysis.filter_for_user(request.user).exists()
+
+        not_completed_peritoneal_dialysis = ManualPeritonealDialysis.filter_for_user(request.user) \
+            .filter_not_completed().first()
+
+        return ManualPeritonealDialysisScreenResponse(
+            last_week_health_statuses=weekly_health_statuses,
+            last_week_light_nutrition_reports=last_week_light_nutrition_reports,
+            peritoneal_dialysis_in_progress=not_completed_peritoneal_dialysis,
+            has_any_manual_peritoneal_dialysis=has_any_manual_peritoneal_dialysis,
+        )
+
+
+# Deprecated 02-28
+@dataclass(frozen=True)
+class ManualPeritonealDialysisLegacyScreenResponse:
+    has_manual_peritoneal_dialysis: bool
+    last_week_manual_dialysis_reports: Iterator[DailyHealthStatus]
+    last_week_health_statuses: DailyHealthStatusQuerySet
+    last_week_light_nutrition_reports: QuerySet[DailyIntakesReport]
+    peritoneal_dialysis_in_progress: Optional[ManualPeritonealDialysis]
+
+    @staticmethod
+    def from_api_request(request: Request) -> ManualPeritonealDialysisLegacyScreenResponse:
+        tz = utils.parse_time_zone(request)
+
+        now = datetime.datetime.now(tz)
+
+        from_date = (now - datetime.timedelta(days=6)).date()
+        to_date = now.date()
+
+        weekly_health_statuses = DailyHealthStatus.get_between_dates_for_user(
+            request.user,
+            from_date,
+            to_date
+        ).prefetch_blood_pressure_and_pulse()
 
         last_week_light_nutrition_reports = DailyIntakesReport.get_for_user_between_dates(
             request.user,
@@ -55,7 +102,7 @@ class ManualPeritonealDialysisScreenResponse:
             .select_related_fields() \
             .filter_not_completed().first()
 
-        return ManualPeritonealDialysisScreenResponse(
+        return ManualPeritonealDialysisLegacyScreenResponse(
             last_week_manual_dialysis_reports=last_week_manual_dialysis_reports,
             last_week_health_statuses=weekly_health_statuses,
             last_week_light_nutrition_reports=last_week_light_nutrition_reports,
@@ -76,7 +123,7 @@ class DailyManualPeritonealDialysisReportsResponse:
             request.user,
             date_from,
             date_to
-        ).filter_manual_peritoneal_dialysis().prefetch_manual_peritoneal_dialysis()
+        ).filter_manual_peritoneal_dialysis()
 
         return DailyManualPeritonealDialysisReportsResponse(
             manual_peritoneal_dialysis_reports=daily_health_statuses,

@@ -37,20 +37,32 @@ urlpatterns = [
     path('health-status/<str:date>/', views.DailyHealthStatusByDateView.as_view(), name="api-health-status-by-date"),
     path('health-status/', views.DailyHealthStatusView.as_view(), name="api-health-status"),
 
-    path('peritoneal-dialysis/manual/', views.CreateManualPeritonealDialysisView.as_view(),
+
+    path('peritoneal-dialysis/manual/dialysis/create/', views.CreateManualPeritonealDialysisLegacyView.as_view(),
          name="api-peritoneal-dialysis-manual-create"),
 
-    path('peritoneal-dialysis/manual/screen/', views.ManualPeritonealDialysisScreenView.as_view(),
+    path('peritoneal-dialysis/manual/dialysis/<int:id>/', views.UpdateManualPeritonealDialysisView.as_view(),
+         name="api-peritoneal-dialysis-manual-dialysis"),
+
+    path('peritoneal-dialysis/manual/screen/v2/', views.ManualPeritonealDialysisScreenView.as_view(),
          name="api-peritoneal-dialysis-manual-screen"),
 
+    # All others are deprecated
+    path('peritoneal-dialysis/manual/', views.CreateManualPeritonealDialysisLegacyView.as_view(),
+         name="api-peritoneal-dialysis-manual-create-deprecated"),
+
+    path('peritoneal-dialysis/manual/screen/', views.ManualPeritonealDialysisLegacyScreenView.as_view(),
+         name="api-peritoneal-dialysis-manual-screen-deprecated"),
+
     path('peritoneal-dialysis/manual/reports/', views.ManualPeritonealDialysisReportsView.as_view(),
-         name="api-peritoneal-dialysis-manual-reports"),
+         name="api-peritoneal-dialysis-manual-reports-deprecated"),
 
     path('peritoneal-dialysis/manual/reports/paginated/', views.ManualPeritonealDialysisReportsPaginatedView.as_view(),
          name="api-peritoneal-dialysis-manual-reports-paginated"),
 
-    path('peritoneal-dialysis/manual/<int:id>/', views.UpdateManualPeritonealDialysisView.as_view(),
-         name="api-peritoneal-dialysis-manual-update"),
+    path('peritoneal-dialysis/manual/<int:id>/', views.UpdateManualPeritonealDialysisLegacyView.as_view(),
+         name="api-peritoneal-dialysis-manual-update-deprecated"),
+
 
     path('schema.json/', SpectacularJSONAPIView.as_view(), name='schema'),
     # Optional UI:

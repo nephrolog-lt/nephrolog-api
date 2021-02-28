@@ -10,7 +10,8 @@ from rest_framework.pagination import PageNumberPagination
 
 from api import serializers
 from api.models import DailyManualPeritonealDialysisReportsResponse, HealthStatusScreenResponse, \
-    HealthStatusWeeklyResponse, ManualPeritonealDialysisScreenResponse, NutritionScreenResponse, \
+    HealthStatusWeeklyResponse, ManualPeritonealDialysisLegacyScreenResponse, ManualPeritonealDialysisScreenResponse, \
+    NutritionScreenResponse, \
     NutrientWeeklyScreenResponse, NutritionScreenV2Response, ProductSearchResponse, DailyIntakesReportsLightResponse
 from api.utils import date_from_request_and_validated_data, datetime_to_date, parse_date_or_validation_error, \
     parse_time_zone
@@ -354,6 +355,20 @@ class GeneralRecommendationsView(RetrieveAPIView):
         return models.GeneralRecommendationCategory.objects.prefetch_related('recommendations')
 
 
+# Deprecated on 02-28
+@extend_schema(tags=['peritoneal-dialysis'])
+class CreateManualPeritonealDialysisLegacyView(CreateAPIView):
+    serializer_class = serializers.ManualPeritonealDialysisLegacySerializer
+
+    def perform_create(self, serializer):
+        date = date_from_request_and_validated_data(self.request, serializer.validated_data, 'started_at')
+        daily_health_status = models.DailyHealthStatus.get_or_create_for_user_and_date(self.request.user, date)
+        daily_intakes_report = models.DailyIntakesReport.get_or_create_for_user_and_date(self.request.user, date)
+
+        serializer.save(daily_health_status=daily_health_status, daily_intakes_report=daily_intakes_report)
+
+
+# Deprecated on 02-28
 @extend_schema(tags=['peritoneal-dialysis'])
 class CreateManualPeritonealDialysisView(CreateAPIView):
     serializer_class = serializers.ManualPeritonealDialysisSerializer
@@ -367,11 +382,19 @@ class CreateManualPeritonealDialysisView(CreateAPIView):
 
 
 @extend_schema(tags=['peritoneal-dialysis'])
-class ManualPeritonealDialysisScreenView(RetrieveAPIView):
-    serializer_class = serializers.ManualPeritonealDialysisScreenResponseSerializer
+class ManualPeritonealDialysisLegacyScreenView(RetrieveAPIView):
+    serializer_class = serializers.ManualPeritonealDialysisLegacyScreenResponseSerializer
 
     def get_object(self) -> ManualPeritonealDialysisScreenResponse:
         return ManualPeritonealDialysisScreenResponse.from_api_request(self.request)
+
+
+@extend_schema(tags=['peritoneal-dialysis'])
+class ManualPeritonealDialysisScreenView(RetrieveAPIView):
+    serializer_class = serializers.ManualPeritonealDialysisLegacyScreenResponseSerializer
+
+    def get_object(self) -> ManualPeritonealDialysisLegacyScreenResponse:
+        return ManualPeritonealDialysisLegacyScreenResponse.from_api_request(self.request)
 
 
 @extend_schema(
@@ -411,12 +434,28 @@ class ManualPeritonealDialysisReportsPaginatedView(ListAPIView):
     def get_queryset(self):
         return models.DailyHealthStatus.filter_for_user(self.request.user) \
             .filter_manual_peritoneal_dialysis() \
-            .prefetch_manual_peritoneal_dialysis() \
             .order_by('-date', 'pk')
 
 
+# Deprecated on 02-28
 @extend_schema(tags=['peritoneal-dialysis'])
-class UpdateManualPeritonealDialysisView(UpdateAPIView):
+class UpdateManualPeritonealDialysisLegacyView(UpdateAPIView):
+    serializer_class = serializers.ManualPeritonealDialysisLegacySerializer
+    lookup_url_kwarg = 'id'
+
+    def get_queryset(self):
+        return models.ManualPeritonealDialysis.objects.filter(daily_health_status__user=self.request.user)
+
+    def perform_update(self, serializer):
+        date = date_from_request_and_validated_data(self.request, serializer.validated_data, 'started_at')
+        daily_health_status = models.DailyHealthStatus.get_or_create_for_user_and_date(self.request.user, date)
+        daily_intakes_report = models.DailyIntakesReport.get_or_create_for_user_and_date(self.request.user, date)
+
+        serializer.save(daily_health_status=daily_health_status, daily_intakes_report=daily_intakes_report)
+
+
+@extend_schema(tags=['peritoneal-dialysis'])
+class UpdateManualPeritonealDialysisView(UpdateAPIView, DestroyAPIView):
     serializer_class = serializers.ManualPeritonealDialysisSerializer
     lookup_url_kwarg = 'id'
 

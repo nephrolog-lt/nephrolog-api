@@ -959,20 +959,14 @@ class Swelling(models.Model):
 
 
 class DailyHealthStatusQuerySet(models.QuerySet):
-    def prefetch_swellings(self) -> DailyHealthStatusQuerySet:
-        return self.prefetch_related('swellings')
+    def prefetch_all_related_fields(self) -> DailyHealthStatusQuerySet:
+        return self.prefetch_related('swellings', 'blood_pressures', 'pulses', 'manual_peritoneal_dialysis')
 
     def prefetch_blood_pressure_and_pulse(self) -> DailyHealthStatusQuerySet:
         return self.prefetch_related('blood_pressures', 'pulses')
 
     def filter_manual_peritoneal_dialysis(self) -> DailyHealthStatusQuerySet:
         return self.exclude(manual_peritoneal_dialysis__isnull=True)
-
-    def prefetch_manual_peritoneal_dialysis(self) -> DailyHealthStatusQuerySet:
-        return self.prefetch_related(
-            Prefetch('manual_peritoneal_dialysis',
-                     queryset=ManualPeritonealDialysis.objects.select_related_fields().prefetch_intakes_report()))
-
 
 class DailyHealthStatus(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -1061,7 +1055,7 @@ class DailyHealthStatus(models.Model):
     def get_between_dates_for_user(user: AbstractBaseUser, date_from: datetime.date,
                                    date_to: datetime.date) -> DailyHealthStatusQuerySet:
         return DailyHealthStatus.filter_for_user(user).filter(
-            date__range=(date_from, date_to)).prefetch_swellings().prefetch_blood_pressure_and_pulse().order_by('date')
+            date__range=(date_from, date_to)).prefetch_all_related_fields().order_by('date')
 
     def __str__(self):
         return f"{self.user} {self.date}"
@@ -1233,11 +1227,6 @@ class DialysateColor(models.TextChoices):
 class ManualPeritonealDialysisQuerySet(models.QuerySet):
     def select_related_fields(self) -> ManualPeritonealDialysisQuerySet:
         return self.select_related('blood_pressure', 'pulse', 'daily_health_status')
-
-    def prefetch_intakes_report(self) -> ManualPeritonealDialysisQuerySet:
-        return self.prefetch_related(
-            Prefetch('daily_health_status', queryset=DailyIntakesReport.objects.annotate_with_nutrient_totals())
-        )
 
     def filter_not_completed(self) -> ManualPeritonealDialysisQuerySet:
         return self.filter(is_completed=False)
