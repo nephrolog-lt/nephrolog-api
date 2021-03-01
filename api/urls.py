@@ -37,7 +37,6 @@ urlpatterns = [
     path('health-status/<str:date>/', views.DailyHealthStatusByDateView.as_view(), name="api-health-status-by-date"),
     path('health-status/', views.DailyHealthStatusView.as_view(), name="api-health-status"),
 
-
     path('peritoneal-dialysis/manual/dialysis/create/', views.CreateManualPeritonealDialysisView.as_view(),
          name="api-peritoneal-dialysis-manual-create"),
 
@@ -46,6 +45,15 @@ urlpatterns = [
 
     path('peritoneal-dialysis/manual/screen/v2/', views.ManualPeritonealDialysisScreenView.as_view(),
          name="api-peritoneal-dialysis-manual-screen"),
+
+    path('peritoneal-dialysis/automatic/dialysis/create/', views.CreateAutomaticPeritonealDialysisView.as_view(),
+         name="api-peritoneal-dialysis-automatic-create"),
+
+    path('peritoneal-dialysis/automatic/dialysis/<str:date>/', views.UpdateAutomaticPeritonealDialysisView.as_view(),
+         name="api-peritoneal-dialysis-automatic-dialysis"),
+
+    path('peritoneal-dialysis/automatic/screen/', views.AutomaticPeritonealDialysisScreenView.as_view(),
+         name="api-peritoneal-dialysis-automatic-screen"),
 
     # All others are deprecated
     path('peritoneal-dialysis/manual/', views.CreateManualPeritonealDialysisLegacyView.as_view(),
@@ -62,7 +70,6 @@ urlpatterns = [
 
     path('peritoneal-dialysis/manual/<int:id>/', views.UpdateManualPeritonealDialysisLegacyView.as_view(),
          name="api-peritoneal-dialysis-manual-update-deprecated"),
-
 
     path('schema.json/', SpectacularJSONAPIView.as_view(), name='schema'),
     # Optional UI:

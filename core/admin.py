@@ -461,7 +461,7 @@ class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
         'created_at',
         'updated_at',
     )
-    raw_id_fields = ('daily_health_status',)
+    raw_id_fields = ('daily_health_status', 'daily_intakes_report')
     date_hierarchy = 'started_at'
     list_select_related = ('daily_health_status', 'daily_health_status__user')
     search_fields = ('user__pk', 'user__email', 'user__username',)
@@ -485,3 +485,73 @@ class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
         return obj.daily_health_status.urine_ml
 
     urine_ml.admin_order_field = "daily_health_status__urine_ml"
+
+
+@admin.register(models.AutomaticPeritonealDialysis)
+class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+
+        'date',
+        'is_completed',
+        'started_at',
+
+        'solution_green_in_ml',
+        'solution_yellow_in_ml',
+        'solution_orange_in_ml',
+        'solution_blue_in_ml',
+        'solution_purple_in_ml',
+
+        'initial_draining_ml',
+        'total_drain_volume_ml',
+        'last_fill_ml',
+        'total_ultrafiltration_ml',
+
+        'additional_drain_ml',
+
+        'dialysate_color',
+        'notes',
+        'finished_at',
+
+        'user',
+        'daily_health_status',
+        'daily_intakes_report',
+
+        'created_at',
+        'updated_at',
+    )
+    raw_id_fields = ('daily_health_status', 'daily_intakes_report')
+    date_hierarchy = 'started_at'
+    search_fields = (
+        'daily_health_status__user__pk',
+        'daily_health_status__user__email',
+        'daily_health_status__user__username',
+    )
+    list_filter = (
+        'is_completed',
+        ('finished_at', EmptyFieldListFilter),
+        'dialysate_color',
+        ('notes', EmptyFieldListFilter),
+    )
+
+    def get_queryset(self, request):
+        # noinspection PyUnresolvedReferences
+        return super().get_queryset(request).prefetch_all_related()
+
+    def user(self, obj):
+        return obj.daily_health_status.user
+
+    def weight_kg(self, obj):
+        return obj.daily_health_status.weight_kg
+
+    weight_kg.admin_order_field = "daily_health_status__weight_kg"
+
+    def urine_ml(self, obj):
+        return obj.daily_health_status.urine_ml
+
+    urine_ml.admin_order_field = "daily_health_status__urine_ml"
+
+    def date(self, obj):
+        return obj.daily_health_status.date
+
+    urine_ml.admin_order_field = "daily_health_status__date"

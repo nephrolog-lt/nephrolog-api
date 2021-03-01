@@ -9,11 +9,13 @@ from rest_framework.generics import CreateAPIView, DestroyAPIView, ListAPIView, 
 from rest_framework.pagination import PageNumberPagination
 
 from api import serializers
-from api.models import DailyManualPeritonealDialysisReportsResponse, HealthStatusScreenResponse, \
+from api.models import AutomaticPeritonealDialysisScreenResponse, DailyManualPeritonealDialysisReportsResponse, \
+    HealthStatusScreenResponse, \
     HealthStatusWeeklyResponse, ManualPeritonealDialysisLegacyScreenResponse, ManualPeritonealDialysisScreenResponse, \
     NutritionScreenResponse, \
     NutrientWeeklyScreenResponse, NutritionScreenV2Response, ProductSearchResponse, DailyIntakesReportsLightResponse
-from api.utils import date_from_request_and_validated_data, datetime_to_date, parse_date_or_validation_error, \
+from api.utils import date_from_request_and_validated_data, datetime_from_request_and_validated_data, datetime_to_date, \
+    parse_date_or_validation_error, \
     parse_time_zone
 from core import models
 
@@ -468,3 +470,44 @@ class UpdateManualPeritonealDialysisLegacyView(UpdateAPIView):
         daily_intakes_report = models.DailyIntakesReport.get_or_create_for_user_and_date(self.request.user, date)
 
         serializer.save(daily_health_status=daily_health_status, daily_intakes_report=daily_intakes_report)
+
+
+@extend_schema(tags=['peritoneal-dialysis'])
+class CreateAutomaticPeritonealDialysisView(CreateAPIView):
+    serializer_class = serializers.AutomaticPeritonealDialysisSerializer
+
+    def perform_create(self, serializer):
+        dt = datetime_from_request_and_validated_data(self.request, serializer.validated_data, 'started_at')
+        date = (dt - datetime.timedelta(hours=3)).date()
+
+        daily_health_status = models.DailyHealthStatus.get_or_create_for_user_and_date(self.request.user, date)
+        daily_intakes_report = models.DailyIntakesReport.get_or_create_for_user_and_date(self.request.user, date)
+
+        serializer.save(daily_health_status=daily_health_status, daily_intakes_report=daily_intakes_report)
+
+
+@extend_schema(tags=['peritoneal-dialysis'])
+class UpdateAutomaticPeritonealDialysisView(UpdateAPIView, DestroyAPIView):
+    serializer_class = serializers.AutomaticPeritonealDialysisSerializer
+    lookup_url_kwarg = 'date'
+    lookup_field = 'daily_health_status__date'
+
+    def get_queryset(self):
+        return models.AutomaticPeritonealDialysis.objects.filter(daily_health_status__user=self.request.user)
+
+    def perform_update(self, serializer):
+        dt = datetime_from_request_and_validated_data(self.request, serializer.validated_data, 'started_at')
+        date = (dt - datetime.timedelta(hours=3)).date()
+
+        daily_health_status = models.DailyHealthStatus.get_or_create_for_user_and_date(self.request.user, date)
+        daily_intakes_report = models.DailyIntakesReport.get_or_create_for_user_and_date(self.request.user, date)
+
+        serializer.save(daily_health_status=daily_health_status, daily_intakes_report=daily_intakes_report)
+
+
+@extend_schema(tags=['peritoneal-dialysis'], )
+class AutomaticPeritonealDialysisScreenView(RetrieveAPIView):
+    serializer_class = serializers.AutomaticPeritonealDialysisScreenResponseSerializer
+
+    def get_object(self) -> AutomaticPeritonealDialysisScreenResponse:
+        return AutomaticPeritonealDialysisScreenResponse.from_api_request(self.request)

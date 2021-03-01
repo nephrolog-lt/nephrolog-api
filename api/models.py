@@ -9,10 +9,46 @@ from rest_framework.request import Request
 
 from api import utils
 from api.utils import parse_date_query_params
-from core.models import DailyHealthStatus, DailyHealthStatusQuerySet, DailyIntakesReport, Intake, \
+from core.models import AutomaticPeritonealDialysis, DailyHealthStatus, DailyHealthStatusQuerySet, DailyIntakesReport, \
+    Intake, \
     ManualPeritonealDialysis, MealType, UserProfile, \
     Product, \
     DailyNutrientNormsAndTotals, ProductSearchLog
+
+
+@dataclass(frozen=True)
+class AutomaticPeritonealDialysisScreenResponse:
+    last_peritoneal_dialysis: Iterable[AutomaticPeritonealDialysis]
+    last_week_peritoneal_dialysis: QuerySet[AutomaticPeritonealDialysis]
+    peritoneal_dialysis_in_progress: Optional[AutomaticPeritonealDialysis]
+
+    @staticmethod
+    def from_api_request(request: Request) -> AutomaticPeritonealDialysisScreenResponse:
+        tz = utils.parse_time_zone(request)
+
+        now = datetime.datetime.now(tz)
+
+        from_date = (now - datetime.timedelta(days=6)).date()
+        to_date = now.date()
+
+        last_week_light_peritoneal_dialysis = AutomaticPeritonealDialysis.filter_for_user_between_dates(
+            request.user,
+            from_date,
+            to_date
+        ).prefetch_all_related()
+
+        last_peritoneal_dialysis = AutomaticPeritonealDialysis.filter_for_user(
+            request.user
+        ).prefetch_all_related().order_by('is_completed', '-started_at')[:3]
+
+        not_completed_peritoneal_dialysis = AutomaticPeritonealDialysis.filter_for_user(request.user) \
+            .filter_not_completed().prefetch_all_related().first()
+
+        return AutomaticPeritonealDialysisScreenResponse(
+            last_week_peritoneal_dialysis=last_week_light_peritoneal_dialysis,
+            peritoneal_dialysis_in_progress=not_completed_peritoneal_dialysis,
+            last_peritoneal_dialysis=last_peritoneal_dialysis,
+        )
 
 
 @dataclass(frozen=True)

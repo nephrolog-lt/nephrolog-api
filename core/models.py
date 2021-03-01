@@ -1301,3 +1301,81 @@ class ManualPeritonealDialysis(models.Model):
     @staticmethod
     def filter_for_user(user: AbstractBaseUser) -> QuerySet[ManualPeritonealDialysis]:
         return ManualPeritonealDialysis.objects.filter(daily_health_status__user=user)
+
+
+class AutomaticPeritonealDialysisQuerySet(models.QuerySet):
+    def prefetch_all_related(self) -> AutomaticPeritonealDialysisQuerySet:
+        return self.prefetch_related(
+            Prefetch(
+                'daily_intakes_report',
+                queryset=DailyIntakesReport.objects.annotate_with_nutrient_totals()
+            ),
+            Prefetch(
+                'daily_health_status',
+                queryset=DailyHealthStatus.objects.prefetch_all_related_fields()
+            ),
+        )
+
+    def filter_not_completed(self) -> AutomaticPeritonealDialysisQuerySet:
+        return self.filter(is_completed=False)
+
+
+class AutomaticPeritonealDialysis(models.Model):
+    daily_health_status = models.OneToOneField(
+        DailyHealthStatus,
+        on_delete=models.CASCADE,
+    )
+    daily_intakes_report = models.OneToOneField(
+        DailyIntakesReport,
+        on_delete=models.CASCADE,
+    )
+
+    is_completed = models.BooleanField(default=False)
+
+    started_at = models.DateTimeField()
+
+    solution_green_in_ml = models.PositiveSmallIntegerField(default=0)
+    solution_yellow_in_ml = models.PositiveSmallIntegerField(default=0)
+    solution_orange_in_ml = models.PositiveSmallIntegerField(default=0)
+    solution_blue_in_ml = models.PositiveSmallIntegerField(default=0)
+    solution_purple_in_ml = models.PositiveSmallIntegerField(default=0)
+
+    initial_draining_ml = models.PositiveSmallIntegerField(null=True, blank=True)
+    total_drain_volume_ml = models.PositiveSmallIntegerField(null=True, blank=True)
+    last_fill_ml = models.PositiveSmallIntegerField(null=True, blank=True)
+    total_ultrafiltration_ml = models.PositiveSmallIntegerField(null=True, blank=True)
+
+    additional_drain_ml = models.PositiveSmallIntegerField(null=True, blank=True)
+
+    dialysate_color = models.CharField(
+        max_length=16,
+        choices=DialysateColor.choices,
+        default=DialysateColor.Unknown,
+    )
+
+    notes = models.TextField(blank=True)
+
+    finished_at = models.DateTimeField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    objects = AutomaticPeritonealDialysisQuerySet.as_manager()
+
+    class Meta:
+        default_related_name = "automatic_peritoneal_dialysis"
+        ordering = ("-pk",)
+
+    @staticmethod
+    def filter_for_user(user: AbstractBaseUser) -> QuerySet[AutomaticPeritonealDialysis]:
+        return AutomaticPeritonealDialysis.objects.filter(daily_health_status__user=user)
+
+    @staticmethod
+    def filter_for_user_between_dates(
+            user: AbstractBaseUser,
+            date_from: datetime.date,
+            date_to: datetime.date
+    ) -> AutomaticPeritonealDialysisQuerySet:
+        return AutomaticPeritonealDialysis.filter_for_user(user).filter(
+            daily_health_status__date__range=(date_from, date_to)
+        )

@@ -5,7 +5,8 @@ from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from core.models import BloodPressure, DailyHealthStatus, DailyIntakesReport, GeneralRecommendation, \
+from core.models import AutomaticPeritonealDialysis, BloodPressure, DailyHealthStatus, DailyIntakesReport, \
+    GeneralRecommendation, \
     GeneralRecommendationCategory, Intake, ManualPeritonealDialysis, Product, Pulse, Swelling, User, UserProfile
 
 logger = getLogger()
@@ -511,4 +512,52 @@ class ManualPeritonealDialysisScreenResponseSerializer(ReadOnlySerializer):
             'last_peritoneal_dialysis',
             'last_week_light_nutrition_reports',
             'last_week_health_statuses',
+        )
+
+
+class AutomaticPeritonealDialysisSerializer(serializers.ModelSerializer):
+    date = serializers.DateField(source='daily_health_status.date', read_only=True)
+    daily_health_status = DailyHealthStatusSerializer(read_only=True)
+    daily_intakes_light_report = DailyIntakesLightReportSerializer(source='daily_intakes_report', read_only=True)
+
+    class Meta:
+        model = AutomaticPeritonealDialysis
+        fields = (
+            'date',
+
+            'daily_health_status',
+            'daily_intakes_light_report',
+
+            'is_completed',
+            'started_at',
+
+            'solution_green_in_ml',
+            'solution_yellow_in_ml',
+            'solution_orange_in_ml',
+            'solution_blue_in_ml',
+            'solution_purple_in_ml',
+
+            'initial_draining_ml',
+            'total_drain_volume_ml',
+            'last_fill_ml',
+            'total_ultrafiltration_ml',
+
+            'additional_drain_ml',
+
+            'dialysate_color',
+            'notes',
+            'finished_at',
+        )
+
+
+class AutomaticPeritonealDialysisScreenResponseSerializer(ReadOnlySerializer):
+    last_peritoneal_dialysis = AutomaticPeritonealDialysisSerializer(many=True, read_only=True)
+    last_week_peritoneal_dialysis = AutomaticPeritonealDialysisSerializer(many=True, read_only=True)
+    peritoneal_dialysis_in_progress = AutomaticPeritonealDialysisSerializer(read_only=True, allow_null=True)
+
+    class Meta:
+        fields = (
+            'last_peritoneal_dialysis',
+            'last_week_peritoneal_dialysis',
+            'peritoneal_dialysis_in_progress'
         )
