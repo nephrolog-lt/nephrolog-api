@@ -1220,8 +1220,8 @@ class GeneralRecommendation(models.Model):
 
 class DialysisSolution(models.TextChoices):
     Unknown = "Unknown"
-    Green = "Green"
     Yellow = "Yellow"
+    Green = "Green"
     Orange = "Orange"
     Blue = "Blue"
     Purple = "Purple"
@@ -1334,8 +1334,8 @@ class AutomaticPeritonealDialysis(models.Model):
 
     started_at = models.DateTimeField()
 
-    solution_green_in_ml = models.PositiveSmallIntegerField(default=0)
     solution_yellow_in_ml = models.PositiveSmallIntegerField(default=0)
+    solution_green_in_ml = models.PositiveSmallIntegerField(default=0)
     solution_orange_in_ml = models.PositiveSmallIntegerField(default=0)
     solution_blue_in_ml = models.PositiveSmallIntegerField(default=0)
     solution_purple_in_ml = models.PositiveSmallIntegerField(default=0)
