@@ -552,12 +552,14 @@ class AutomaticPeritonealDialysisSerializer(serializers.ModelSerializer):
 
 class AutomaticPeritonealDialysisScreenResponseSerializer(ReadOnlySerializer):
     last_peritoneal_dialysis = AutomaticPeritonealDialysisSerializer(many=True, read_only=True)
-    last_week_peritoneal_dialysis = AutomaticPeritonealDialysisSerializer(many=True, read_only=True)
+    last_week_health_statuses = DailyHealthStatusSerializer(many=True, read_only=True)
+    last_week_light_nutrition_reports = DailyIntakesLightReportSerializer(many=True, read_only=True)
     peritoneal_dialysis_in_progress = AutomaticPeritonealDialysisSerializer(read_only=True, allow_null=True)
 
     class Meta:
         fields = (
             'last_peritoneal_dialysis',
             'last_week_peritoneal_dialysis',
+            'last_week_light_nutrition_reports',
             'peritoneal_dialysis_in_progress'
         )

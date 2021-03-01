@@ -19,7 +19,8 @@ from core.models import AutomaticPeritonealDialysis, DailyHealthStatus, DailyHea
 @dataclass(frozen=True)
 class AutomaticPeritonealDialysisScreenResponse:
     last_peritoneal_dialysis: Iterable[AutomaticPeritonealDialysis]
-    last_week_peritoneal_dialysis: QuerySet[AutomaticPeritonealDialysis]
+    last_week_health_statuses: DailyHealthStatusQuerySet
+    last_week_light_nutrition_reports: QuerySet[DailyIntakesReport]
     peritoneal_dialysis_in_progress: Optional[AutomaticPeritonealDialysis]
 
     @staticmethod
@@ -31,11 +32,17 @@ class AutomaticPeritonealDialysisScreenResponse:
         from_date = (now - datetime.timedelta(days=6)).date()
         to_date = now.date()
 
-        last_week_light_peritoneal_dialysis = AutomaticPeritonealDialysis.filter_for_user_between_dates(
+        last_week_health_statuses = DailyHealthStatus.get_between_dates_for_user(
             request.user,
             from_date,
             to_date
-        ).prefetch_all_related()
+        ).prefetch_all_related_fields()
+
+        last_week_light_nutrition_reports = DailyIntakesReport.get_for_user_between_dates(
+            request.user,
+            from_date,
+            to_date
+        ).annotate_with_nutrient_totals()
 
         last_peritoneal_dialysis = AutomaticPeritonealDialysis.filter_for_user(
             request.user
@@ -45,7 +52,8 @@ class AutomaticPeritonealDialysisScreenResponse:
             .filter_not_completed().prefetch_all_related().first()
 
         return AutomaticPeritonealDialysisScreenResponse(
-            last_week_peritoneal_dialysis=last_week_light_peritoneal_dialysis,
+            last_week_health_statuses=last_week_health_statuses,
+            last_week_light_nutrition_reports=last_week_light_nutrition_reports,
             peritoneal_dialysis_in_progress=not_completed_peritoneal_dialysis,
             last_peritoneal_dialysis=last_peritoneal_dialysis,
         )
