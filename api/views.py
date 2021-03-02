@@ -172,7 +172,14 @@ class DailyIntakesReportsLightView(RetrieveAPIView):
 
 
 @extend_schema(
-    tags=['nutrition']
+    tags=['nutrition'],
+    parameters=[
+        OpenApiParameter(
+            name='date',
+            type=OpenApiTypes.DATE,
+            location=OpenApiParameter.PATH,
+        ),
+    ],
 )
 class DailyIntakesReportView(RetrieveAPIView):
     serializer_class = serializers.DailyIntakesReportResponseSerializer
@@ -486,7 +493,16 @@ class CreateAutomaticPeritonealDialysisView(CreateAPIView):
         serializer.save(daily_health_status=daily_health_status, daily_intakes_report=daily_intakes_report)
 
 
-@extend_schema(tags=['peritoneal-dialysis'])
+@extend_schema(
+    tags=['peritoneal-dialysis'],
+    parameters=[
+        OpenApiParameter(
+            name='date',
+            type=OpenApiTypes.DATE,
+            location=OpenApiParameter.PATH,
+        ),
+    ],
+)
 class UpdateAutomaticPeritonealDialysisView(UpdateAPIView, DestroyAPIView):
     serializer_class = serializers.AutomaticPeritonealDialysisSerializer
     lookup_url_kwarg = 'date'
