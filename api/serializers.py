@@ -32,9 +32,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ('user', 'gender', 'birthday', 'year_of_birth', 'height_cm', 'weight_kg',
-                  'chronic_kidney_disease_years', 'chronic_kidney_disease_stage', 'dialysis_type',
-                  'diabetes_type', 'diabetes_years', 'diabetes_complications',)
+        fields = (
+            'user', 'gender', 'birthday', 'year_of_birth', 'height_cm', 'weight_kg',
+            'chronic_kidney_disease_years', 'chronic_kidney_disease_stage',
+            'dialysis_type', 'periotonic_dialysis_type',
+            'diabetes_type', 'diabetes_years', 'diabetes_complications',
+        )
 
 
 class NutritionSummaryStatisticsSerializer(ReadOnlySerializer):

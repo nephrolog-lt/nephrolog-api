@@ -125,6 +125,12 @@ class Gender(models.TextChoices):
     Female = "Female"
 
 
+class PeriotonicDialysisType(models.TextChoices):
+    Unknown = "Unknown"
+    Manual = "Manual"
+    Automatic = "Automatic"
+
+
 class DialysisType(models.TextChoices):
     Unknown = "Unknown"
     PeriotonicDialysis = "PeriotonicDialysis"
@@ -178,6 +184,12 @@ class BaseUserProfile(models.Model):
     dialysis_type = models.CharField(
         max_length=32,
         choices=DialysisType.choices,
+    )
+
+    periotonic_dialysis_type = models.CharField(
+        max_length=16,
+        choices=PeriotonicDialysisType.choices,
+        default=PeriotonicDialysisType.Unknown,
     )
 
     diabetes_years = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -342,6 +354,7 @@ class HistoricalUserProfile(BaseUserProfile):
                 'chronic_kidney_disease_years': user_profile.chronic_kidney_disease_years,
                 'chronic_kidney_disease_stage': user_profile.chronic_kidney_disease_stage,
                 'dialysis_type': user_profile.dialysis_type,
+                'periotonic_dialysis_type': user_profile.periotonic_dialysis_type,
                 'diabetes_complications': user_profile.diabetes_complications,
                 'created_at': user_profile.created_at,
                 'updated_at': user_profile.updated_at,
