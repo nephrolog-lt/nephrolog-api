@@ -60,6 +60,25 @@ class AutomaticPeritonealDialysisScreenResponse:
 
 
 @dataclass(frozen=True)
+class AutomaticPeritonealDialysisPeriodResponse:
+    peritoneal_dialysis: QuerySet[AutomaticPeritonealDialysis]
+
+    @staticmethod
+    def from_api_request(request: Request) -> AutomaticPeritonealDialysisPeriodResponse:
+        date_from, date_to = parse_date_query_params(request)
+
+        peritoneal_dialysis = AutomaticPeritonealDialysis.filter_for_user_between_dates(
+            request.user,
+            date_from,
+            date_to
+        ).prefetch_all_related().order_by('-pk')
+
+        return AutomaticPeritonealDialysisPeriodResponse(
+            peritoneal_dialysis=peritoneal_dialysis,
+        )
+
+
+@dataclass(frozen=True)
 class ManualPeritonealDialysisScreenResponse:
     last_peritoneal_dialysis: Iterable[ManualPeritonealDialysis]
     last_week_health_statuses: DailyHealthStatusQuerySet

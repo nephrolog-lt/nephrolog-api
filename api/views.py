@@ -9,7 +9,8 @@ from rest_framework.generics import CreateAPIView, DestroyAPIView, ListAPIView, 
 from rest_framework.pagination import PageNumberPagination
 
 from api import serializers
-from api.models import AutomaticPeritonealDialysisScreenResponse, DailyManualPeritonealDialysisReportsResponse, \
+from api.models import AutomaticPeritonealDialysisPeriodResponse, AutomaticPeritonealDialysisScreenResponse, \
+    DailyManualPeritonealDialysisReportsResponse, \
     HealthStatusScreenResponse, \
     HealthStatusWeeklyResponse, ManualPeritonealDialysisLegacyScreenResponse, ManualPeritonealDialysisScreenResponse, \
     NutritionScreenResponse, \
@@ -527,3 +528,27 @@ class AutomaticPeritonealDialysisScreenView(RetrieveAPIView):
 
     def get_object(self) -> AutomaticPeritonealDialysisScreenResponse:
         return AutomaticPeritonealDialysisScreenResponse.from_api_request(self.request)
+
+
+@extend_schema(
+    tags=['peritoneal-dialysis'],
+    parameters=[
+        OpenApiParameter(
+            name='from',
+            type=OpenApiTypes.DATE,
+            required=True,
+            location=OpenApiParameter.QUERY,
+        ),
+        OpenApiParameter(
+            name='to',
+            type=OpenApiTypes.DATE,
+            required=True,
+            location=OpenApiParameter.QUERY,
+        ),
+    ],
+)
+class AutomaticPeritonealDialysisPeriodView(RetrieveAPIView):
+    serializer_class = serializers.AutomaticPeritonealDialysisPeriodResponseSerializer
+
+    def get_object(self) -> AutomaticPeritonealDialysisPeriodResponse:
+        return AutomaticPeritonealDialysisPeriodResponse.from_api_request(self.request)

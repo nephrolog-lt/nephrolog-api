@@ -55,6 +55,9 @@ urlpatterns = [
     path('peritoneal-dialysis/automatic/screen/', views.AutomaticPeritonealDialysisScreenView.as_view(),
          name="api-peritoneal-dialysis-automatic-screen"),
 
+    path('peritoneal-dialysis/automatic/period/', views.AutomaticPeritonealDialysisPeriodView.as_view(),
+         name="api-peritoneal-dialysis-automatic-period"),
+
     # All others are deprecated
     path('peritoneal-dialysis/manual/', views.CreateManualPeritonealDialysisLegacyView.as_view(),
          name="api-peritoneal-dialysis-manual-create-deprecated"),

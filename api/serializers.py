@@ -566,3 +566,12 @@ class AutomaticPeritonealDialysisScreenResponseSerializer(ReadOnlySerializer):
             'last_week_light_nutrition_reports',
             'peritoneal_dialysis_in_progress'
         )
+
+
+class AutomaticPeritonealDialysisPeriodResponseSerializer(ReadOnlySerializer):
+    peritoneal_dialysis = AutomaticPeritonealDialysisSerializer(many=True, read_only=True)
+
+    class Meta:
+        fields = (
+            'peritoneal_dialysis',
+        )
