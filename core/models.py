@@ -186,7 +186,7 @@ class BaseUserProfile(models.Model):
         choices=DialysisType.choices,
     )
 
-    peritoneal_dialysis_type = models.CharField(
+    periotonic_dialysis_type = models.CharField(
         max_length=16,
         choices=PeriotonicDialysisType.choices,
         default=PeriotonicDialysisType.Unknown,
@@ -354,7 +354,7 @@ class HistoricalUserProfile(BaseUserProfile):
                 'chronic_kidney_disease_years': user_profile.chronic_kidney_disease_years,
                 'chronic_kidney_disease_stage': user_profile.chronic_kidney_disease_stage,
                 'dialysis_type': user_profile.dialysis_type,
-                'peritoneal_dialysis_type': user_profile.peritoneal_dialysis_type,
+                'periotonic_dialysis_type': user_profile.periotonic_dialysis_type,
                 'diabetes_complications': user_profile.diabetes_complications,
                 'created_at': user_profile.created_at,
                 'updated_at': user_profile.updated_at,
