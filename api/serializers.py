@@ -35,7 +35,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = (
             'user', 'gender', 'birthday', 'year_of_birth', 'height_cm', 'weight_kg',
             'chronic_kidney_disease_years', 'chronic_kidney_disease_stage',
-            'dialysis_type', 'periotonic_dialysis_type',
+            'dialysis_type', 'peritoneal_dialysis_type',
             'diabetes_type', 'diabetes_years', 'diabetes_complications',
         )
 
