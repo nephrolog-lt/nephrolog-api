@@ -526,7 +526,7 @@ class AutomaticPeritonealDialysisSerializer(serializers.ModelSerializer):
     daily_intakes_light_report = DailyIntakesLightReportSerializer(source='daily_intakes_report', read_only=True)
 
     def validate(self, data):
-        if data['finished_at'] is not None and data['started_at'] > data['finished_at']:
+        if 'finished_at' in data and data['started_at'] > data['finished_at']:
             raise serializers.ValidationError("finish must occur after start")
 
         if self.instance is None:
