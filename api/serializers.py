@@ -1,3 +1,4 @@
+import datetime
 from logging import getLogger
 from typing import Dict
 
@@ -8,6 +9,7 @@ from rest_framework.validators import UniqueTogetherValidator
 from core.models import AutomaticPeritonealDialysis, BloodPressure, DailyHealthStatus, DailyIntakesReport, \
     GeneralRecommendation, \
     GeneralRecommendationCategory, Intake, ManualPeritonealDialysis, Product, Pulse, Swelling, User, UserProfile
+from utils import datetime_from_request_and_validated_data
 
 logger = getLogger()
 
@@ -522,6 +524,26 @@ class AutomaticPeritonealDialysisSerializer(serializers.ModelSerializer):
     date = serializers.DateField(source='daily_health_status.date', read_only=True)
     daily_health_status = DailyHealthStatusSerializer(read_only=True)
     daily_intakes_light_report = DailyIntakesLightReportSerializer(source='daily_intakes_report', read_only=True)
+
+    def validate(self, data):
+        if data['finished_at'] is not None and data['started_at'] > data['finished_at']:
+            raise serializers.ValidationError("finish must occur after start")
+
+        if self.instance is None:
+            request = self.context['request']
+            dt = datetime_from_request_and_validated_data(request, data, 'started_at')
+            date = (dt - datetime.timedelta(hours=3)).date()
+
+            dialysis_exists = AutomaticPeritonealDialysis.filter_for_user_between_dates(
+                request.user,
+                date,
+                date
+            ).exists()
+
+            if dialysis_exists:
+                raise serializers.ValidationError(f"Automatic peritoneal dialysis with the same date of {date} already exists")
+
+        return data
 
     class Meta:
         model = AutomaticPeritonealDialysis
