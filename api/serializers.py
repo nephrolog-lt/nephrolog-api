@@ -9,7 +9,7 @@ from rest_framework.validators import UniqueTogetherValidator
 from core.models import AutomaticPeritonealDialysis, BloodPressure, DailyHealthStatus, DailyIntakesReport, \
     GeneralRecommendation, \
     GeneralRecommendationCategory, Intake, ManualPeritonealDialysis, Product, Pulse, Swelling, User, UserProfile
-from utils import datetime_from_request_and_validated_data
+from api.utils import datetime_from_request_and_validated_data
 
 logger = getLogger()
 
@@ -541,7 +541,9 @@ class AutomaticPeritonealDialysisSerializer(serializers.ModelSerializer):
             ).exists()
 
             if dialysis_exists:
-                raise serializers.ValidationError(f"Automatic peritoneal dialysis with the same date of {date} already exists")
+                raise serializers.ValidationError(
+                    f"Automatic peritoneal dialysis with the same date of {date} already exists"
+                )
 
         return data
 
