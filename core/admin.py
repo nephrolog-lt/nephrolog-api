@@ -509,8 +509,6 @@ class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
         'last_fill_ml',
         'total_ultrafiltration_ml',
 
-        'additional_drain_ml',
-
         'dialysate_color',
         'notes',
         'finished_at',
