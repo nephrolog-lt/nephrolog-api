@@ -12,7 +12,7 @@ firebase-admin==4.5.2
 
 # Logging and monitoring
 sentry-sdk==1.0.0
-ddtrace==0.46.0
+ddtrace==0.47.0
 datadog==0.40.0
 
 # Celery
