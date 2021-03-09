@@ -1280,9 +1280,7 @@ class GeneralRecommendation(models.Model):
         return self.name_lt
 
     def full_body(self) -> str:
-        body_with_absolute_paths = self.body_lt.replace('"/media/uploads/', '"https://api.nephrogo.com/media/uploads/')
-
-        return f"<h3>{self.name_lt}</h3>{body_with_absolute_paths}"
+        return f"<h3>{self.name_lt}</h3>{self.body_lt}"
 
 
 
