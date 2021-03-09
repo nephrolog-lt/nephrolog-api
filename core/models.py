@@ -1279,6 +1279,9 @@ class GeneralRecommendation(models.Model):
     def __str__(self):
         return self.name_lt
 
+    def body_with_absolute_image_paths(self):
+        return self.body_lt.replace('"/media/uploads/', '"https://api.nephrogo.com/media/uploads/')
+
 
 class DialysisSolution(models.TextChoices):
     Unknown = "Unknown"
