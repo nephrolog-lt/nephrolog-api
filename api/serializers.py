@@ -7,8 +7,8 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from core.models import AutomaticPeritonealDialysis, BloodPressure, DailyHealthStatus, DailyIntakesReport, \
-    GeneralRecommendation, \
-    GeneralRecommendationCategory, Intake, ManualPeritonealDialysis, Product, Pulse, Swelling, User, UserProfile
+    GeneralRecommendationDeprecated, \
+    GeneralRecommendationDeprecatedCategory, Intake, ManualPeritonealDialysis, Product, Pulse, Swelling, User, UserProfile
 from api.utils import datetime_from_request_and_validated_data
 
 logger = getLogger()
@@ -390,21 +390,21 @@ class GeneralRecommendationSerializer(serializers.ModelSerializer):
     answer = serializers.CharField(source='answer_lt')
 
     class Meta:
-        model = GeneralRecommendation
+        model = GeneralRecommendationDeprecated
         fields = ('id', 'question', 'answer', 'order')
 
 
-class GeneralRecommendationCategorySerializer(serializers.ModelSerializer):
+class GeneralRecommendationCategoryDeprecatedSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='name_lt')
     recommendations = GeneralRecommendationSerializer(many=True)
 
     class Meta:
-        model = GeneralRecommendationCategory
+        model = GeneralRecommendationDeprecatedCategory
         fields = ('id', 'name', 'order', 'recommendations')
 
 
-class GeneralRecommendationsResponseSerializer(ReadOnlySerializer):
-    categories = GeneralRecommendationCategorySerializer(many=True, source='*')
+class GeneralRecommendationsDeprecatedResponseSerializer(ReadOnlySerializer):
+    categories = GeneralRecommendationCategoryDeprecatedSerializer(many=True, source='*')
 
     class Meta:
         fields = ('categories',)

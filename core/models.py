@@ -1199,7 +1199,7 @@ class ProductSearchLog(models.Model):
         return f"{self.user} {self.query}"
 
 
-class GeneralRecommendationCategory(models.Model):
+class GeneralRecommendationDeprecatedCategory(models.Model):
     name_lt = models.CharField(max_length=128)
     order = models.PositiveSmallIntegerField(default=0)
 
@@ -1213,8 +1213,8 @@ class GeneralRecommendationCategory(models.Model):
         return self.name_lt
 
 
-class GeneralRecommendation(models.Model):
-    category = models.ForeignKey(GeneralRecommendationCategory, on_delete=models.PROTECT,
+class GeneralRecommendationDeprecated(models.Model):
+    category = models.ForeignKey(GeneralRecommendationDeprecatedCategory, on_delete=models.PROTECT,
                                  related_name='recommendations')
     question_lt = models.CharField(max_length=256)
     answer_lt = models.TextField()

@@ -421,14 +421,14 @@ class DailyIntakesReportAdmin(admin.ModelAdmin):
 
 
 class GeneralRecommendationsInline(SortableInlineAdminMixin, admin.StackedInline):
-    model = models.GeneralRecommendation
+    model = models.GeneralRecommendationDeprecated
     readonly_fields = (
         'created_at',
         'updated_at',
     )
 
 
-@admin.register(models.GeneralRecommendationCategory)
+@admin.register(models.GeneralRecommendationDeprecatedCategory)
 class GeneralRecommendationCategoryAdmin(SortableAdminMixin, admin.ModelAdmin):
     list_display = (
         'name_lt',

@@ -358,11 +358,11 @@ class HealthStatusWeeklyScreenView(RetrieveAPIView):
 
 
 @extend_schema(tags=['general-recommendations'])
-class GeneralRecommendationsView(RetrieveAPIView):
-    serializer_class = serializers.GeneralRecommendationsResponseSerializer
+class GeneralRecommendationsDeprecatedView(RetrieveAPIView):
+    serializer_class = serializers.GeneralRecommendationsDeprecatedResponseSerializer
 
     def get_object(self) -> HealthStatusScreenResponse:
-        return models.GeneralRecommendationCategory.objects.prefetch_related('recommendations')
+        return models.GeneralRecommendationDeprecatedCategory.objects.prefetch_related('recommendations')
 
 
 @extend_schema(tags=['peritoneal-dialysis'])
