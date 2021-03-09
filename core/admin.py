@@ -420,7 +420,7 @@ class DailyIntakesReportAdmin(admin.ModelAdmin):
     export_data_csv.short_description = 'Export CSV'
 
 
-class GeneralRecommendationsInline(SortableInlineAdminMixin, admin.StackedInline):
+class GeneralRecommendationsDeprecatedInline(SortableInlineAdminMixin, admin.StackedInline):
     model = models.GeneralRecommendationDeprecated
     readonly_fields = (
         'created_at',
@@ -429,6 +429,25 @@ class GeneralRecommendationsInline(SortableInlineAdminMixin, admin.StackedInline
 
 
 @admin.register(models.GeneralRecommendationDeprecatedCategory)
+class GeneralRecommendationCategoryDeprecatedAdmin(SortableAdminMixin, admin.ModelAdmin):
+    list_display = (
+        'name_lt',
+        'created_at',
+        'updated_at',
+    )
+    search_fields = ('name_lt', 'questions__question_lt',)
+    inlines = (GeneralRecommendationsDeprecatedInline,)
+
+
+class GeneralRecommendationsSubcategoryInline(SortableInlineAdminMixin, admin.StackedInline):
+    model = models.GeneralRecommendationSubcategory
+    readonly_fields = (
+        'created_at',
+        'updated_at',
+    )
+
+
+@admin.register(models.GeneralRecommendationCategory)
 class GeneralRecommendationCategoryAdmin(SortableAdminMixin, admin.ModelAdmin):
     list_display = (
         'name_lt',
@@ -436,7 +455,20 @@ class GeneralRecommendationCategoryAdmin(SortableAdminMixin, admin.ModelAdmin):
         'updated_at',
     )
     search_fields = ('name_lt', 'questions__question_lt',)
-    inlines = (GeneralRecommendationsInline,)
+    inlines = (GeneralRecommendationsSubcategoryInline,)
+
+
+@admin.register(models.GeneralRecommendation)
+class GeneralRecommendationAdmin(SortableAdminMixin, admin.ModelAdmin):
+    list_display = (
+        'name_lt',
+        'subcategory',
+        'created_at',
+        'updated_at',
+    )
+    search_fields = ('name_lt', 'body',)
+    list_filter = ('subcategory',)
+    list_select_related = ('subcategory',)
 
 
 @admin.register(models.ManualPeritonealDialysis)

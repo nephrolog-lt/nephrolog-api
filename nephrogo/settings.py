@@ -58,6 +58,9 @@ INSTALLED_APPS = [
 
     'adminsortable2',
 
+    'ckeditor',
+    'ckeditor_uploader',
+
     'core.apps.CoreConfig',
     'api.apps.ApiConfig',
 
@@ -340,6 +343,50 @@ SPECTACULAR_SETTINGS = {
     'COMPONENT_SPLIT_REQUEST': True,
     # Adds "blank" and "null" enum choices where appropriate. disable on client generation issues
     'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': False,
+}
+
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
+
+CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_IMAGE_BACKEND = "pillow"
+CKEDITOR_FORCE_JPEG_COMPRESSION = True
+CKEDITOR_IMAGE_QUALITY = 85
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar_NephroGoToolbarConfig': [
+            {'name': 'basicstyles',
+             'items': ['Format', 'Templates', 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-',
+                       'RemoveFormat']},
+
+            {'name': 'clipboard', 'items': ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo']},
+            {'name': 'paragraph',
+             'items': ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-',
+                       'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock']},
+            {'name': 'links', 'items': ['Link', 'Unlink']},
+            {'name': 'insert',
+             'items': ['Image', 'Table', 'HorizontalRule', 'SpecialChar', 'Iframe']},
+            {'name': 'document', 'items': ['Source', ]},
+
+        ],
+        'toolbar': 'NephroGoToolbarConfig',  # put selected toolbar config here
+        'tabSpaces': 3,
+        'extraPlugins': ','.join([
+            'uploadimage',  # the upload image feature
+            # your extra plugins here
+            'div',
+            'autolink',
+            'autoembed',
+            'embedsemantic',
+            'autogrow',
+            # 'devtools',
+            'widget',
+            'lineutils',
+            'clipboard',
+            'dialog',
+            'dialogui',
+            'elementspath'
+        ]),
+    }
 }
 
 if not DEBUG:

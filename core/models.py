@@ -6,6 +6,8 @@ from decimal import Decimal
 from functools import reduce
 from typing import List, Optional
 
+from ckeditor.fields import RichTextField
+from ckeditor_uploader.fields import RichTextUploadingField
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AbstractUser, UserManager as AbstractUserManager
 from django.contrib.postgres.indexes import GinIndex, GistIndex
@@ -1229,6 +1231,52 @@ class GeneralRecommendationDeprecated(models.Model):
 
     def __str__(self):
         return self.question_lt
+
+
+class GeneralRecommendationCategory(models.Model):
+    name_lt = models.CharField(max_length=128)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("order", "pk")
+
+    def __str__(self):
+        return self.name_lt
+
+
+class GeneralRecommendationSubcategory(models.Model):
+    category = models.ForeignKey(GeneralRecommendationCategory, on_delete=models.CASCADE)
+    name_lt = models.CharField(max_length=256)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("order", "pk")
+
+    def __str__(self):
+        return self.name_lt
+
+
+class GeneralRecommendation(models.Model):
+    subcategory = models.ForeignKey(GeneralRecommendationSubcategory, on_delete=models.PROTECT)
+    name_lt = models.CharField(max_length=256)
+    body_lt = RichTextUploadingField()
+
+    order = models.PositiveSmallIntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("order", "pk")
+
+    def __str__(self):
+        return self.name_lt
 
 
 class DialysisSolution(models.TextChoices):
