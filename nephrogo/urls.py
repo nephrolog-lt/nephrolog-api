@@ -19,7 +19,7 @@ from django.urls import include, path
 from django.views.generic import RedirectView
 
 import api.urls
-import settings
+import nephrogo.settings
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
