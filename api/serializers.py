@@ -439,7 +439,7 @@ class GeneralRecommendationCategorySerializer(serializers.ModelSerializer):
         fields = ('name', 'subcategories',)
 
 
-class GeneralRecommendationResponseSerializer(ReadOnlySerializer):
+class GeneralRecommendationsResponseSerializer(ReadOnlySerializer):
     categories = GeneralRecommendationCategorySerializer(many=True, source='*')
 
     class Meta:

@@ -368,7 +368,7 @@ class GeneralRecommendationsDeprecatedView(RetrieveAPIView):
 
 @extend_schema(tags=['general-recommendations'])
 class GeneralRecommendationsView(RetrieveAPIView):
-    serializer_class = serializers.GeneralRecommendationResponseSerializer
+    serializer_class = serializers.GeneralRecommendationsResponseSerializer
 
     def get_object(self) -> HealthStatusScreenResponse:
         return models.GeneralRecommendationCategory.objects.prefetch_related(

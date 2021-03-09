@@ -368,7 +368,7 @@ CKEDITOR_CONFIGS = {
         'toolbar': 'NephroGoToolbarConfig',  # put selected toolbar config here
         'tabSpaces': 3,
         'extraPlugins': ','.join([
-            'uploadimage',  # the upload image feature
+            'uploadimage',
             # your extra plugins here
             'div',
             'autolink',
