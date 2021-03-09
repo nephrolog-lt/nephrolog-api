@@ -7,8 +7,10 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from core.models import AutomaticPeritonealDialysis, BloodPressure, DailyHealthStatus, DailyIntakesReport, \
-    GeneralRecommendationDeprecated, \
-    GeneralRecommendationDeprecatedCategory, Intake, ManualPeritonealDialysis, Product, Pulse, Swelling, User, UserProfile
+    GeneralRecommendation, GeneralRecommendationCategory, GeneralRecommendationDeprecated, \
+    GeneralRecommendationDeprecatedCategory, GeneralRecommendationSubcategory, Intake, ManualPeritonealDialysis, \
+    Product, Pulse, Swelling, User, \
+    UserProfile
 from api.utils import datetime_from_request_and_validated_data
 
 logger = getLogger()
@@ -385,7 +387,7 @@ class ProductSearchResponseSerializer(serializers.Serializer):
         fields = ('query', 'daily_nutrient_norms_and_totals', 'products')
 
 
-class GeneralRecommendationSerializer(serializers.ModelSerializer):
+class GeneralRecommendationDeprecatedSerializer(serializers.ModelSerializer):
     question = serializers.CharField(source='question_lt')
     answer = serializers.CharField(source='answer_lt')
 
@@ -396,7 +398,7 @@ class GeneralRecommendationSerializer(serializers.ModelSerializer):
 
 class GeneralRecommendationCategoryDeprecatedSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='name_lt')
-    recommendations = GeneralRecommendationSerializer(many=True)
+    recommendations = GeneralRecommendationDeprecatedSerializer(many=True)
 
     class Meta:
         model = GeneralRecommendationDeprecatedCategory
@@ -405,6 +407,40 @@ class GeneralRecommendationCategoryDeprecatedSerializer(serializers.ModelSeriali
 
 class GeneralRecommendationsDeprecatedResponseSerializer(ReadOnlySerializer):
     categories = GeneralRecommendationCategoryDeprecatedSerializer(many=True, source='*')
+
+    class Meta:
+        fields = ('categories',)
+
+
+class GeneralRecommendationSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='name_lt')
+    body = serializers.CharField(source='body_lt')
+
+    class Meta:
+        model = GeneralRecommendation
+        fields = ('name', 'body',)
+
+
+class GeneralRecommendationSubcategorySerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='name_lt')
+    recommendations = GeneralRecommendationSerializer(many=True)
+
+    class Meta:
+        model = GeneralRecommendationSubcategory
+        fields = ('name', 'recommendations',)
+
+
+class GeneralRecommendationCategorySerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='name_lt')
+    subcategories = GeneralRecommendationSubcategorySerializer(many=True)
+
+    class Meta:
+        model = GeneralRecommendationCategory
+        fields = ('name', 'subcategories',)
+
+
+class GeneralRecommendationResponseSerializer(ReadOnlySerializer):
+    categories = GeneralRecommendationCategorySerializer(many=True, source='*')
 
     class Meta:
         fields = ('categories',)

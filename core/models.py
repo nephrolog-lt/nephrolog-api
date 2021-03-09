@@ -1248,7 +1248,7 @@ class GeneralRecommendationCategory(models.Model):
 
 
 class GeneralRecommendationSubcategory(models.Model):
-    category = models.ForeignKey(GeneralRecommendationCategory, on_delete=models.CASCADE)
+    category = models.ForeignKey(GeneralRecommendationCategory, on_delete=models.CASCADE, related_name='subcategories')
     name_lt = models.CharField(max_length=256)
     order = models.PositiveSmallIntegerField(default=0)
 
@@ -1263,7 +1263,8 @@ class GeneralRecommendationSubcategory(models.Model):
 
 
 class GeneralRecommendation(models.Model):
-    subcategory = models.ForeignKey(GeneralRecommendationSubcategory, on_delete=models.PROTECT)
+    subcategory = models.ForeignKey(GeneralRecommendationSubcategory, on_delete=models.PROTECT,
+                                    related_name='recommendations')
     name_lt = models.CharField(max_length=256)
     body_lt = RichTextUploadingField()
 

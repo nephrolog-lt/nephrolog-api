@@ -1,6 +1,6 @@
 import datetime
 
-from django.db.models import QuerySet
+from django.db.models import Prefetch, QuerySet
 from django.http import Http404
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -357,12 +357,26 @@ class HealthStatusWeeklyScreenView(RetrieveAPIView):
         return HealthStatusWeeklyResponse.from_api_request(self.request)
 
 
-@extend_schema(tags=['general-recommendations'])
+# Deprecated on 03-09 remove in the future
+@extend_schema(tags=['general-recommendations'], deprecated=True, exclude=True)
 class GeneralRecommendationsDeprecatedView(RetrieveAPIView):
     serializer_class = serializers.GeneralRecommendationsDeprecatedResponseSerializer
 
     def get_object(self) -> HealthStatusScreenResponse:
         return models.GeneralRecommendationDeprecatedCategory.objects.prefetch_related('recommendations')
+
+
+@extend_schema(tags=['general-recommendations'])
+class GeneralRecommendationsView(RetrieveAPIView):
+    serializer_class = serializers.GeneralRecommendationResponseSerializer
+
+    def get_object(self) -> HealthStatusScreenResponse:
+        return models.GeneralRecommendationCategory.objects.prefetch_related(
+            Prefetch(
+                'subcategories',
+                models.GeneralRecommendationSubcategory.objects.prefetch_related('recommendations')
+            )
+        )
 
 
 @extend_schema(tags=['peritoneal-dialysis'])
