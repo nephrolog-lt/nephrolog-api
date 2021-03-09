@@ -414,7 +414,7 @@ class GeneralRecommendationsDeprecatedResponseSerializer(ReadOnlySerializer):
 
 class GeneralRecommendationSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='name_lt')
-    body = serializers.CharField(source='body_with_absolute_image_paths')
+    body = serializers.CharField(source='full_body')
 
     class Meta:
         model = GeneralRecommendation
