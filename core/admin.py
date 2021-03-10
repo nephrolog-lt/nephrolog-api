@@ -454,7 +454,6 @@ class GeneralRecommendationCategoryAdmin(SortableAdminMixin, admin.ModelAdmin):
         'created_at',
         'updated_at',
     )
-    search_fields = ('name_lt', 'questions__question_lt',)
     inlines = (GeneralRecommendationsSubcategoryInline,)
 
 
@@ -498,7 +497,11 @@ class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
     raw_id_fields = ('daily_health_status', 'daily_intakes_report')
     date_hierarchy = 'started_at'
     list_select_related = ('daily_health_status', 'daily_health_status__user')
-    search_fields = ('user__pk', 'user__email', 'user__username',)
+    search_fields = (
+        'daily_health_status__user__pk',
+        'daily_health_status__user__email',
+        'daily_health_status__user__username',
+    )
     list_filter = (
         'is_completed',
         ('finished_at', EmptyFieldListFilter),
