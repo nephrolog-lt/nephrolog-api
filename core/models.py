@@ -1283,7 +1283,6 @@ class GeneralRecommendation(models.Model):
         return f"<h3>{self.name_lt}</h3>{self.body_lt}"
 
 
-
 class DialysisSolution(models.TextChoices):
     Unknown = "Unknown"
     Yellow = "Yellow"
@@ -1309,6 +1308,15 @@ class ManualPeritonealDialysisQuerySet(models.QuerySet):
 
     def filter_not_completed(self) -> ManualPeritonealDialysisQuerySet:
         return self.filter(is_completed=False)
+
+    def annotate_with_calculated_finished_at(self):
+        return self.annotate(
+            calculated_finished_at=models.Window(
+                functions.Lag('started_at'),
+                order_by=models.F('started_at').desc(),
+                partition_by=models.F('daily_health_status__user')
+            )
+        )
 
 
 class ManualPeritonealDialysis(models.Model):

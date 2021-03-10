@@ -487,9 +487,9 @@ class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
         'dialysate_color',
 
         'notes',
-        'finished_at',
-
         'user',
+        'finished_at',
+        'calculated_finished_at',
 
         'created_at',
         'updated_at',
@@ -510,6 +510,10 @@ class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
         ('notes', EmptyFieldListFilter),
     )
 
+    def get_queryset(self, request):
+        # noinspection PyUnresolvedReferences
+        return super().get_queryset(request).annotate_with_calculated_finished_at()
+
     def user(self, obj):
         return obj.daily_health_status.user
 
@@ -523,9 +527,14 @@ class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
 
     urine_ml.admin_order_field = "daily_health_status__urine_ml"
 
+    def calculated_finished_at(self, obj):
+        return obj.calculated_finished_at
+
+    calculated_finished_at.admin_order_field = "calculated_finished_at"
+
 
 @admin.register(models.AutomaticPeritonealDialysis)
-class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
+class AutomaticPeritonealDialysisAdmin(admin.ModelAdmin):
     list_display = (
         'id',
 
