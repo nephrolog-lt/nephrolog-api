@@ -1417,7 +1417,7 @@ class AutomaticPeritonealDialysis(models.Model):
     initial_draining_ml = models.PositiveSmallIntegerField(null=True, blank=True)
     total_drain_volume_ml = models.PositiveSmallIntegerField(null=True, blank=True)
     last_fill_ml = models.PositiveSmallIntegerField(null=True, blank=True)
-    total_ultrafiltration_ml = models.PositiveSmallIntegerField(null=True, blank=True)
+    total_ultrafiltration_ml = models.PositiveIntegerField(null=True, blank=True)
 
     dialysate_color = models.CharField(
         max_length=16,
