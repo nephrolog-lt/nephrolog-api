@@ -39,7 +39,6 @@ USE_X_FORWARDED_HOST = True
 
 # Application definition
 INSTALLED_APPS = [
-    'admin_numeric_filter',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -57,6 +56,8 @@ INSTALLED_APPS = [
     'drf_firebase_token_auth',
 
     'adminsortable2',
+    'admin_numeric_filter',
+    'csvexport',
 
     'ckeditor',
     'ckeditor_uploader',

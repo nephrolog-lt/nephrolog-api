@@ -34,5 +34,5 @@ django-ckeditor==6.0.0
 
 # Admin improvements
 django-admin-numeric-filter==0.1.6
-django-csv-export-view==1.1.0
+django-admin-csvexport==1.9
 django-admin-sortable2==0.7.8

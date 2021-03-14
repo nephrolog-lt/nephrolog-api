@@ -1,6 +1,6 @@
 from admin_numeric_filter.admin import NumericFilterModelAdmin, RangeNumericFilter
 from adminsortable2.admin import SortableAdminMixin, SortableInlineAdminMixin
-from csv_export.views import CSVExportView
+from csvexport.actions import csvexport
 from django.contrib import admin
 from django.contrib.admin import EmptyFieldListFilter
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -39,6 +39,7 @@ class UserAdmin(BaseUserAdmin):
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
     inlines = (UserProfileAdminInline,)
+    actions = [csvexport]
 
     ordering = ('-last_login',)
     search_fields = ('username', 'first_name', 'last_name', 'email', 'pk')
@@ -108,6 +109,7 @@ class ProductSearchLogAdmin(NumericFilterModelAdmin):
     )
     search_fields = ('product1__name_lt', 'product2__name_lt', 'product3__name_lt', 'user__email', 'user__username')
     date_hierarchy = 'created_at'
+    actions = [csvexport]
 
 
 @admin.register(models.Product)
@@ -145,6 +147,7 @@ class ProductAdmin(admin.ModelAdmin):
         'updated_at'
     )
     search_fields = ('name_lt', 'name_en', 'name_search_lt')
+    actions = [csvexport]
 
     def get_queryset(self, request):
         # noinspection PyUnresolvedReferences
@@ -172,6 +175,7 @@ class BaseUserProfileAdminMixin(NumericFilterModelAdmin):
     list_select_related = ('user',)
     search_fields = ('user__pk', 'user__email', 'user__username')
     date_hierarchy = 'created_at'
+    actions = [csvexport]
 
 
 @admin.register(models.HistoricalUserProfile)
@@ -248,6 +252,7 @@ class IntakeAdmin(admin.ModelAdmin):
     search_fields = ('user__pk', 'user__email', 'user__username', 'product__name_lt')
     list_filter = ('consumed_at', 'meal_type')
     date_hierarchy = 'consumed_at'
+    actions = [csvexport]
 
 
 @admin.register(models.BloodPressure)
@@ -273,6 +278,7 @@ class BloodPressureAdmin(admin.ModelAdmin):
         'daily_health_status__user__email',
         'daily_health_status__user__username',
     )
+    actions = [csvexport]
 
     def user(self, obj):
         return str(obj.daily_health_status.user)
@@ -300,6 +306,7 @@ class BloodPressureAdmin(admin.ModelAdmin):
         'daily_health_status__user__email',
         'daily_health_status__user__username',
     )
+    actions = [csvexport]
 
     def user(self, obj):
         return str(obj.daily_health_status.user)
@@ -343,6 +350,7 @@ class DailyHealthStatusAdmin(admin.ModelAdmin):
     search_fields = ('user__pk', 'user__email', 'user__username',)
     inlines = (BloodPressureAdminInline, PulseAdminInline)
     list_filter = (('systolic_blood_pressure', EmptyFieldListFilter),)
+    actions = [csvexport]
 
     def get_queryset(self, request):
         # noinspection PyUnresolvedReferences
@@ -400,7 +408,7 @@ class DailyIntakesReportAdmin(admin.ModelAdmin):
     raw_id_fields = ('user',)
     search_fields = ('user__pk', 'user__email', 'user__username',)
     inlines = (IntakeAdminInline,)
-    actions = ('export_data_csv',)
+    actions = (csvexport,)
 
     def get_queryset(self, request):
         # noinspection PyUnresolvedReferences
@@ -411,13 +419,6 @@ class DailyIntakesReportAdmin(admin.ModelAdmin):
 
     intakes_count.admin_order_field = "intakes_count"
     intakes_count.short_description = "intakes_count"
-
-    def export_data_csv(self, request, queryset):
-        view = CSVExportView(queryset=queryset.annotate_with_nutrient_totals(),
-                             fields='__all__')
-        return view.get(request)
-
-    export_data_csv.short_description = 'Export CSV'
 
 
 class GeneralRecommendationsDeprecatedInline(SortableInlineAdminMixin, admin.StackedInline):
@@ -509,6 +510,7 @@ class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
         'dialysate_color',
         ('notes', EmptyFieldListFilter),
     )
+    actions = [csvexport]
 
     def get_queryset(self, request):
         # noinspection PyUnresolvedReferences
@@ -577,6 +579,7 @@ class AutomaticPeritonealDialysisAdmin(admin.ModelAdmin):
         'dialysate_color',
         ('notes', EmptyFieldListFilter),
     )
+    actions = [csvexport]
 
     def get_queryset(self, request):
         # noinspection PyUnresolvedReferences
