@@ -19,7 +19,7 @@ datadog==0.40.1
 celery[redis]==5.0.5
 
 # Django rest framework
-djangorestframework==3.12.2
+djangorestframework==3.12.4
 drf-firebase-token-auth==0.2.1
 drf-spectacular==0.14.0
 django-filter==2.4.0
