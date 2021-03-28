@@ -296,6 +296,8 @@ class PulseSerializer(serializers.ModelSerializer):
 
 
 class ManualPeritonealDialysisSerializer(serializers.ModelSerializer):
+    finished_at = serializers.DateTimeField(allow_null=True, read_only=True)
+
     class Meta:
         model = ManualPeritonealDialysis
         fields = (
@@ -458,87 +460,6 @@ class UserPulsePrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
         user = self.context['request'].user
 
         return Pulse.filter_for_user(user)
-
-
-class ManualPeritonealDialysisLegacySerializer(serializers.ModelSerializer):
-    blood_pressure_id = UserBloodPressurePrimaryKeyRelatedField(source='blood_pressure', write_only=True,
-                                                                allow_null=True, required=False)
-    pulse_id = UserPulsePrimaryKeyRelatedField(source='pulse', write_only=True, allow_null=True, required=False)
-
-    blood_pressure = BloodPressureSerializer(read_only=True)
-    pulse = PulseSerializer(read_only=True)
-
-    liquids_ml = serializers.IntegerField(default=0, read_only=True)
-    urine_ml = serializers.IntegerField(source='daily_health_status.urine_ml', allow_null=True, read_only=True)
-    weight_kg = serializers.DecimalField(source='daily_health_status.weight_kg', allow_null=True, read_only=True,
-                                         max_digits=4, decimal_places=1)
-
-    class Meta:
-        model = ManualPeritonealDialysis
-        fields = (
-            'id',
-
-            'is_completed',
-            'started_at',
-
-            'blood_pressure',
-            'blood_pressure_id',
-            'pulse',
-            'pulse_id',
-
-            'urine_ml',
-            'weight_kg',
-            'liquids_ml',
-
-            'dialysis_solution',
-            'solution_in_ml',
-            'solution_out_ml',
-            'dialysate_color',
-
-            'notes',
-            'finished_at'
-        )
-
-
-class DailyManualPeritonealDialysisReportSerializer(serializers.ModelSerializer):
-    manual_peritoneal_dialysis = ManualPeritonealDialysisLegacySerializer(many=True)
-
-    class Meta:
-        model = DailyHealthStatus
-        fields = (
-            'date',
-
-            'manual_peritoneal_dialysis',
-
-            'urine_ml',
-            'weight_kg',
-        )
-
-
-class DailyManualPeritonealDialysisReportResponseSerializer(serializers.Serializer):
-    manual_peritoneal_dialysis_reports = DailyManualPeritonealDialysisReportSerializer(many=True)
-
-    class Meta:
-        fields = (
-            'manual_peritoneal_dialysis_reports',
-        )
-
-
-class ManualPeritonealDialysisLegacyScreenResponseSerializer(ReadOnlySerializer):
-    peritoneal_dialysis_in_progress = ManualPeritonealDialysisLegacySerializer(allow_null=True)
-    has_manual_peritoneal_dialysis = serializers.BooleanField()
-    last_week_manual_dialysis_reports = DailyManualPeritonealDialysisReportSerializer(many=True)
-    last_week_light_nutrition_reports = DailyIntakesLightReportSerializer(many=True)
-    last_week_health_statuses = DailyHealthStatusSerializer(many=True)
-
-    class Meta:
-        fields = (
-            'peritoneal_dialysis_in_progress',
-            'has_manual_peritoneal_dialysis',
-            'last_week_manual_dialysis_reports',
-            'last_week_light_nutrition_reports',
-            'last_week_health_statuses',
-        )
 
 
 class ManualPeritonealDialysisScreenResponseSerializer(ReadOnlySerializer):

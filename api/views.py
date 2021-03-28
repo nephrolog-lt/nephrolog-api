@@ -6,15 +6,12 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.generics import CreateAPIView, DestroyAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView, \
     RetrieveUpdateDestroyAPIView, UpdateAPIView, get_object_or_404
-from rest_framework.pagination import PageNumberPagination
 
 from api import serializers
 from api.models import AutomaticPeritonealDialysisPeriodResponse, AutomaticPeritonealDialysisScreenResponse, \
-    DailyManualPeritonealDialysisReportsResponse, \
-    HealthStatusScreenResponse, \
-    HealthStatusWeeklyResponse, ManualPeritonealDialysisLegacyScreenResponse, ManualPeritonealDialysisScreenResponse, \
-    NutritionScreenResponse, \
-    NutrientWeeklyScreenResponse, NutritionScreenV2Response, ProductSearchResponse, DailyIntakesReportsLightResponse
+    DailyIntakesReportsLightResponse, HealthStatusScreenResponse, HealthStatusWeeklyResponse, \
+    ManualPeritonealDialysisScreenResponse, NutrientWeeklyScreenResponse, NutritionScreenResponse, \
+    NutritionScreenV2Response, ProductSearchResponse
 from api.utils import date_from_request_and_validated_data, datetime_from_request_and_validated_data, datetime_to_date, \
     parse_date_or_validation_error, \
     parse_time_zone
@@ -413,85 +410,6 @@ class ManualPeritonealDialysisScreenView(RetrieveAPIView):
 
     def get_object(self) -> ManualPeritonealDialysisScreenResponse:
         return ManualPeritonealDialysisScreenResponse.from_api_request(self.request)
-
-
-# Deprecated on 02-28
-@extend_schema(tags=['peritoneal-dialysis'], exclude=True, deprecated=True)
-class CreateManualPeritonealDialysisLegacyView(CreateAPIView):
-    serializer_class = serializers.ManualPeritonealDialysisLegacySerializer
-
-    def perform_create(self, serializer):
-        date = date_from_request_and_validated_data(self.request, serializer.validated_data, 'started_at')
-        daily_health_status = models.DailyHealthStatus.get_or_create_for_user_and_date(self.request.user, date)
-        daily_intakes_report = models.DailyIntakesReport.get_or_create_for_user_and_date(self.request.user, date)
-
-        serializer.save(daily_health_status=daily_health_status, daily_intakes_report=daily_intakes_report)
-
-
-@extend_schema(tags=['peritoneal-dialysis'], exclude=True, deprecated=True)
-class ManualPeritonealDialysisLegacyScreenView(RetrieveAPIView):
-    serializer_class = serializers.ManualPeritonealDialysisLegacyScreenResponseSerializer
-
-    def get_object(self) -> ManualPeritonealDialysisLegacyScreenResponse:
-        return ManualPeritonealDialysisLegacyScreenResponse.from_api_request(self.request)
-
-
-@extend_schema(
-    tags=['peritoneal-dialysis'],
-    parameters=[
-        OpenApiParameter(
-            name='from',
-            type=OpenApiTypes.DATE,
-            required=True,
-            location=OpenApiParameter.QUERY,
-        ),
-        OpenApiParameter(
-            name='to',
-            type=OpenApiTypes.DATE,
-            required=True,
-            location=OpenApiParameter.QUERY,
-        ),
-    ],
-    exclude=True, deprecated=True,
-)
-class ManualPeritonealDialysisReportsView(RetrieveAPIView):
-    serializer_class = serializers.DailyManualPeritonealDialysisReportResponseSerializer
-
-    def get_object(self) -> DailyManualPeritonealDialysisReportsResponse:
-        return DailyManualPeritonealDialysisReportsResponse.from_api_request(self.request)
-
-
-class ManualPeritonealDialysisReportsPagination(PageNumberPagination):
-    page_size = 300
-    max_page_size = 300
-
-
-@extend_schema(tags=['peritoneal-dialysis'], exclude=True, deprecated=True)
-class ManualPeritonealDialysisReportsPaginatedView(ListAPIView):
-    serializer_class = serializers.DailyManualPeritonealDialysisReportSerializer
-    pagination_class = ManualPeritonealDialysisReportsPagination
-
-    def get_queryset(self):
-        return models.DailyHealthStatus.filter_for_user(self.request.user) \
-            .filter_manual_peritoneal_dialysis() \
-            .order_by('-date', 'pk')
-
-
-# Deprecated on 02-28
-@extend_schema(tags=['peritoneal-dialysis'], exclude=True, deprecated=True)
-class UpdateManualPeritonealDialysisLegacyView(UpdateAPIView):
-    serializer_class = serializers.ManualPeritonealDialysisLegacySerializer
-    lookup_url_kwarg = 'id'
-
-    def get_queryset(self):
-        return models.ManualPeritonealDialysis.objects.filter(daily_health_status__user=self.request.user)
-
-    def perform_update(self, serializer):
-        date = date_from_request_and_validated_data(self.request, serializer.validated_data, 'started_at')
-        daily_health_status = models.DailyHealthStatus.get_or_create_for_user_and_date(self.request.user, date)
-        daily_intakes_report = models.DailyIntakesReport.get_or_create_for_user_and_date(self.request.user, date)
-
-        serializer.save(daily_health_status=daily_health_status, daily_intakes_report=daily_intakes_report)
 
 
 @extend_schema(tags=['peritoneal-dialysis'])

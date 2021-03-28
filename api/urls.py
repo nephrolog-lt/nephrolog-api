@@ -60,22 +60,6 @@ urlpatterns = [
     path('peritoneal-dialysis/automatic/period/', views.AutomaticPeritonealDialysisPeriodView.as_view(),
          name="api-peritoneal-dialysis-automatic-period"),
 
-    # All others are deprecated
-    path('peritoneal-dialysis/manual/', views.CreateManualPeritonealDialysisLegacyView.as_view(),
-         name="api-peritoneal-dialysis-manual-create-deprecated"),
-
-    path('peritoneal-dialysis/manual/screen/', views.ManualPeritonealDialysisLegacyScreenView.as_view(),
-         name="api-peritoneal-dialysis-manual-screen-deprecated"),
-
-    path('peritoneal-dialysis/manual/reports/', views.ManualPeritonealDialysisReportsView.as_view(),
-         name="api-peritoneal-dialysis-manual-reports-deprecated"),
-
-    path('peritoneal-dialysis/manual/reports/paginated/', views.ManualPeritonealDialysisReportsPaginatedView.as_view(),
-         name="api-peritoneal-dialysis-manual-reports-paginated"),
-
-    path('peritoneal-dialysis/manual/<int:id>/', views.UpdateManualPeritonealDialysisLegacyView.as_view(),
-         name="api-peritoneal-dialysis-manual-update-deprecated"),
-
     path('schema.json/', SpectacularJSONAPIView.as_view(), name='schema'),
     # Optional UI:
     path('', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

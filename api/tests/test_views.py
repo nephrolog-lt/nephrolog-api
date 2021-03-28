@@ -6,8 +6,8 @@ from rest_framework import status
 from rest_framework.test import APIRequestFactory, APITestCase
 
 from core.models import DailyHealthStatus, User
-from core.tests.factories import BloodPressureFactory, DailyHealthStatusFactory, DailyIntakesReportFactory, \
-    IntakeFactory, ProductFactory, PulseFactory, UserFactory, UserProfileFactory
+from core.tests.factories import DailyIntakesReportFactory, \
+    IntakeFactory, ProductFactory, UserFactory, UserProfileFactory
 
 
 class BaseApiTest(APITestCase):
@@ -522,59 +522,22 @@ class CreateManualPeritonealDialysisViewTests(BaseApiTest):
     def test_successful_creation(self):
         self.login_user()
 
-        daily_health_status = DailyHealthStatusFactory(user=self.user, date=date(2021, 2, 23))
-
-        pulse = PulseFactory(daily_health_status=daily_health_status)
-        blood_pressure = BloodPressureFactory(daily_health_status=daily_health_status)
-
         request_data = {
-            "started_at": "2021-02-23T09:29:04.539Z",
-            "blood_pressure_id": blood_pressure.pk,
-            "pulse_id": pulse.pk,
+            "started_at": "2021-02-22T09:29:04.539Z",
             "dialysis_solution": "Unknown",
             "solution_in_ml": 2000,
             "solution_out_ml": 2300,
             "dialysate_color": "Unknown",
             "notes": "My note",
-            "finished_at": "2021-02-23T09:29:04.539Z"
+            "finished_at": "2021-02-22T12:29:04.539Z"
         }
 
         response = self.client.post(
-            reverse('api-peritoneal-dialysis-manual-create-deprecated'),
+            reverse('api-peritoneal-dialysis-manual-create'),
             data=request_data,
         )
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['notes'], "My note")
-        self.assertEqual(response.data['pulse']['id'], pulse.pk)
-        self.assertEqual(response.data['blood_pressure']['id'], blood_pressure.pk)
-
-    def test_creation_with_other_user_pulse(self):
-        self.login_user()
-
-        daily_health_status = DailyHealthStatusFactory(user=self.user, date=date(2021, 2, 23))
-
-        other_user = UserFactory()
-
-        other_user_daily_health_status = DailyHealthStatusFactory(user=other_user, date=date(2021, 2, 23))
-
-        pulse = PulseFactory(daily_health_status=other_user_daily_health_status)
-        blood_pressure = BloodPressureFactory(daily_health_status=daily_health_status)
-
-        request_data = {
-            "started_at": "2021-02-23T09:29:04.539Z",
-            "blood_pressure_id": blood_pressure.pk,
-            "pulse_id": pulse.pk,
-            "dialysis_solution": "Unknown",
-            "solution_in_ml": 0,
-            "solution_out_ml": 0,
-            "dialysate_color": "Unknown",
-            "notes": "My note",
-            "finished_at": "2021-02-23T09:29:04.539Z"
-        }
-
-        response = self.client.post(
-            reverse('api-peritoneal-dialysis-manual-create-deprecated'),
-            data=request_data,
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['solution_in_ml'], 2000)
+        self.assertIsNone(response.data['finished_at'])

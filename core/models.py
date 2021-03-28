@@ -1309,9 +1309,22 @@ class ManualPeritonealDialysisQuerySet(models.QuerySet):
     def filter_not_completed(self) -> ManualPeritonealDialysisQuerySet:
         return self.filter(is_completed=False)
 
-    def annotate_with_calculated_finished_at(self):
+    def annotate_with_finished_at(self):
         return self.annotate(
-            calculated_finished_at=models.Window(
+            finished_at=models.Window(
+                functions.Lag('started_at'),
+                order_by=models.F('started_at').desc(),
+                partition_by=models.F('daily_health_status__user')
+            )
+        )
+
+
+# noinspection PyUnresolvedReferences
+class ManualPeritonealDialysisManager(models.Manager.from_queryset(ManualPeritonealDialysisQuerySet)):
+    def get_queryset(self):
+        print("ManualPeritonealDialysisManager get_queryset")
+        return super().get_queryset().annotate(
+            finished_at=models.Window(
                 functions.Lag('started_at'),
                 order_by=models.F('started_at').desc(),
                 partition_by=models.F('daily_health_status__user')
@@ -1354,12 +1367,12 @@ class ManualPeritonealDialysis(models.Model):
 
     notes = models.TextField(blank=True)
 
-    finished_at = models.DateTimeField(null=True, blank=True)
+    finished_at_deprecated = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    objects = ManualPeritonealDialysisQuerySet.as_manager()
+    objects = ManualPeritonealDialysisManager()
 
     class Meta:
         default_related_name = "manual_peritoneal_dialysis"
@@ -1368,9 +1381,8 @@ class ManualPeritonealDialysis(models.Model):
     def clean(self) -> None:
         super().clean()
 
-        if self.is_completed:
-            if self.finished_at is None or self.solution_out_ml is None:
-                raise ValidationError('Make sure that by completeing dialysis all required fields are filled out')
+        if self.is_completed and self.solution_out_ml is None:
+            raise ValidationError('Make sure that by completeing dialysis all required fields are filled out')
 
     @staticmethod
     def filter_for_user(user: AbstractBaseUser) -> QuerySet[ManualPeritonealDialysis]:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 from dataclasses import dataclass
-from typing import Iterable, Iterator, List, Optional
+from typing import Iterable, List, Optional
 
 from django.db.models import QuerySet
 from rest_framework.request import Request
@@ -10,10 +10,7 @@ from rest_framework.request import Request
 from api import utils
 from api.utils import parse_date_query_params
 from core.models import AutomaticPeritonealDialysis, DailyHealthStatus, DailyHealthStatusQuerySet, DailyIntakesReport, \
-    Intake, \
-    ManualPeritonealDialysis, MealType, UserProfile, \
-    Product, \
-    DailyNutrientNormsAndTotals, ProductSearchLog
+    DailyNutrientNormsAndTotals, Intake, ManualPeritonealDialysis, MealType, Product, ProductSearchLog, UserProfile
 
 
 @dataclass(frozen=True)
@@ -121,75 +118,6 @@ class ManualPeritonealDialysisScreenResponse:
             last_week_light_nutrition_reports=last_week_light_nutrition_reports,
             peritoneal_dialysis_in_progress=not_completed_peritoneal_dialysis,
             last_peritoneal_dialysis=last_peritoneal_dialysis,
-        )
-
-
-# Deprecated 02-28
-@dataclass(frozen=True)
-class ManualPeritonealDialysisLegacyScreenResponse:
-    has_manual_peritoneal_dialysis: bool
-    last_week_manual_dialysis_reports: Iterator[DailyHealthStatus]
-    last_week_health_statuses: DailyHealthStatusQuerySet
-    last_week_light_nutrition_reports: QuerySet[DailyIntakesReport]
-    peritoneal_dialysis_in_progress: Optional[ManualPeritonealDialysis]
-
-    @staticmethod
-    def from_api_request(request: Request) -> ManualPeritonealDialysisLegacyScreenResponse:
-        tz = utils.parse_time_zone(request)
-
-        now = datetime.datetime.now(tz)
-
-        from_date = (now - datetime.timedelta(days=6)).date()
-        to_date = now.date()
-
-        weekly_health_statuses = DailyHealthStatus.get_between_dates_for_user(
-            request.user,
-            from_date,
-            to_date
-        ).prefetch_blood_pressure_and_pulse()
-
-        last_week_light_nutrition_reports = DailyIntakesReport.get_for_user_between_dates(
-            request.user,
-            from_date,
-            to_date
-        ).annotate_with_nutrient_totals()
-
-        last_week_manual_dialysis_reports = filter(lambda s: len(s.manual_peritoneal_dialysis.all()) > 0,
-                                                   weekly_health_statuses)
-
-        has_manual_peritoneal_dialysis = bool(last_week_manual_dialysis_reports)
-        if not has_manual_peritoneal_dialysis:
-            has_manual_peritoneal_dialysis = ManualPeritonealDialysis.filter_for_user(request.user).exists()
-
-        not_completed_peritoneal_dialysis = ManualPeritonealDialysis.filter_for_user(request.user) \
-            .select_related_fields() \
-            .filter_not_completed().first()
-
-        return ManualPeritonealDialysisLegacyScreenResponse(
-            last_week_manual_dialysis_reports=last_week_manual_dialysis_reports,
-            last_week_health_statuses=weekly_health_statuses,
-            last_week_light_nutrition_reports=last_week_light_nutrition_reports,
-            peritoneal_dialysis_in_progress=not_completed_peritoneal_dialysis,
-            has_manual_peritoneal_dialysis=has_manual_peritoneal_dialysis,
-        )
-
-
-@dataclass(frozen=True)
-class DailyManualPeritonealDialysisReportsResponse:
-    manual_peritoneal_dialysis_reports: DailyHealthStatusQuerySet
-
-    @staticmethod
-    def from_api_request(request: Request) -> DailyManualPeritonealDialysisReportsResponse:
-        date_from, date_to = parse_date_query_params(request)
-
-        daily_health_statuses = DailyHealthStatus.get_between_dates_for_user(
-            request.user,
-            date_from,
-            date_to
-        ).filter_manual_peritoneal_dialysis()
-
-        return DailyManualPeritonealDialysisReportsResponse(
-            manual_peritoneal_dialysis_reports=daily_health_statuses,
         )
 
 
