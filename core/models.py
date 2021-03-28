@@ -1322,7 +1322,6 @@ class ManualPeritonealDialysisQuerySet(models.QuerySet):
 # noinspection PyUnresolvedReferences
 class ManualPeritonealDialysisManager(models.Manager.from_queryset(ManualPeritonealDialysisQuerySet)):
     def get_queryset(self):
-        print("ManualPeritonealDialysisManager get_queryset")
         return super().get_queryset().annotate(
             finished_at=models.Window(
                 functions.Lag('started_at'),
