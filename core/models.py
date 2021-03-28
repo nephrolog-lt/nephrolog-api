@@ -1309,15 +1309,6 @@ class ManualPeritonealDialysisQuerySet(models.QuerySet):
     def filter_not_completed(self) -> ManualPeritonealDialysisQuerySet:
         return self.filter(is_completed=False)
 
-    def annotate_with_finished_at(self):
-        return self.annotate(
-            finished_at=models.Window(
-                functions.Lag('started_at'),
-                order_by=models.F('started_at').desc(),
-                partition_by=models.F('daily_health_status__user')
-            )
-        )
-
 
 # noinspection PyUnresolvedReferences
 class ManualPeritonealDialysisManager(models.Manager.from_queryset(ManualPeritonealDialysisQuerySet)):
