@@ -347,7 +347,6 @@ class DailyHealthStatusAdmin(admin.ModelAdmin):
     list_select_related = ('user',)
     search_fields = ('user__pk', 'user__email', 'user__username',)
     inlines = (BloodPressureAdminInline, PulseAdminInline)
-    list_filter = (('systolic_blood_pressure', EmptyFieldListFilter),)
     actions = [csvexport]
 
     def get_queryset(self, request):
