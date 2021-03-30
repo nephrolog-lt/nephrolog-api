@@ -11,7 +11,7 @@ from core.models import Appetite, BloodPressure, DailyHealthStatus, DailyIntakes
     HistoricalUserProfile, Intake, \
     Product, \
     ProductKind, \
-    ShortnessOfBreath, SwellingDifficulty, User, \
+    Pulse, ShortnessOfBreath, SwellingDifficulty, User, \
     UserProfile, WellFeeling
 from core.utils import Datadog
 
@@ -117,8 +117,8 @@ def sync_product_metrics():
             tags=[f'kind:{kind}']
         )
 
-    datadog.gauge('product.health_status.blood_pressure',
-                  DailyHealthStatus.objects.filter(systolic_blood_pressure__isnull=False).count())
+    datadog.gauge('product.health_status.blood_pressure', BloodPressure.objects.count())
+    datadog.gauge('product.health_status.pulse', Pulse.objects.count())
 
     datadog.gauge('product.health_status.weight_kg',
                   DailyHealthStatus.objects.filter(weight_kg__isnull=False).count())
