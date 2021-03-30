@@ -288,10 +288,6 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'core.tasks.sync_product_metrics',
         'schedule': timedelta(minutes=15)
     },
-    'sync_legacy_blood_pressure': {
-        'task': 'core.tasks.sync_legacy_blood_pressure',
-        'schedule': timedelta(minutes=10)
-    },
 }
 
 CELERYD_TASK_SOFT_TIME_LIMIT = 45 * 60
