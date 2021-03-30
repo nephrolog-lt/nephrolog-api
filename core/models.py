@@ -1336,10 +1336,6 @@ class ManualPeritonealDialysis(models.Model):
 
     started_at = models.DateTimeField()
 
-    blood_pressure = models.OneToOneField(BloodPressure, on_delete=models.SET_NULL, null=True, blank=True,
-                                          db_index=False)
-    pulse = models.OneToOneField(Pulse, on_delete=models.SET_NULL, null=True, blank=True, db_index=False)
-
     dialysis_solution = models.CharField(
         max_length=16,
         choices=DialysisSolution.choices,
