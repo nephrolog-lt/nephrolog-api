@@ -409,8 +409,6 @@ class HealthStatusCreateViewTests(BaseApiTest):
         request_data = {
             "$": "DailyHealthStatusRequest",
             "date": "2021-02-18",
-            "systolic_blood_pressure": 180,
-            "diastolic_blood_pressure": 60,
             "weight_kg": 70.0,
             "glucose": 24.8,
             "urine_ml": 1000,
@@ -434,8 +432,8 @@ class HealthStatusCreateViewTests(BaseApiTest):
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['systolic_blood_pressure'], 180)
-        self.assertEqual(response.data['diastolic_blood_pressure'], 60)
+        self.assertEqual(response.data['weight_kg'], 70.0)
+        self.assertEqual(response.data['urine_ml'], 1000)
         self.assertEqual(len(response.data['swellings']), 2)
 
 
