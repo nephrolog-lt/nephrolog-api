@@ -327,8 +327,6 @@ class DailyHealthStatusAdmin(admin.ModelAdmin):
         'user',
         'date',
 
-        'systolic_blood_pressure',
-        'diastolic_blood_pressure',
         'blood_pressures',
         'pulses',
 

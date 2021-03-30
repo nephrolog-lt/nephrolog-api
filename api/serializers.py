@@ -316,8 +316,6 @@ class ManualPeritonealDialysisSerializer(serializers.ModelSerializer):
         )
 
 
-# Excluded on 02-18 remove in the future: diastolic_blood_pressure, systolic_blood_pressure
-@extend_schema_serializer(exclude_fields=['systolic_blood_pressure', 'diastolic_blood_pressure'])
 class DailyHealthStatusSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     swellings = SwellingSerializer(many=True)
@@ -328,7 +326,7 @@ class DailyHealthStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = DailyHealthStatus
         fields = (
-            'date', 'user', 'systolic_blood_pressure', 'diastolic_blood_pressure', 'weight_kg', 'glucose', 'urine_ml',
+            'date', 'user', 'weight_kg', 'glucose', 'urine_ml',
             'swelling_difficulty', 'well_feeling', 'appetite', 'shortness_of_breath', 'swellings', 'blood_pressures',
             'pulses', 'manual_peritoneal_dialysis'
         )

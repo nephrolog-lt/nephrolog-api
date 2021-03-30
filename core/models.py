@@ -1000,9 +1000,6 @@ class DailyHealthStatus(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date = models.DateField()
 
-    systolic_blood_pressure = models.PositiveSmallIntegerField(null=True, blank=True)
-    diastolic_blood_pressure = models.PositiveSmallIntegerField(null=True, blank=True)
-
     weight_kg = models.DecimalField(null=True, blank=True, max_digits=4, decimal_places=1,
                                     validators=[validators.MinValueValidator(Decimal('10'))])
 
