@@ -270,7 +270,7 @@ class BaseUserProfile(models.Model):
         return None
 
     def daily_norm_energy_kcal(self) -> Optional[int]:
-        return round(35 * self.perfect_weight_kg)
+        return None
 
     def daily_norm_liquids_g_without_urine(self) -> Optional[int]:
         if self.dialysis_type in (DialysisType.Hemodialysis, DialysisType.PeriotonicDialysis):
