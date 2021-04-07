@@ -221,6 +221,15 @@ class UserProfileView(CreateAPIView, RetrieveUpdateAPIView):
 
 
 @extend_schema(tags=['user'])
+class UserProfileV2View(CreateAPIView, RetrieveUpdateAPIView):
+    queryset = models.UserProfile.objects.all()
+    serializer_class = serializers.UserProfileV2Serializer
+
+    def get_object(self):
+        return get_object_or_404(self.filter_queryset(self.get_queryset()), user=self.request.user)
+
+
+@extend_schema(tags=['user'])
 class UserView(RetrieveAPIView, UpdateAPIView):
     serializer_class = serializers.UserSerializer
 

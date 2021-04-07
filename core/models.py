@@ -6,7 +6,6 @@ from decimal import Decimal
 from functools import reduce
 from typing import List, Optional
 
-from ckeditor.fields import RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AbstractUser, UserManager as AbstractUserManager
@@ -133,9 +132,18 @@ class PeriotonicDialysisType(models.TextChoices):
     Automatic = "Automatic"
 
 
-class DialysisType(models.TextChoices):
+class DialysisTypeLegacy(models.TextChoices):
     Unknown = "Unknown"
     PeriotonicDialysis = "PeriotonicDialysis"
+    Hemodialysis = "Hemodialysis"
+    PostTransplant = "PostTransplant"
+    NotPerformed = "NotPerformed"
+
+
+class DialysisType(models.TextChoices):
+    Unknown = "Unknown"
+    AutomaticPeritonealDialysis = "AutomaticPeritonealDialysis"
+    ManualPeritonealDialysis = "ManualPeritonealDialysis"
     Hemodialysis = "Hemodialysis"
     PostTransplant = "PostTransplant"
     NotPerformed = "NotPerformed"
@@ -155,6 +163,14 @@ class DiabetesType(models.TextChoices):
     Type1 = "Type1"
     Type2 = "Type2"
     No = "No"
+
+
+class ChronicKidneyDiseaseAgeInterval(models.TextChoices):
+    Unknown = "Unknown", "Unknown"
+    BelowOne = "<1", "<1"
+    TwoToFive = "2-5", "2-5"
+    SixToTen = "6-10", "6-10"
+    MoreThanTen = ">10", ">10"
 
 
 class DiabetesComplications(models.TextChoices):
@@ -178,14 +194,28 @@ class BaseUserProfile(models.Model):
     weight_kg = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True,
                                     validators=[validators.MinValueValidator(Decimal('10'))])
 
+    chronic_kidney_disease_age = models.CharField(
+        max_length=16,
+        choices=ChronicKidneyDiseaseAgeInterval.choices,
+        default=ChronicKidneyDiseaseAgeInterval.Unknown,
+    )
+
     chronic_kidney_disease_years = models.PositiveSmallIntegerField()
     chronic_kidney_disease_stage = models.CharField(
         max_length=16,
         choices=ChronicKidneyDiseaseStage.choices,
     )
-    dialysis_type = models.CharField(
+
+    dialysis = models.CharField(
         max_length=32,
         choices=DialysisType.choices,
+        default=DialysisType.Unknown,
+    )
+
+    dialysis_type = models.CharField(
+        max_length=32,
+        choices=DialysisTypeLegacy.choices,
+        default=DialysisTypeLegacy.Unknown,
     )
 
     periotonic_dialysis_type = models.CharField(
@@ -227,8 +257,28 @@ class BaseUserProfile(models.Model):
             self.diabetes_complications = DiabetesComplications.Unknown
             self.diabetes_years = None
 
-        if self.birthday and self.year_of_birth is None:
-            self.year_of_birth = self.birthday.year
+        if self.dialysis == DialysisType.Unknown:
+            if self.dialysis_type == DialysisTypeLegacy.Hemodialysis:
+                self.dialysis = DialysisType.Hemodialysis
+            elif self.dialysis_type == DialysisTypeLegacy.NotPerformed:
+                self.dialysis = DialysisType.NotPerformed
+            elif self.dialysis_type == DialysisTypeLegacy.PostTransplant:
+                self.dialysis = DialysisType.PostTransplant
+            elif self.dialysis_type == DialysisTypeLegacy.PeriotonicDialysis:
+                if self.periotonic_dialysis_type == PeriotonicDialysisType.Manual:
+                    self.dialysis = DialysisType.ManualPeritonealDialysis
+                else:
+                    self.dialysis = DialysisType.AutomaticPeritonealDialysis
+
+        if self.chronic_kidney_disease_age == ChronicKidneyDiseaseAgeInterval.Unknown:
+            if self.chronic_kidney_disease_years < 1:
+                self.chronic_kidney_disease_age = ChronicKidneyDiseaseAgeInterval.BelowOne
+            elif 2 <= self.chronic_kidney_disease_years <= 5:
+                self.chronic_kidney_disease_age = ChronicKidneyDiseaseAgeInterval.TwoToFive
+            elif 6 <= self.chronic_kidney_disease_years <= 10:
+                self.chronic_kidney_disease_age = ChronicKidneyDiseaseAgeInterval.SixToTen
+            else:
+                self.chronic_kidney_disease_age = ChronicKidneyDiseaseAgeInterval.MoreThanTen
 
         super().save(force_insert, force_update, using, update_fields)
 
@@ -237,24 +287,24 @@ class BaseUserProfile(models.Model):
         return self.diabetes_type in (DiabetesType.Type1, DiabetesType.Type2)
 
     def daily_norm_potassium_mg(self) -> Optional[int]:
-        if self.dialysis_type == DialysisType.Hemodialysis:
+        if self.dialysis_type == DialysisTypeLegacy.Hemodialysis:
             return round(40 * self.perfect_weight_kg)
-        if self.dialysis_type == DialysisType.PeriotonicDialysis:
+        if self.dialysis_type == DialysisTypeLegacy.PeriotonicDialysis:
             return 4000
 
         return None
 
     def daily_norm_proteins_mg(self) -> Optional[int]:
-        if self.dialysis_type == DialysisType.NotPerformed:
+        if self.dialysis_type == DialysisTypeLegacy.NotPerformed:
             if self._is_diabetic:
                 return round(800 * self.perfect_weight_kg)
             else:
                 return round(600 * self.perfect_weight_kg)
 
-        if self.dialysis_type in (DialysisType.PeriotonicDialysis, DialysisType.Hemodialysis):
+        if self.dialysis_type in (DialysisTypeLegacy.PeriotonicDialysis, DialysisTypeLegacy.Hemodialysis):
             return round(1200 * self.perfect_weight_kg)
 
-        if self.dialysis_type == DialysisType.PostTransplant:
+        if self.dialysis_type == DialysisTypeLegacy.PostTransplant:
             return round(800 * self.perfect_weight_kg)
 
         return None
@@ -264,7 +314,8 @@ class BaseUserProfile(models.Model):
 
     def daily_norm_phosphorus_mg(self) -> Optional[int]:
         if self.dialysis_type in (
-                DialysisType.Hemodialysis, DialysisType.PeriotonicDialysis, DialysisType.NotPerformed):
+                DialysisTypeLegacy.Hemodialysis, DialysisTypeLegacy.PeriotonicDialysis,
+                DialysisTypeLegacy.NotPerformed):
             return 1000
 
         return None
@@ -273,7 +324,7 @@ class BaseUserProfile(models.Model):
         return None
 
     def daily_norm_liquids_g_without_urine(self) -> Optional[int]:
-        if self.dialysis_type in (DialysisType.Hemodialysis, DialysisType.PeriotonicDialysis):
+        if self.dialysis_type in (DialysisTypeLegacy.Hemodialysis, DialysisTypeLegacy.PeriotonicDialysis):
             return 1000
 
         return None
@@ -353,9 +404,11 @@ class HistoricalUserProfile(BaseUserProfile):
                 'year_of_birth': user_profile.year_of_birth,
                 'height_cm': user_profile.height_cm,
                 'weight_kg': user_profile.weight_kg,
+                'chronic_kidney_disease_age': user_profile.chronic_kidney_disease_age,
                 'chronic_kidney_disease_years': user_profile.chronic_kidney_disease_years,
                 'chronic_kidney_disease_stage': user_profile.chronic_kidney_disease_stage,
                 'dialysis_type': user_profile.dialysis_type,
+                'dialysis': user_profile.dialysis,
                 'periotonic_dialysis_type': user_profile.periotonic_dialysis_type,
                 'diabetes_complications': user_profile.diabetes_complications,
                 'created_at': user_profile.created_at,

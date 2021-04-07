@@ -26,7 +26,7 @@ class UserProfileFactory(DjangoModelFactory):
     height_cm = 185
     weight_kg = 188.8
     chronic_kidney_disease_years = 2
-    dialysis_type = factory.Iterator(models.DialysisType.PeriotonicDialysis, models.DialysisType.PostTransplant)
+    dialysis_type = factory.Iterator(models.DialysisTypeLegacy.PeriotonicDialysis, models.DialysisTypeLegacy.PostTransplant)
 
 
 class ProductFactory(DjangoModelFactory):

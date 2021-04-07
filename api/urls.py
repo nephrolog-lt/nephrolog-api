@@ -5,6 +5,7 @@ from api import views
 
 urlpatterns = [
     path('user/profile/', views.UserProfileView.as_view(), name="api-user-profile"),
+    path('user/profile/v2/', views.UserProfileV2View.as_view(), name="api-user-profile-v2"),
     path('user/app-review/', views.UserAppReview.as_view(), name="api-user-app-review"),
     path('user/', views.UserView.as_view(), name="api-user"),
 

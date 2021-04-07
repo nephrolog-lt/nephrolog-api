@@ -44,6 +44,22 @@ class UserProfileSerializer(serializers.ModelSerializer):
         )
 
 
+class UserProfileV2Serializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = UserProfile
+        fields = (
+            'user',
+            'gender',
+            'height_cm',
+            'chronic_kidney_disease_age',
+            'chronic_kidney_disease_stage',
+            'dialysis',
+            'diabetes_type',
+        )
+
+
 class NutritionSummaryStatisticsSerializer(ReadOnlySerializer):
     min_report_date = serializers.DateField(allow_null=True)
     max_report_date = serializers.DateField(allow_null=True)
