@@ -168,7 +168,7 @@ class DiabetesType(models.TextChoices):
 class ChronicKidneyDiseaseAgeInterval(models.TextChoices):
     Unknown = "Unknown", "Unknown"
     BelowOne = "<1", "<1"
-    OneToFive = "2-5", "1-5"
+    OneToFive = "1-5", "1-5"
     SixToTen = "6-10", "6-10"
     MoreThanTen = ">10", ">10"
 
