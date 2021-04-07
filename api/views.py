@@ -211,7 +211,7 @@ class NutritionWeeklyScreenView(RetrieveAPIView):
         return NutrientWeeklyScreenResponse.from_api_request(self.request)
 
 
-@extend_schema(tags=['user'])
+@extend_schema(tags=['user'], exclude=True)
 class UserProfileView(CreateAPIView, RetrieveUpdateAPIView):
     queryset = models.UserProfile.objects.all()
     serializer_class = serializers.UserProfileSerializer
