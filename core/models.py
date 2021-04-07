@@ -168,7 +168,7 @@ class DiabetesType(models.TextChoices):
 class ChronicKidneyDiseaseAgeInterval(models.TextChoices):
     Unknown = "Unknown", "Unknown"
     BelowOne = "<1", "<1"
-    TwoToFive = "2-5", "2-5"
+    OneToFive = "2-5", "1-5"
     SixToTen = "6-10", "6-10"
     MoreThanTen = ">10", ">10"
 
@@ -274,7 +274,7 @@ class BaseUserProfile(models.Model):
             if self.chronic_kidney_disease_years < 1:
                 self.chronic_kidney_disease_age = ChronicKidneyDiseaseAgeInterval.BelowOne
             elif 2 <= self.chronic_kidney_disease_years <= 5:
-                self.chronic_kidney_disease_age = ChronicKidneyDiseaseAgeInterval.TwoToFive
+                self.chronic_kidney_disease_age = ChronicKidneyDiseaseAgeInterval.OneToFive
             elif 6 <= self.chronic_kidney_disease_years <= 10:
                 self.chronic_kidney_disease_age = ChronicKidneyDiseaseAgeInterval.SixToTen
             else:
