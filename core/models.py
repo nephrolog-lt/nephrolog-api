@@ -200,7 +200,7 @@ class BaseUserProfile(models.Model):
         default=ChronicKidneyDiseaseAgeInterval.Unknown,
     )
 
-    chronic_kidney_disease_years = models.PositiveSmallIntegerField()
+    chronic_kidney_disease_years = models.PositiveSmallIntegerField(null=True, blank=True)
     chronic_kidney_disease_stage = models.CharField(
         max_length=16,
         choices=ChronicKidneyDiseaseStage.choices,
