@@ -287,24 +287,28 @@ class BaseUserProfile(models.Model):
         return self.diabetes_type in (DiabetesType.Type1, DiabetesType.Type2)
 
     def daily_norm_potassium_mg(self) -> Optional[int]:
-        if self.dialysis_type == DialysisTypeLegacy.Hemodialysis:
+        if self.dialysis == DialysisType.Hemodialysis:
             return round(40 * self.perfect_weight_kg)
-        if self.dialysis_type == DialysisTypeLegacy.PeriotonicDialysis:
+        if self.dialysis in (DialysisType.AutomaticPeritonealDialysis, DialysisType.ManualPeritonealDialysis):
             return 4000
 
         return None
 
     def daily_norm_proteins_mg(self) -> Optional[int]:
-        if self.dialysis_type == DialysisTypeLegacy.NotPerformed:
+        if self.dialysis == DialysisType.NotPerformed:
             if self._is_diabetic:
                 return round(800 * self.perfect_weight_kg)
             else:
                 return round(600 * self.perfect_weight_kg)
 
-        if self.dialysis_type in (DialysisTypeLegacy.PeriotonicDialysis, DialysisTypeLegacy.Hemodialysis):
+        if self.dialysis in (
+                DialysisType.AutomaticPeritonealDialysis,
+                DialysisType.ManualPeritonealDialysis,
+                DialysisType.Hemodialysis
+        ):
             return round(1200 * self.perfect_weight_kg)
 
-        if self.dialysis_type == DialysisTypeLegacy.PostTransplant:
+        if self.dialysis == DialysisType.PostTransplant:
             return round(800 * self.perfect_weight_kg)
 
         return None
@@ -313,9 +317,11 @@ class BaseUserProfile(models.Model):
         return 2300
 
     def daily_norm_phosphorus_mg(self) -> Optional[int]:
-        if self.dialysis_type in (
-                DialysisTypeLegacy.Hemodialysis, DialysisTypeLegacy.PeriotonicDialysis,
-                DialysisTypeLegacy.NotPerformed):
+        if self.dialysis in (
+                DialysisType.Hemodialysis,
+                DialysisType.AutomaticPeritonealDialysis,
+                DialysisType.ManualPeritonealDialysis,
+                DialysisType.NotPerformed):
             return 1000
 
         return None
@@ -324,7 +330,11 @@ class BaseUserProfile(models.Model):
         return None
 
     def daily_norm_liquids_g_without_urine(self) -> Optional[int]:
-        if self.dialysis_type in (DialysisTypeLegacy.Hemodialysis, DialysisTypeLegacy.PeriotonicDialysis):
+        if self.dialysis in (
+                DialysisType.Hemodialysis,
+                DialysisType.AutomaticPeritonealDialysis,
+                DialysisType.ManualPeritonealDialysis,
+        ):
             return 1000
 
         return None
