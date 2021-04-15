@@ -13,7 +13,7 @@ firebase-admin==4.5.3
 # Logging and monitoring
 sentry-sdk==1.0.0
 ddtrace==0.48.0
-datadog==0.40.1
+datadog==0.41.0
 
 # Celery
 celery[redis]==5.0.5
