@@ -17,11 +17,6 @@ from core.utils import Datadog
 
 logger = logging.getLogger(__name__)
 
-_sick_years_groups = [(0, 4), (5, 9), (10, 14), (15, 19), (20, 24), (25, 29), (30, 34),
-                      (35, 39), (40, 44), (45, 49), (50, 100)]
-
-_user_age_groups = [(18, 24), (25, 34), (35, 44), (45, 54), (55, 64), (65, 74), (75, 100)]
-
 
 @shared_task(soft_time_limit=60, autoretry_for=(Exception,), retry_backoff=True)
 def sync_product_metrics():
@@ -29,11 +24,13 @@ def sync_product_metrics():
     now = timezone.now()
 
     def _gauge_daily_norm(field_name: str, metric_name: str):
+        total_field_name = field_name if field_name != 'liquids_g' else 'liquids_ml'
+
         intake_reports_with_totals = DailyIntakesReport.objects.exclude_empty_intakes() \
             .annotate_with_nutrient_totals()
 
         reports_with_indicator = intake_reports_with_totals.filter(**{f'daily_norm_{field_name}__isnull': False})
-        exceeded = reports_with_indicator.filter(**{f'daily_norm_{field_name}__lt': F(f'total_{field_name}')})
+        exceeded = reports_with_indicator.filter(**{f'daily_norm_{field_name}__lt': F(f'total_{total_field_name}')})
 
         datadog.gauge(
             f'product.nutrition.norms.{metric_name}.total', reports_with_indicator.count())
@@ -49,16 +46,6 @@ def sync_product_metrics():
             datadog.gauge(f'product.users.profiles.{field_name}', metric['total'],
                           tags=[f'{field_name}:{metric[field_name]}'])
 
-    def _gauge_aggregated_user_profile_group_metric(field_name: str, groups: List[Tuple[int, int]],
-                                                    user_profile_queryset: QuerySet[UserProfile] = None):
-        if user_profile_queryset is None:
-            user_profile_queryset = UserProfile.objects.all()
-
-        for group in groups:
-            total = user_profile_queryset.filter(**{f"{field_name}__range": group}).count()
-            datadog.gauge(f'product.users.profiles.{field_name}', total,
-                          tags=[f'{field_name}:{group[0]}_{group[1]}'])
-
     user_with_statistics_queryset = User.objects.annotate_with_statistics()
     user_with_statistics_and_profile_queryset = user_with_statistics_queryset.exclude(profile_count=0)
 
@@ -72,18 +59,10 @@ def sync_product_metrics():
                   user_with_statistics_and_profile_queryset.exclude(daily_health_statuses_count=0).count())
 
     _gauge_aggregated_user_profile_metric('gender')
+    _gauge_aggregated_user_profile_metric('chronic_kidney_disease_age')
     _gauge_aggregated_user_profile_metric('chronic_kidney_disease_stage')
-    # _gauge_aggregated_user_profile_metric('dialysis_type')
+    _gauge_aggregated_user_profile_metric('dialysis')
     _gauge_aggregated_user_profile_metric('diabetes_type')
-    # _gauge_aggregated_user_profile_metric('diabetes_complications', UserProfile.objects.filter_diabetics())
-
-    # _gauge_aggregated_user_profile_group_metric('chronic_kidney_disease_years', _sick_years_groups)
-    # _gauge_aggregated_user_profile_group_metric('diabetes_years', _sick_years_groups,
-    #                                             user_profile_queryset=UserProfile.objects.filter_diabetics())
-    # _gauge_aggregated_user_profile_group_metric(
-    #     'age', _user_age_groups,
-    #     user_profile_queryset=UserProfile.objects.annotate_with_age()
-    # )
 
     datadog.gauge('product.users.last_sign_in.24_hours',
                   user_with_statistics_and_profile_queryset.filter(last_login__gte=now - timedelta(days=1)).count())
