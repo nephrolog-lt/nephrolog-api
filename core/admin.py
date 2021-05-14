@@ -445,10 +445,10 @@ class GeneralRecommendationAdmin(SortableAdminMixin, admin.ModelAdmin):
     actions = [csvexport]
 
 
-@admin.register(models.GeneralRecommendationUserRead)
-class GeneralRecommendationUserReadAdmin(admin.ModelAdmin):
+@admin.register(models.GeneralRecommendationRead)
+class GeneralRecommendationReadAdmin(admin.ModelAdmin):
     list_display = (
-        'recommendation',
+        'general_recommendation',
         'user',
         'reads',
         'created_at',
@@ -456,7 +456,7 @@ class GeneralRecommendationUserReadAdmin(admin.ModelAdmin):
     )
     search_fields = ('user__pk', 'user__email', 'user__username')
     list_filter = ('created_at', 'updated_at')
-    list_select_related = ('recommendation', 'user',)
+    list_select_related = ('general_recommendation', 'user',)
     actions = [csvexport]
 
 

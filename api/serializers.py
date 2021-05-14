@@ -10,7 +10,7 @@ from core.models import AutomaticPeritonealDialysis, BloodPressure, DailyHealthS
     GeneralRecommendation, GeneralRecommendationCategory, GeneralRecommendationSubcategory, Intake, \
     ManualPeritonealDialysis, \
     Product, Pulse, Swelling, User, \
-    UserProfile, GeneralRecommendationUserRead
+    UserProfile, GeneralRecommendationRead
 from api.utils import datetime_from_request_and_validated_data
 
 logger = getLogger()
@@ -386,6 +386,29 @@ class GeneralRecommendationsResponseSerializer(ReadOnlySerializer):
 
     class Meta:
         fields = ('read_recommendation_ids', 'categories',)
+
+
+class CreateGeneralRecommendationReadSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    general_recommendation = serializers.PrimaryKeyRelatedField(queryset=GeneralRecommendation.objects.all())
+
+    class Meta:
+        model = GeneralRecommendationRead
+        fields = (
+            'user',
+            'general_recommendation',
+        )
+
+    def create(self, validated_data: Dict) -> DailyHealthStatus:
+        general_recommendation = validated_data['general_recommendation']
+        user = self.context['request'].user
+
+        recommendation_read, _ = GeneralRecommendationRead.objects.update_or_create(
+            user=user,
+            general_recommendation=general_recommendation
+        )
+
+        return recommendation_read
 
 
 class UserBloodPressurePrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):

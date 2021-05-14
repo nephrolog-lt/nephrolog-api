@@ -314,10 +314,15 @@ class GeneralRecommendationsView(RetrieveAPIView):
             )
         )
 
-        read_recommendation_ids = models.GeneralRecommendationUserRead.objects.filter(
-            user=self.request.user).values_list('recommendation', flat=True).order_by('recommendation')
+        read_recommendation_ids = models.GeneralRecommendationRead.objects.filter(
+            user=self.request.user).values_list('general_recommendation', flat=True).order_by('general_recommendation')
 
         return GeneralRecommendationsResponse(categories=categories, read_recommendation_ids=read_recommendation_ids)
+
+
+@extend_schema(tags=['general-recommendations'])
+class CreateGeneralRecommendationReadView(CreateAPIView):
+    serializer_class = serializers.CreateGeneralRecommendationReadSerializer
 
 
 @extend_schema(tags=['peritoneal-dialysis'])

@@ -1197,9 +1197,9 @@ class GeneralRecommendation(models.Model):
         return f"<h3>{self.name_lt}</h3>{self.body_lt}"
 
 
-class GeneralRecommendationUserRead(models.Model):
-    recommendation = models.ForeignKey(
-        GeneralRecommendationSubcategory,
+class GeneralRecommendationRead(models.Model):
+    general_recommendation = models.ForeignKey(
+        GeneralRecommendation,
         on_delete=models.CASCADE,
         db_index=False,
     )
@@ -1213,7 +1213,7 @@ class GeneralRecommendationUserRead(models.Model):
         ordering = ("-pk",)
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'recommendation'],
+                fields=['user', 'general_recommendation'],
                 name='unique_user_and_recommendation_for_read'
             )
         ]
