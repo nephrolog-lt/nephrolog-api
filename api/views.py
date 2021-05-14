@@ -93,20 +93,19 @@ class NutritionScreenV2View(RetrieveAPIView):
         return NutritionScreenV2Response.from_api_request(self.request)
 
 
-# TODO make into required in the near future. Written 02-09
 @extend_schema(
     tags=['nutrition'],
     parameters=[
         OpenApiParameter(
             name='from',
             type=OpenApiTypes.DATE,
-            required=False,
+            required=True,
             location=OpenApiParameter.QUERY,
         ),
         OpenApiParameter(
             name='to',
             type=OpenApiTypes.DATE,
-            required=False,
+            required=True,
             location=OpenApiParameter.QUERY,
         ),
     ],
@@ -158,15 +157,6 @@ class NutritionWeeklyScreenView(RetrieveAPIView):
 
     def get_object(self) -> NutrientWeeklyScreenResponse:
         return NutrientWeeklyScreenResponse.from_api_request(self.request)
-
-
-@extend_schema(tags=['user'], exclude=True)
-class UserProfileView(CreateAPIView, RetrieveUpdateAPIView):
-    queryset = models.UserProfile.objects.all()
-    serializer_class = serializers.UserProfileSerializer
-
-    def get_object(self):
-        return get_object_or_404(self.filter_queryset(self.get_queryset()), user=self.request.user)
 
 
 @extend_schema(tags=['user'])

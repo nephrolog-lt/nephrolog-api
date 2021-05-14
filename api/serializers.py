@@ -30,20 +30,6 @@ class ReadOnlySerializer(serializers.Serializer):
         raise RuntimeError("ReadOnlySerializer can not perform create")
 
 
-@extend_schema_serializer(exclude_fields=['weight_kg', 'birthday'])
-class UserProfileSerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-
-    class Meta:
-        model = UserProfile
-        fields = (
-            'user', 'gender', 'birthday', 'year_of_birth', 'height_cm', 'weight_kg',
-            'chronic_kidney_disease_years', 'chronic_kidney_disease_stage',
-            'dialysis_type', 'periotonic_dialysis_type',
-            'diabetes_type', 'diabetes_years', 'diabetes_complications',
-        )
-
-
 class UserProfileV2Serializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
