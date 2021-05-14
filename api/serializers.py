@@ -359,7 +359,7 @@ class GeneralRecommendationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GeneralRecommendation
-        fields = ('name', 'body',)
+        fields = ('id', 'name', 'body',)
 
 
 class GeneralRecommendationSubcategorySerializer(serializers.ModelSerializer):
