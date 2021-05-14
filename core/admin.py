@@ -457,6 +457,8 @@ class GeneralRecommendationReadAdmin(admin.ModelAdmin):
     search_fields = ('user__pk', 'user__email', 'user__username')
     list_filter = ('created_at', 'updated_at')
     list_select_related = ('general_recommendation', 'user',)
+    raw_id_fields = ('general_recommendation', 'user',)
+    readonly_fields = ('created_at', 'updated_at')
     actions = [csvexport]
 
 
