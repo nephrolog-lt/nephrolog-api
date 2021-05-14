@@ -422,25 +422,6 @@ class DailyIntakesReportAdmin(admin.ModelAdmin):
     intakes_count.short_description = "intakes_count"
 
 
-class GeneralRecommendationsDeprecatedInline(SortableInlineAdminMixin, admin.StackedInline):
-    model = models.GeneralRecommendationDeprecated
-    readonly_fields = (
-        'created_at',
-        'updated_at',
-    )
-
-
-@admin.register(models.GeneralRecommendationDeprecatedCategory)
-class GeneralRecommendationCategoryDeprecatedAdmin(SortableAdminMixin, admin.ModelAdmin):
-    list_display = (
-        'name_lt',
-        'created_at',
-        'updated_at',
-    )
-    search_fields = ('name_lt', 'questions__question_lt',)
-    inlines = (GeneralRecommendationsDeprecatedInline,)
-
-
 class GeneralRecommendationsSubcategoryInline(SortableInlineAdminMixin, admin.StackedInline):
     model = models.GeneralRecommendationSubcategory
     readonly_fields = (

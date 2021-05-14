@@ -1239,38 +1239,6 @@ class ProductSearchLog(models.Model):
         return f"{self.user} {self.query}"
 
 
-class GeneralRecommendationDeprecatedCategory(models.Model):
-    name_lt = models.CharField(max_length=128)
-    order = models.PositiveSmallIntegerField(default=0)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ("order", "pk")
-
-    def __str__(self):
-        return self.name_lt
-
-
-class GeneralRecommendationDeprecated(models.Model):
-    category = models.ForeignKey(GeneralRecommendationDeprecatedCategory, on_delete=models.PROTECT,
-                                 related_name='recommendations')
-    question_lt = models.CharField(max_length=256)
-    answer_lt = models.TextField()
-
-    order = models.PositiveSmallIntegerField(default=0)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ("order", "pk")
-
-    def __str__(self):
-        return self.question_lt
-
-
 class GeneralRecommendationCategory(models.Model):
     name_lt = models.CharField(max_length=128)
     order = models.PositiveSmallIntegerField(default=0)

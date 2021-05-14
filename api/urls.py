@@ -8,8 +8,6 @@ urlpatterns = [
     path('user/app-review/', views.UserAppReview.as_view(), name="api-user-app-review"),
     path('user/', views.UserView.as_view(), name="api-user"),
 
-    path('general-recommendations/', views.GeneralRecommendationsDeprecatedView.as_view(),
-         name="api-general-recommendations-deprecated"),
     path('general-recommendations/v2/', views.GeneralRecommendationsView.as_view(), name="api-general-recommendations"),
 
     path('nutrition/products/search/', views.ProductSearchView.as_view(), name="api-products-search"),

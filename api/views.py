@@ -302,15 +302,6 @@ class HealthStatusWeeklyScreenView(RetrieveAPIView):
         return HealthStatusWeeklyResponse.from_api_request(self.request)
 
 
-# Deprecated on 03-09 remove in the future
-@extend_schema(tags=['general-recommendations'], deprecated=True, exclude=True)
-class GeneralRecommendationsDeprecatedView(RetrieveAPIView):
-    serializer_class = serializers.GeneralRecommendationsDeprecatedResponseSerializer
-
-    def get_object(self) -> HealthStatusScreenResponse:
-        return models.GeneralRecommendationDeprecatedCategory.objects.prefetch_related('recommendations')
-
-
 @extend_schema(tags=['general-recommendations'])
 class GeneralRecommendationsView(RetrieveAPIView):
     serializer_class = serializers.GeneralRecommendationsResponseSerializer
