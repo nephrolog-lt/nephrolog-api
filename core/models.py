@@ -1197,6 +1197,33 @@ class GeneralRecommendation(models.Model):
         return f"<h3>{self.name_lt}</h3>{self.body_lt}"
 
 
+class GeneralRecommendationUserRead(models.Model):
+    recommendation = models.ForeignKey(
+        GeneralRecommendationSubcategory,
+        on_delete=models.CASCADE,
+        db_index=False,
+    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
+    reads = models.IntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-pk",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recommendation'],
+                name='unique_user_and_recommendation_for_read'
+            )
+        ]
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.reads = (self.reads or 0) + 1
+
+        super().save(force_insert, force_update, using, update_fields)
+
+
 class DialysisSolution(models.TextChoices):
     Unknown = "Unknown"
     Yellow = "Yellow"

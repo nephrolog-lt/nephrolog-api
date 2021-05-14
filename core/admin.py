@@ -445,6 +445,21 @@ class GeneralRecommendationAdmin(SortableAdminMixin, admin.ModelAdmin):
     actions = [csvexport]
 
 
+@admin.register(models.GeneralRecommendationUserRead)
+class GeneralRecommendationUserReadAdmin(admin.ModelAdmin):
+    list_display = (
+        'recommendation',
+        'user',
+        'reads',
+        'created_at',
+        'updated_at',
+    )
+    search_fields = ('user__pk', 'user__email', 'user__username')
+    list_filter = ('created_at', 'updated_at')
+    list_select_related = ('recommendation', 'user',)
+    actions = [csvexport]
+
+
 @admin.register(models.ManualPeritonealDialysis)
 class ManualPeritonealDialysisAdmin(admin.ModelAdmin):
     list_display = (

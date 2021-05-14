@@ -346,3 +346,9 @@ class ProductSearchResponse:
             query=query,
             daily_nutrient_norms_and_totals=daily_nutrient_norms_and_totals,
         )
+
+
+@dataclass(frozen=True)
+class GeneralRecommendationsResponse:
+    read_recommendation_ids: List[int]
+    categories: QuerySet[GeneralRecommendationCategory]

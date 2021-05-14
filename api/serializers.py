@@ -10,7 +10,7 @@ from core.models import AutomaticPeritonealDialysis, BloodPressure, DailyHealthS
     GeneralRecommendation, GeneralRecommendationCategory, GeneralRecommendationSubcategory, Intake, \
     ManualPeritonealDialysis, \
     Product, Pulse, Swelling, User, \
-    UserProfile
+    UserProfile, GeneralRecommendationUserRead
 from api.utils import datetime_from_request_and_validated_data
 
 logger = getLogger()
@@ -381,10 +381,11 @@ class GeneralRecommendationCategorySerializer(serializers.ModelSerializer):
 
 
 class GeneralRecommendationsResponseSerializer(ReadOnlySerializer):
-    categories = GeneralRecommendationCategorySerializer(many=True, source='*')
+    read_recommendation_ids = serializers.ListField(child=serializers.IntegerField())
+    categories = GeneralRecommendationCategorySerializer(many=True)
 
     class Meta:
-        fields = ('categories',)
+        fields = ('read_recommendation_ids', 'categories',)
 
 
 class UserBloodPressurePrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):

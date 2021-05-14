@@ -11,7 +11,7 @@ from api import serializers
 from api.models import AutomaticPeritonealDialysisPeriodResponse, AutomaticPeritonealDialysisScreenResponse, \
     DailyIntakesReportsLightResponse, HealthStatusScreenResponse, HealthStatusWeeklyResponse, \
     ManualPeritonealDialysisScreenResponse, NutrientWeeklyScreenResponse, NutritionScreenResponse, \
-    NutritionScreenV2Response, ProductSearchResponse
+    NutritionScreenV2Response, ProductSearchResponse, GeneralRecommendationsResponse
 from api.utils import date_from_request_and_validated_data, datetime_from_request_and_validated_data, datetime_to_date, \
     parse_date_or_validation_error, \
     parse_time_zone
@@ -306,13 +306,18 @@ class HealthStatusWeeklyScreenView(RetrieveAPIView):
 class GeneralRecommendationsView(RetrieveAPIView):
     serializer_class = serializers.GeneralRecommendationsResponseSerializer
 
-    def get_object(self) -> HealthStatusScreenResponse:
-        return models.GeneralRecommendationCategory.objects.prefetch_related(
+    def get_object(self):
+        categories = models.GeneralRecommendationCategory.objects.prefetch_related(
             Prefetch(
                 'subcategories',
                 models.GeneralRecommendationSubcategory.objects.prefetch_related('recommendations')
             )
         )
+
+        read_recommendation_ids = models.GeneralRecommendationUserRead.objects.filter(
+            user=self.request.user).values_list('recommendation', flat=True).order_by('recommendation')
+
+        return GeneralRecommendationsResponse(categories=categories, read_recommendation_ids=read_recommendation_ids)
 
 
 @extend_schema(tags=['peritoneal-dialysis'])
