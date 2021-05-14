@@ -21,12 +21,8 @@ class UserProfileFactory(DjangoModelFactory):
         model = models.UserProfile
 
     gender = factory.Iterator(models.Gender.Female, models.Gender.Male)
-    birthday = factory.Faker('date_of_birth')
-    year_of_birth = 1960
     height_cm = 185
-    weight_kg = 188.8
-    chronic_kidney_disease_years = 2
-    dialysis_type = factory.Iterator(models.DialysisTypeLegacy.PeriotonicDialysis, models.DialysisTypeLegacy.PostTransplant)
+    dialysis = factory.Iterator(models.DialysisType.ManualPeritonealDialysis, models.DialysisType.PostTransplant)
 
 
 class ProductFactory(DjangoModelFactory):

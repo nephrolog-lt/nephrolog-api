@@ -73,17 +73,17 @@ def sync_product_metrics():
 
     _gauge_aggregated_user_profile_metric('gender')
     _gauge_aggregated_user_profile_metric('chronic_kidney_disease_stage')
-    _gauge_aggregated_user_profile_metric('dialysis_type')
+    # _gauge_aggregated_user_profile_metric('dialysis_type')
     _gauge_aggregated_user_profile_metric('diabetes_type')
-    _gauge_aggregated_user_profile_metric('diabetes_complications', UserProfile.objects.filter_diabetics())
+    # _gauge_aggregated_user_profile_metric('diabetes_complications', UserProfile.objects.filter_diabetics())
 
-    _gauge_aggregated_user_profile_group_metric('chronic_kidney_disease_years', _sick_years_groups)
-    _gauge_aggregated_user_profile_group_metric('diabetes_years', _sick_years_groups,
-                                                user_profile_queryset=UserProfile.objects.filter_diabetics())
-    _gauge_aggregated_user_profile_group_metric(
-        'age', _user_age_groups,
-        user_profile_queryset=UserProfile.objects.annotate_with_age()
-    )
+    # _gauge_aggregated_user_profile_group_metric('chronic_kidney_disease_years', _sick_years_groups)
+    # _gauge_aggregated_user_profile_group_metric('diabetes_years', _sick_years_groups,
+    #                                             user_profile_queryset=UserProfile.objects.filter_diabetics())
+    # _gauge_aggregated_user_profile_group_metric(
+    #     'age', _user_age_groups,
+    #     user_profile_queryset=UserProfile.objects.annotate_with_age()
+    # )
 
     datadog.gauge('product.users.last_sign_in.24_hours',
                   user_with_statistics_and_profile_queryset.filter(last_login__gte=now - timedelta(days=1)).count())

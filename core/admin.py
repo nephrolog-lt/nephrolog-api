@@ -184,10 +184,14 @@ class HistoricalUserProfileAdmin(BaseUserProfileAdminMixin):
         'id',
         'user',
         'date',
+
         'gender',
-        'birthday',
         'height_cm',
-        'weight_kg',
+
+        'chronic_kidney_disease_age',
+        'chronic_kidney_disease_stage',
+        'dialysis',
+        'diabetes_type',
 
         'created_at',
         'updated_at',
@@ -202,20 +206,12 @@ class UserProfileAdmin(BaseUserProfileAdminMixin):
     list_display = (
         'user',
         'gender',
-        'year_of_birth',
-        'birthday',
         'height_cm',
-        'weight_kg',
 
         'chronic_kidney_disease_age',
-        'chronic_kidney_disease_years',
         'chronic_kidney_disease_stage',
         'dialysis',
-        'dialysis_type',
-        'periotonic_dialysis_type',
-        'diabetes_years',
         'diabetes_type',
-        'diabetes_complications',
 
         'created_at',
         'updated_at',
@@ -223,17 +219,11 @@ class UserProfileAdmin(BaseUserProfileAdminMixin):
 
     list_filter = (
         'gender',
-        ('year_of_birth', RangeNumericFilter),
         ('height_cm', RangeNumericFilter),
-        ('weight_kg', RangeNumericFilter),
         'chronic_kidney_disease_age',
-        ('chronic_kidney_disease_years', RangeNumericFilter),
         'chronic_kidney_disease_stage',
         'dialysis',
-        'dialysis_type',
-        'periotonic_dialysis_type',
-        ('diabetes_years', RangeNumericFilter),
-        'diabetes_type', 'diabetes_complications',
+        'diabetes_type',
         'created_at',
     )
 

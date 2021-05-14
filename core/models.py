@@ -125,20 +125,6 @@ class Gender(models.TextChoices):
     Female = "Female"
 
 
-class PeriotonicDialysisType(models.TextChoices):
-    Unknown = "Unknown"
-    Manual = "Manual"
-    Automatic = "Automatic"
-
-
-class DialysisTypeLegacy(models.TextChoices):
-    Unknown = "Unknown"
-    PeriotonicDialysis = "PeriotonicDialysis"
-    Hemodialysis = "Hemodialysis"
-    PostTransplant = "PostTransplant"
-    NotPerformed = "NotPerformed"
-
-
 class DialysisType(models.TextChoices):
     Unknown = "Unknown"
     AutomaticPeritonealDialysis = "AutomaticPeritonealDialysis"
@@ -172,26 +158,13 @@ class ChronicKidneyDiseaseAgeInterval(models.TextChoices):
     MoreThanTen = ">10", ">10"
 
 
-class DiabetesComplications(models.TextChoices):
-    Unknown = "Unknown"
-    No = "No"
-    Yes = "Yes"
-
-
 class BaseUserProfile(models.Model):
     gender = models.CharField(
         max_length=8,
         choices=Gender.choices,
     )
-    # TODO remove birthday in the future. Change made 02-03
-    birthday = models.DateField(null=True, blank=True)
-    year_of_birth = models.PositiveSmallIntegerField(
-        null=True, blank=True, validators=[validators.MinValueValidator(1920), validators.MaxValueValidator(2003)]
-    )
+
     height_cm = models.PositiveSmallIntegerField()
-    # TODO remove in the future. Change made 02-03
-    weight_kg = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True,
-                                    validators=[validators.MinValueValidator(Decimal('10'))])
 
     chronic_kidney_disease_age = models.CharField(
         max_length=16,
@@ -199,7 +172,6 @@ class BaseUserProfile(models.Model):
         default=ChronicKidneyDiseaseAgeInterval.Unknown,
     )
 
-    chronic_kidney_disease_years = models.PositiveSmallIntegerField(null=True, blank=True)
     chronic_kidney_disease_stage = models.CharField(
         max_length=16,
         choices=ChronicKidneyDiseaseStage.choices,
@@ -211,28 +183,10 @@ class BaseUserProfile(models.Model):
         default=DialysisType.Unknown,
     )
 
-    dialysis_type = models.CharField(
-        max_length=32,
-        choices=DialysisTypeLegacy.choices,
-        default=DialysisTypeLegacy.Unknown,
-    )
-
-    periotonic_dialysis_type = models.CharField(
-        max_length=16,
-        choices=PeriotonicDialysisType.choices,
-        default=PeriotonicDialysisType.Unknown,
-    )
-
-    diabetes_years = models.PositiveSmallIntegerField(null=True, blank=True)
     diabetes_type = models.CharField(
         max_length=16,
         choices=DiabetesType.choices,
         default=DiabetesType.Unknown,
-    )
-    diabetes_complications = models.CharField(
-        max_length=8,
-        choices=DiabetesComplications.choices,
-        default=DiabetesComplications.Unknown,
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -249,37 +203,6 @@ class BaseUserProfile(models.Model):
 
     class Meta:
         abstract = True
-
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        if self.diabetes_type in (DiabetesType.Unknown, DiabetesType.No):
-            self.diabetes_complications = DiabetesComplications.Unknown
-            self.diabetes_years = None
-
-        if self.dialysis == DialysisType.Unknown:
-            if self.dialysis_type == DialysisTypeLegacy.Hemodialysis:
-                self.dialysis = DialysisType.Hemodialysis
-            elif self.dialysis_type == DialysisTypeLegacy.NotPerformed:
-                self.dialysis = DialysisType.NotPerformed
-            elif self.dialysis_type == DialysisTypeLegacy.PostTransplant:
-                self.dialysis = DialysisType.PostTransplant
-            elif self.dialysis_type == DialysisTypeLegacy.PeriotonicDialysis:
-                if self.periotonic_dialysis_type == PeriotonicDialysisType.Manual:
-                    self.dialysis = DialysisType.ManualPeritonealDialysis
-                else:
-                    self.dialysis = DialysisType.AutomaticPeritonealDialysis
-
-        if self.chronic_kidney_disease_age == ChronicKidneyDiseaseAgeInterval.Unknown:
-            if self.chronic_kidney_disease_years < 1:
-                self.chronic_kidney_disease_age = ChronicKidneyDiseaseAgeInterval.BelowOne
-            elif 2 <= self.chronic_kidney_disease_years <= 5:
-                self.chronic_kidney_disease_age = ChronicKidneyDiseaseAgeInterval.OneToFive
-            elif 6 <= self.chronic_kidney_disease_years <= 10:
-                self.chronic_kidney_disease_age = ChronicKidneyDiseaseAgeInterval.SixToTen
-            else:
-                self.chronic_kidney_disease_age = ChronicKidneyDiseaseAgeInterval.MoreThanTen
-
-        super().save(force_insert, force_update, using, update_fields)
 
     @property
     def _is_diabetic(self) -> bool:
@@ -359,15 +282,6 @@ class BaseUserProfile(models.Model):
 
 
 class UserProfileQuerySet(models.QuerySet):
-    def annotate_with_age(self) -> QuerySet[UserProfile]:
-        current_year = now().year
-        return self.annotate(
-            age=models.ExpressionWrapper(
-                models.Value(current_year, output_field=models.IntegerField()) - models.F('year_of_birth'),
-                output_field=models.IntegerField()
-            )
-        )
-
     def filter_diabetics(self) -> UserProfileQuerySet:
         return self.filter(diabetes_type__in=(DiabetesType.Type1, DiabetesType.Type2))
 
@@ -409,17 +323,11 @@ class HistoricalUserProfile(BaseUserProfile):
             date=datetime.date.today(),
             defaults={
                 'gender': user_profile.gender,
-                'birthday': user_profile.birthday,
-                'year_of_birth': user_profile.year_of_birth,
                 'height_cm': user_profile.height_cm,
-                'weight_kg': user_profile.weight_kg,
                 'chronic_kidney_disease_age': user_profile.chronic_kidney_disease_age,
-                'chronic_kidney_disease_years': user_profile.chronic_kidney_disease_years,
                 'chronic_kidney_disease_stage': user_profile.chronic_kidney_disease_stage,
-                'dialysis_type': user_profile.dialysis_type,
                 'dialysis': user_profile.dialysis,
-                'periotonic_dialysis_type': user_profile.periotonic_dialysis_type,
-                'diabetes_complications': user_profile.diabetes_complications,
+                'diabetes_type': user_profile.diabetes_type,
                 'created_at': user_profile.created_at,
                 'updated_at': user_profile.updated_at,
             })

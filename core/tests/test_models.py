@@ -7,18 +7,6 @@ from core.tests.factories import DailyIntakesReportFactory, IntakeFactory, Produ
     UserProfileFactory
 
 
-class UserProfileTests(TestCase):
-
-    def test_age_calculation(self):
-        user = UserFactory()
-        UserProfileFactory(user=user, year_of_birth=1960)
-        expected_age = (date.today().year - 1960)
-
-        queryset = UserProfile.objects.annotate_with_age()
-
-        self.assertAlmostEqual(queryset.first().age, expected_age, delta=1)
-
-
 class IntakeTests(TestCase):
 
     def test_annotating_with_total_norms(self):
