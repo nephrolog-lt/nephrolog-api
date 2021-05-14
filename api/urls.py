@@ -13,7 +13,6 @@ urlpatterns = [
          name="api-general-recommendations-deprecated"),
     path('general-recommendations/v2/', views.GeneralRecommendationsView.as_view(), name="api-general-recommendations"),
 
-    path('nutrition/products/', views.ProductListView.as_view(), name="api-products"),
     path('nutrition/products/search/', views.ProductSearchView.as_view(), name="api-products-search"),
 
     path('nutrition/daily-reports/light/', views.DailyIntakesReportsLightView.as_view(),
@@ -24,7 +23,6 @@ urlpatterns = [
 
     path('nutrition/intake/', views.IntakeCreateView.as_view(), name="api-intake"),
     path('nutrition/intake/<int:id>/', views.IntakeView.as_view(), name="api-intake"),
-    path('nutrition/screen/', views.NutritionScreenView.as_view(), name="api-nutrition-screen"),
     path('nutrition/screen/v2/', views.NutritionScreenV2View.as_view(), name="api-nutrition-screen-v2"),
     path('nutrition/weekly/', views.NutritionWeeklyScreenView.as_view(), name="api-nutrition-weekly-screen"),
 

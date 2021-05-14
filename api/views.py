@@ -52,46 +52,6 @@ class ProductSearchView(RetrieveAPIView):
         return ProductSearchResponse.from_api_request(self.request, self._limit)
 
 
-@extend_schema(
-    tags=['nutrition'],
-    deprecated=True,
-    parameters=[
-        OpenApiParameter(
-            name='query',
-            type=OpenApiTypes.STR,
-            location=OpenApiParameter.QUERY,
-        ),
-        OpenApiParameter(
-            name='submit',
-            type=OpenApiTypes.BOOL,
-            location=OpenApiParameter.QUERY
-        ),
-    ],
-)
-class ProductListView(ListAPIView):
-    queryset = models.Product.objects.all()
-    serializer_class = serializers.ProductSerializer
-    _limit = 20
-
-    def get_queryset(self):
-        query = self.request.query_params.get('query', None)
-
-        products = models.Product.filter_by_user_and_query(self.request.user, query)[:self._limit]
-
-        if query:
-            submit_str = self.request.query_params.get('submit', None)
-
-            submit = None
-            if submit_str in ('0', 'false'):
-                submit = False
-            elif submit_str in ('1', 'true'):
-                submit = True
-
-            models.ProductSearchLog.insert_from_product_search(query, products, self.request.user, submit)
-
-        return products
-
-
 @extend_schema(tags=['nutrition'])
 class IntakeView(RetrieveUpdateDestroyAPIView):
     queryset = models.Intake.objects.all()
@@ -121,17 +81,6 @@ class IntakeCreateView(CreateAPIView):
         daily_report = models.DailyIntakesReport.get_or_create_for_user_and_date(self.request.user, date)
 
         serializer.save(daily_report=daily_report)
-
-
-@extend_schema(
-    tags=['nutrition'],
-    deprecated=True,
-)
-class NutritionScreenView(RetrieveAPIView):
-    serializer_class = serializers.NutritionScreenResponseSerializer
-
-    def get_object(self) -> NutritionScreenResponse:
-        return NutritionScreenResponse.from_api_request(self.request)
 
 
 @extend_schema(

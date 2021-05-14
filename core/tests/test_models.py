@@ -53,7 +53,6 @@ class IntakeTests(TestCase):
         self.assertEqual(annotated_daily_report.total_phosphorus_mg, 100)
         self.assertEqual(annotated_daily_report.total_proteins_mg, 65574)
         self.assertEqual(annotated_daily_report.total_energy_kcal, 65584)
-        self.assertEqual(annotated_daily_report.total_liquids_g, 65594)
         self.assertEqual(annotated_daily_report.total_liquids_ml, 65834)
 
     def test_annotating_with_total_norms_empty(self):
@@ -68,5 +67,4 @@ class IntakeTests(TestCase):
         self.assertEqual(annotated_daily_report.total_phosphorus_mg, 0)
         self.assertEqual(annotated_daily_report.total_proteins_mg, 0)
         self.assertEqual(annotated_daily_report.total_energy_kcal, 0)
-        self.assertEqual(annotated_daily_report.total_liquids_g, 0)
         self.assertEqual(annotated_daily_report.total_liquids_ml, 0)

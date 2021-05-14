@@ -36,7 +36,6 @@ class DailyNutrientNormsAndTotals:
     sodium_mg: DailyNutrientConsumption
     phosphorus_mg: DailyNutrientConsumption
     energy_kcal: DailyNutrientConsumption
-    liquids_g: DailyNutrientConsumption
     liquids_ml: DailyNutrientConsumption
     fat_mg: DailyNutrientConsumption
     carbohydrates_mg: DailyNutrientConsumption
@@ -638,15 +637,6 @@ class DailyIntakesReportQuerySet(models.QuerySet):
                     output_field=models.IntegerField()
                 ),
             ), 0),
-            total_liquids_g=functions.Coalesce(models.Sum(
-                models.ExpressionWrapper(
-                    functions.Cast(models.F("intakes__product__liquids_g"), output_field=models.IntegerField()) *
-                    models.ExpressionWrapper(models.F("intakes__amount_g"),
-                                             output_field=models.IntegerField()
-                                             ) / models.Value(100, output_field=models.IntegerField()),
-                    output_field=models.IntegerField()
-                ),
-            ), 0),
             total_liquids_ml=functions.Coalesce(models.Sum(
                 models.ExpressionWrapper(
                     models.ExpressionWrapper(
@@ -737,10 +727,6 @@ class DailyIntakesReport(models.Model):
         return DailyNutrientConsumption(total=self._total_energy_kcal, norm=self.daily_norm_energy_kcal)
 
     @property
-    def liquids_g(self) -> DailyNutrientConsumption:
-        return DailyNutrientConsumption(total=self._total_liquids_g, norm=self.daily_norm_liquids_g)
-
-    @property
     def carbohydrates_mg(self) -> DailyNutrientConsumption:
         return DailyNutrientConsumption(total=self._total_carbohydrates_mg, norm=self.daily_norm_carbohydrates_mg)
 
@@ -760,7 +746,6 @@ class DailyIntakesReport(models.Model):
             sodium_mg=self.sodium_mg,
             phosphorus_mg=self.phosphorus_mg,
             energy_kcal=self.energy_kcal,
-            liquids_g=self.liquids_g,
             liquids_ml=self.liquids_ml,
             fat_mg=self.fat_mg,
             carbohydrates_mg=self.carbohydrates_mg,
@@ -800,13 +785,6 @@ class DailyIntakesReport(models.Model):
             return self.total_energy_kcal
 
         return sum(intake.energy_kcal for intake in self.intakes.all())
-
-    @property
-    def _total_liquids_g(self):
-        if hasattr(self, 'total_liquids_g'):
-            return self.total_liquids_g
-
-        return sum(intake.liquids_g for intake in self.intakes.all())
 
     @property
     def _total_liquids_ml(self):

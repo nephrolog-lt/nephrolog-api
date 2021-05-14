@@ -84,8 +84,6 @@ class UserAppReviewSerializer(serializers.ModelSerializer):
         fields = ('show_app_review_dialog',)
 
 
-# liquids_g excluded on 02-26
-@extend_schema_serializer(exclude_fields=['liquids_g'])
 class ProductSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='name_lt')
     liquids_ml = serializers.IntegerField()
@@ -101,7 +99,6 @@ class ProductSerializer(serializers.ModelSerializer):
             'sodium_mg',
             'phosphorus_mg',
             'energy_kcal',
-            'liquids_g',
             'liquids_ml',
             'carbohydrates_mg',
             'fat_mg',
@@ -109,8 +106,6 @@ class ProductSerializer(serializers.ModelSerializer):
         )
 
 
-# liquids_g excluded on 02-26
-@extend_schema_serializer(exclude_fields=['liquids_g'])
 class IntakeSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
     product_id = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), source='product', write_only=True)
@@ -120,7 +115,6 @@ class IntakeSerializer(serializers.ModelSerializer):
     sodium_mg = serializers.IntegerField(read_only=True)
     phosphorus_mg = serializers.IntegerField(read_only=True)
     energy_kcal = serializers.IntegerField(read_only=True)
-    liquids_g = serializers.IntegerField(read_only=True)
     liquids_ml = serializers.IntegerField(read_only=True)
 
     class Meta:
@@ -138,7 +132,6 @@ class IntakeSerializer(serializers.ModelSerializer):
             'sodium_mg',
             'phosphorus_mg',
             'energy_kcal',
-            'liquids_g',
             'liquids_ml',
             'carbohydrates_mg',
             'fat_mg',
@@ -154,15 +147,12 @@ class DailyNutrientConsumptionSerializer(ReadOnlySerializer):
         fields = ('norm', 'total')
 
 
-# liquids_g excluded on 02-26
-@extend_schema_serializer(exclude_fields=['liquids_g'])
 class DailyNutrientNormsWithTotalsSerializer(ReadOnlySerializer):
     potassium_mg = DailyNutrientConsumptionSerializer(read_only=True)
     proteins_mg = DailyNutrientConsumptionSerializer(read_only=True)
     sodium_mg = DailyNutrientConsumptionSerializer(read_only=True)
     phosphorus_mg = DailyNutrientConsumptionSerializer(read_only=True)
     energy_kcal = DailyNutrientConsumptionSerializer(read_only=True)
-    liquids_g = DailyNutrientConsumptionSerializer(read_only=True)
     liquids_ml = DailyNutrientConsumptionSerializer(read_only=True)
     carbohydrates_mg = DailyNutrientConsumptionSerializer(read_only=True)
     fat_mg = DailyNutrientConsumptionSerializer(read_only=True)
@@ -174,16 +164,12 @@ class DailyNutrientNormsWithTotalsSerializer(ReadOnlySerializer):
             'sodium_mg',
             'phosphorus_mg',
             'energy_kcal',
-            'liquids_g',
             'liquids_ml',
             'carbohydrates_mg',
             'fat_mg',
         )
 
 
-@extend_schema_serializer(
-    exclude_fields=['liquids_ml', 'potassium_mg', 'proteins_mg', 'sodium_mg', 'phosphorus_mg', 'energy_kcal',
-                    'liquids_g'])
 class DailyIntakesReportSerializer(serializers.ModelSerializer):
     date = serializers.DateField(read_only=True)
 
@@ -191,20 +177,10 @@ class DailyIntakesReportSerializer(serializers.ModelSerializer):
 
     intakes = IntakeSerializer(read_only=True, many=True)
 
-    # Deprecated fields on 02-06
-    potassium_mg = DailyNutrientConsumptionSerializer(read_only=True)
-    proteins_mg = DailyNutrientConsumptionSerializer(read_only=True)
-    sodium_mg = DailyNutrientConsumptionSerializer(read_only=True)
-    phosphorus_mg = DailyNutrientConsumptionSerializer(read_only=True)
-    energy_kcal = DailyNutrientConsumptionSerializer(read_only=True)
-    liquids_g = DailyNutrientConsumptionSerializer(read_only=True)
-    liquids_ml = DailyNutrientConsumptionSerializer(read_only=True)
-
     class Meta:
         model = DailyIntakesReport
         fields = (
             'date', 'intakes', 'daily_nutrient_norms_and_totals',
-            'potassium_mg', 'proteins_mg', 'sodium_mg', 'phosphorus_mg', 'energy_kcal', 'liquids_g', 'liquids_ml',
         )
 
 
@@ -231,18 +207,6 @@ class DailyIntakesReportResponseSerializer(ReadOnlySerializer):
 
     class Meta:
         fields = ('daily_intakes_report',)
-
-
-class NutritionScreenResponseSerializer(ReadOnlySerializer):
-    today_intakes_report = DailyIntakesReportSerializer(read_only=True)
-    daily_intakes_reports = DailyIntakesReportSerializer(read_only=True, many=True)
-    latest_intakes = IntakeSerializer(read_only=True, many=True)
-    current_month_daily_reports = DailyIntakesLightReportSerializer(read_only=True, many=True)
-    nutrition_summary_statistics = NutritionSummaryStatisticsSerializer(read_only=True)
-
-    class Meta:
-        fields = ('today_intakes_report', 'latest_intakes', 'daily_intakes', 'current_month_daily_reports',
-                  'nutrition_summary_statistics')
 
 
 class NutritionScreenV2ResponseSerializer(ReadOnlySerializer):

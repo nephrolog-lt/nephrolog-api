@@ -43,7 +43,7 @@ class Command(BaseCommand):
                 'daily_norm_energy_kcal': report.daily_norm_energy_kcal,
                 'total_energy_kcal': report.total_energy_kcal,
                 'daily_norm_liquids_g': report.daily_norm_liquids_g,
-                'total_liquids_g': report.total_liquids_g,
+                'total_liquids_ml': report.total_liquids_ml,
                 'created_at': report.created_at,
                 'updated_at': report.updated_at,
             })
