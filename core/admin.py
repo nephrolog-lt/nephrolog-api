@@ -437,6 +437,7 @@ class GeneralRecommendationCategoryAdmin(SortableAdminMixin, admin.ModelAdmin):
         'created_at',
         'updated_at',
     )
+    actions = [csvexport]
     inlines = (GeneralRecommendationsSubcategoryInline,)
 
 
@@ -451,6 +452,7 @@ class GeneralRecommendationAdmin(SortableAdminMixin, admin.ModelAdmin):
     search_fields = ('name_lt', 'body',)
     list_filter = ('subcategory',)
     list_select_related = ('subcategory',)
+    actions = [csvexport]
 
 
 @admin.register(models.ManualPeritonealDialysis)
