@@ -390,7 +390,6 @@ class Product(models.Model):
     region = models.CharField(
         max_length=2,
         choices=ProductRegion.choices,
-        default=ProductRegion.LT,
     )
 
     product_source = models.CharField(
