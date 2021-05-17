@@ -376,8 +376,8 @@ class ProductQuerySet(models.QuerySet):
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=128, unique=True)
-    name_en = models.CharField(max_length=128, unique=True)
+    name = models.CharField(max_length=128)
+    name_en = models.CharField(max_length=128)
 
     synonyms = models.TextField(blank=True)
 
@@ -430,6 +430,11 @@ class Product(models.Model):
         indexes = [
             GinIndex(name="gin_trgm_product_lt", fields=('name_search_lt',), opclasses=("gin_trgm_ops",)),
             GistIndex(name="gist_trgm_product_lt", fields=('name_search_lt',), opclasses=("gist_trgm_ops",)),
+            models.Index(fields=['region', 'name', ])
+        ]
+
+        constraints = [
+            models.UniqueConstraint(fields=['region', 'name'], name='unique_product_name_region')
         ]
 
     def save(self, force_insert=False, force_update=False, using=None,
