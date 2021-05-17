@@ -119,6 +119,7 @@ class ProductAdmin(admin.ModelAdmin):
         'product_kind',
         'name_lt',
         'name_en',
+        'region',
         'popularity',
         'density_g_ml',
         'potassium_mg',
@@ -140,6 +141,7 @@ class ProductAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('product_source', 'name_search_lt',)
     list_filter = (
+        'region',
         ('density_g_ml', EmptyFieldListFilter),
         'product_kind',
         'product_source',

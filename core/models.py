@@ -357,6 +357,11 @@ class ProductSource(models.TextChoices):
     DN = "DN"
 
 
+class ProductRegion(models.TextChoices):
+    LT = "LT"
+    DE = "DE"
+
+
 class ProductQuerySet(models.QuerySet):
     def annotate_with_popularity(self) -> QuerySet[Product]:
         return self.annotate(popularity=SubqueryCount('intakes'))
@@ -380,6 +385,12 @@ class Product(models.Model):
         max_length=16,
         choices=ProductKind.choices,
         default=ProductKind.Unknown,
+    )
+
+    region = models.CharField(
+        max_length=2,
+        choices=ProductRegion.choices,
+        default=ProductRegion.LT,
     )
 
     product_source = models.CharField(
