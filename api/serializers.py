@@ -71,7 +71,7 @@ class UserAppReviewSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='name_lt')
+    name = serializers.CharField()
     liquids_ml = serializers.IntegerField()
 
     class Meta:

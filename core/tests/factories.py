@@ -29,7 +29,7 @@ class ProductFactory(DjangoModelFactory):
     class Meta:
         model = models.Product
 
-    name_lt = factory.Faker('user_name')
+    name = factory.Faker('user_name')
     name_en = factory.Faker('user_name')
     product_kind = factory.Iterator(models.ProductKind.Food, models.ProductKind.Drink)
 

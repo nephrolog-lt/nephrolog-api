@@ -376,7 +376,7 @@ class ProductQuerySet(models.QuerySet):
 
 
 class Product(models.Model):
-    name_lt = models.CharField(max_length=128, unique=True)
+    name = models.CharField(max_length=128, unique=True)
     name_en = models.CharField(max_length=128, unique=True)
 
     name_search_lt = models.CharField(max_length=128, unique=True)
@@ -432,10 +432,10 @@ class Product(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
-        self.name_lt = self.name_lt.strip()
+        self.name = self.name.strip()
         self.name_en = self.name_en.strip()
 
-        self.name_search_lt = only_alphanumeric_or_spaces(str_to_ascii(self.name_lt).lower())
+        self.name_search_lt = only_alphanumeric_or_spaces(str_to_ascii(self.name).lower())
 
         super().save(force_insert, force_update, using, update_fields)
 
@@ -486,11 +486,11 @@ class Product(models.Model):
                 output_field=models.BooleanField()
             ),
             starts_with_original_query=models.ExpressionWrapper(
-                models.Q(name_lt__istartswith=original_query),
+                models.Q(name__istartswith=original_query),
                 output_field=models.BooleanField()
             ),
             contains_original_query=models.ExpressionWrapper(
-                models.Q(name_lt__icontains=original_query),
+                models.Q(name__icontains=original_query),
                 output_field=models.BooleanField()
             )
         ).annotate_with_popularity().annotate_with_last_consumed_by_user(user).order_by(
@@ -502,7 +502,7 @@ class Product(models.Model):
         )
 
     def __str__(self):
-        return self.name_lt
+        return self.name
 
 
 class DailyIntakesReportQuerySet(models.QuerySet):

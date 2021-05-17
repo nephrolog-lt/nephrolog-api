@@ -107,7 +107,7 @@ class ProductSearchLogAdmin(NumericFilterModelAdmin):
         'meal_type',
         'created_at'
     )
-    search_fields = ('product1__name_lt', 'product2__name_lt', 'product3__name_lt', 'user__email', 'user__username')
+    search_fields = ('product1__name', 'product2__name', 'product3__name', 'user__email', 'user__username')
     date_hierarchy = 'created_at'
     actions = [csvexport]
 
@@ -117,7 +117,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'product_kind',
-        'name_lt',
+        'name',
         'name_en',
         'region',
         'popularity',
@@ -148,7 +148,7 @@ class ProductAdmin(admin.ModelAdmin):
         'created_at',
         'updated_at'
     )
-    search_fields = ('name_lt', 'name_en', 'name_search_lt')
+    search_fields = ('name', 'name_en', 'name_search_lt')
     actions = [csvexport]
 
     def get_queryset(self, request):
@@ -245,7 +245,7 @@ class IntakeAdmin(admin.ModelAdmin):
     )
     list_select_related = ('user', 'product')
     raw_id_fields = ('product', 'user', 'daily_report')
-    search_fields = ('user__pk', 'user__email', 'user__username', 'product__name_lt')
+    search_fields = ('user__pk', 'user__email', 'user__username', 'product__name')
     list_filter = ('consumed_at', 'meal_type')
     date_hierarchy = 'consumed_at'
     actions = [csvexport]

@@ -188,7 +188,7 @@ class ProductSearchViewTests(BaseApiTest):
             liquids_g=6,
         )
         excluded_product = ProductFactory(
-            name_lt='apple excluded',
+            name='apple excluded',
             potassium_mg=15,
             sodium_mg=25,
             phosphorus_mg=35,
@@ -254,7 +254,7 @@ class ProductSearchViewTests(BaseApiTest):
 
     def test_product_search(self):
         product1 = ProductFactory(
-            name_lt='apple',
+            name='apple',
             potassium_mg=15,
             sodium_mg=25,
             phosphorus_mg=35,
@@ -263,7 +263,7 @@ class ProductSearchViewTests(BaseApiTest):
             liquids_g=32767,
         )
         product2 = ProductFactory(
-            name_lt='apple other',
+            name='apple other',
             potassium_mg=15,
             sodium_mg=25,
             phosphorus_mg=35,
@@ -272,7 +272,7 @@ class ProductSearchViewTests(BaseApiTest):
             liquids_g=32767,
         )
         product3 = ProductFactory(
-            name_lt='apple other 3',
+            name='apple other 3',
             potassium_mg=15,
             sodium_mg=25,
             phosphorus_mg=35,
@@ -281,7 +281,7 @@ class ProductSearchViewTests(BaseApiTest):
             liquids_g=32767,
         )
         excluded_product = ProductFactory(
-            name_lt='apple excluded',
+            name='apple excluded',
             potassium_mg=15,
             sodium_mg=25,
             phosphorus_mg=35,
@@ -290,7 +290,7 @@ class ProductSearchViewTests(BaseApiTest):
             liquids_g=32767,
         )
         ProductFactory(
-            name_lt='orange',
+            name='orange',
             potassium_mg=1,
             sodium_mg=2,
             phosphorus_mg=3,
@@ -316,9 +316,9 @@ class ProductSearchViewTests(BaseApiTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['query'], 'apple')
         self.assertEqual(len(response.data['products']), 3)
-        self.assertEqual(response.data['products'][0]['name'], product2.name_lt)
-        self.assertEqual(response.data['products'][1]['name'], product3.name_lt)
-        self.assertEqual(response.data['products'][2]['name'], product1.name_lt)
+        self.assertEqual(response.data['products'][0]['name'], product2.name)
+        self.assertEqual(response.data['products'][1]['name'], product3.name)
+        self.assertEqual(response.data['products'][2]['name'], product1.name)
         self.assertIsNotNone(response.data['daily_nutrient_norms_and_totals'])
 
 
