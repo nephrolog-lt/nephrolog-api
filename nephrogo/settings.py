@@ -105,6 +105,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'nephrogo.wsgi.application'
 
+# Required for export plugin
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
