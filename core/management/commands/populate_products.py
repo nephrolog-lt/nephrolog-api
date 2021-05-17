@@ -17,7 +17,7 @@ class Command(BaseCommand):
                 continue
 
             defaults = {
-                'name_lt': item['Name'],
+                'name': item['Name'],
                 'name_en': item['NameEn'],
                 'product_kind': ProductKind.Drink if item['EDIBLE'] > 0.9 else ProductKind.Food,
                 'liquids_g': item['WATER'],

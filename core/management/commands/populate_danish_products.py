@@ -19,7 +19,7 @@ class Command(BaseCommand):
 
         for item in reader:
             defaults = {
-                'name_lt': item['LT'],
+                'name': item['LT'],
                 'name_en': item['EN'],
                 'product_kind': ProductKind.Food,
                 'liquids_g': round(float(item['Water'])),

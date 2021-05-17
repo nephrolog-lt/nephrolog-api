@@ -134,6 +134,7 @@ class ProductAdmin(admin.ModelAdmin):
         'liquids_g',
         'liquids_ml',
 
+        'synonyms',
         'product_source',
         'raw_id',
         'created_at',
@@ -143,6 +144,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = (
         'region',
         ('density_g_ml', EmptyFieldListFilter),
+        ('synonyms', EmptyFieldListFilter),
         'product_kind',
         'product_source',
         'created_at',
