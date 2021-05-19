@@ -461,9 +461,9 @@ class GeneralRecommendationAdmin(SortableAdminMixin, admin.ModelAdmin):
     )
     search_fields = ('name_lt', 'name_en', 'name_de', 'body',)
     list_filter = (
-        'subcategory',
         ('name_en', EmptyFieldListFilter),
         ('name_de', EmptyFieldListFilter),
+        'subcategory',
     )
     list_select_related = ('subcategory', 'subcategory__category')
     actions = [csvexport]
