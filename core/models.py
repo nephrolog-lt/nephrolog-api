@@ -1171,14 +1171,17 @@ class ProductSearchLog(models.Model):
 
 
 class GeneralRecommendationCategory(models.Model):
-    name_lt = models.CharField(max_length=128)
-    order = models.PositiveSmallIntegerField(default=0)
+    name_lt = models.CharField(max_length=128, unique=True)
+    name_en = models.CharField(max_length=128, null=True, blank=True, unique=True)
+    name_de = models.CharField(max_length=128, null=True, blank=True, unique=True)
+
+    order = models.PositiveSmallIntegerField(default=0, db_index=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ("order", "pk")
+        ordering = ("order",)
 
     def __str__(self):
         return self.name_lt
@@ -1186,32 +1189,40 @@ class GeneralRecommendationCategory(models.Model):
 
 class GeneralRecommendationSubcategory(models.Model):
     category = models.ForeignKey(GeneralRecommendationCategory, on_delete=models.CASCADE, related_name='subcategories')
-    name_lt = models.CharField(max_length=256)
-    order = models.PositiveSmallIntegerField(default=0)
+    name_lt = models.CharField(max_length=256, unique=True)
+    name_en = models.CharField(max_length=256, null=True, blank=True, unique=True)
+    name_de = models.CharField(max_length=256, null=True, blank=True, unique=True)
+
+    order = models.PositiveSmallIntegerField(default=0, db_index=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ("order", "pk")
+        ordering = ("order",)
 
     def __str__(self):
-        return self.name_lt
+        return f"{self.name_lt} ({self.category})"
 
 
 class GeneralRecommendation(models.Model):
     subcategory = models.ForeignKey(GeneralRecommendationSubcategory, on_delete=models.PROTECT,
                                     related_name='recommendations')
     name_lt = models.CharField(max_length=256)
-    body_lt = RichTextUploadingField()
+    name_en = models.CharField(max_length=256, null=True, blank=True)
+    name_de = models.CharField(max_length=256, null=True, blank=True)
 
-    order = models.PositiveSmallIntegerField(default=0)
+    body_lt = RichTextUploadingField()
+    body_en = RichTextUploadingField(null=True, blank=True)
+    body_de = RichTextUploadingField(null=True, blank=True)
+
+    order = models.PositiveSmallIntegerField(default=0, db_index=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ("order", "pk")
+        ordering = ("order",)
 
     def __str__(self):
         return self.name_lt

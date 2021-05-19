@@ -429,8 +429,21 @@ class GeneralRecommendationsSubcategoryInline(SortableInlineAdminMixin, admin.St
 class GeneralRecommendationCategoryAdmin(SortableAdminMixin, admin.ModelAdmin):
     list_display = (
         'name_lt',
+        'name_en',
+        'name_de',
         'created_at',
         'updated_at',
+    )
+    search_fields = (
+        'name_lt',
+        'name_en',
+        'name_de',
+    )
+
+    list_filter = (
+        ('name_en', EmptyFieldListFilter),
+        ('name_de', EmptyFieldListFilter),
+        'created_at',
     )
     actions = [csvexport]
     inlines = (GeneralRecommendationsSubcategoryInline,)
@@ -440,13 +453,19 @@ class GeneralRecommendationCategoryAdmin(SortableAdminMixin, admin.ModelAdmin):
 class GeneralRecommendationAdmin(SortableAdminMixin, admin.ModelAdmin):
     list_display = (
         'name_lt',
+        'name_en',
+        'name_de',
         'subcategory',
         'created_at',
         'updated_at',
     )
-    search_fields = ('name_lt', 'body',)
-    list_filter = ('subcategory',)
-    list_select_related = ('subcategory',)
+    search_fields = ('name_lt', 'name_en', 'name_de', 'body',)
+    list_filter = (
+        'subcategory',
+        ('name_en', EmptyFieldListFilter),
+        ('name_de', EmptyFieldListFilter),
+    )
+    list_select_related = ('subcategory', 'subcategory__category')
     actions = [csvexport]
 
 
