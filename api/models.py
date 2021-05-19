@@ -218,7 +218,7 @@ class NutrientWeeklyScreenResponse:
 @dataclass(frozen=True)
 class HealthStatusScreenResponse:
     has_any_statuses: bool
-    daily_health_statuses: List[DailyHealthStatus]
+    daily_health_statuses: QuerySet[DailyHealthStatus]
 
     @staticmethod
     def from_api_request(request: Request) -> HealthStatusScreenResponse:
@@ -242,7 +242,7 @@ class HealthStatusScreenResponse:
 @dataclass(frozen=True)
 class HealthStatusWeeklyResponse:
     earliest_health_status_date: Optional[datetime.date]
-    daily_health_statuses: List[DailyHealthStatus]
+    daily_health_statuses: QuerySet[DailyHealthStatus]
 
     @staticmethod
     def from_api_request(request: Request) -> HealthStatusWeeklyResponse:
