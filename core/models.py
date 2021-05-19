@@ -1026,12 +1026,6 @@ class DailyHealthStatus(models.Model):
 
         DailyIntakesReport.recalculate_daily_norms_for_date_if_exists(user=self.user, date=self.date)
 
-    def clean(self) -> None:
-        super().clean()
-
-        if (self.systolic_blood_pressure is None) != (self.diastolic_blood_pressure is None):
-            raise ValidationError('Pass both systolic and diastolic blood pressure')
-
     @staticmethod
     def get_earliest_user_entry_date(user: AbstractBaseUser) -> Optional[datetime.date]:
         return DailyHealthStatus.filter_for_user(user).aggregate(min_date=Min('date'))['min_date']
