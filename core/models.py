@@ -355,6 +355,7 @@ class ProductKind(models.TextChoices):
 class ProductSource(models.TextChoices):
     LT = "LT"
     DN = "DN"
+    SW = "SW"
 
 
 class ProductRegion(models.TextChoices):
@@ -418,7 +419,7 @@ class Product(models.Model):
     density_g_ml = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True,
                                        validators=[validators.MinValueValidator(Decimal('0.01'))])
 
-    raw_id = models.CharField(max_length=64, null=True, blank=True, editable=False, unique=True)
+    raw_id = models.CharField(max_length=64, null=True, blank=True, editable=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -434,15 +435,19 @@ class Product(models.Model):
         ]
 
         constraints = [
-            models.UniqueConstraint(fields=['region', 'name'], name='unique_product_name_region')
+            models.UniqueConstraint(fields=['region', 'name'], name='unique_product_name_region'),
+            models.UniqueConstraint(fields=['product_source', 'raw_id'], name='unique_product_source_and_raw_id'),
         ]
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         self.name = self.name.strip()
         self.name_en = self.name_en.strip()
+        self.synonyms = self.synonyms.lower().strip()
 
-        self.name_search_lt = only_alphanumeric_or_spaces(str_to_ascii(self.name).lower())
+        search_term_raw = f"{self.name} {self.synonyms}".strip().lower()
+
+        self.name_search_lt = only_alphanumeric_or_spaces(str_to_ascii(search_term_raw))
 
         super().save(force_insert, force_update, using, update_fields)
 
@@ -475,8 +480,11 @@ class Product(models.Model):
         query = only_alphanumeric_or_spaces(str_to_ascii(original_query))
 
         if not query:
-            return Product.objects.exclude(pk__in=exclude_product_ids).annotate_with_popularity() \
-                .annotate_with_last_consumed_by_user(user).order_by(
+            return Product.objects.exclude(pk__in=exclude_product_ids) \
+                .filter(region=ProductRegion.LT) \
+                .annotate_with_popularity() \
+                .annotate_with_last_consumed_by_user(user) \
+                .order_by(
                 models.F('last_consumed_by_user').desc(nulls_last=True),
                 '-popularity'
             )
@@ -487,7 +495,9 @@ class Product(models.Model):
 
         first_word = query_words[0]
 
-        return Product.objects.filter(query_filter).exclude(pk__in=exclude_product_ids).annotate(
+        return Product.objects.filter(query_filter).exclude(pk__in=exclude_product_ids) \
+            .filter(region=ProductRegion.LT) \
+            .annotate(
             starts_with_word=models.ExpressionWrapper(
                 models.Q(name_search_lt__startswith=first_word),
                 output_field=models.BooleanField()
@@ -500,7 +510,9 @@ class Product(models.Model):
                 models.Q(name__icontains=original_query),
                 output_field=models.BooleanField()
             )
-        ).annotate_with_popularity().annotate_with_last_consumed_by_user(user).order_by(
+        ).annotate_with_popularity() \
+            .annotate_with_last_consumed_by_user(user) \
+            .order_by(
             '-starts_with_original_query',
             '-contains_original_query',
             '-starts_with_word',

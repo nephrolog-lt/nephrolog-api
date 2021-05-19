@@ -118,6 +118,7 @@ class ProductAdmin(admin.ModelAdmin):
         'id',
         'product_kind',
         'name',
+        'synonyms',
         'name_en',
         'region',
         'popularity',

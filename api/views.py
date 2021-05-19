@@ -4,13 +4,13 @@ from django.db.models import Prefetch, QuerySet
 from django.http import Http404
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
-from rest_framework.generics import CreateAPIView, DestroyAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView, \
+from rest_framework.generics import CreateAPIView, DestroyAPIView, RetrieveAPIView, RetrieveUpdateAPIView, \
     RetrieveUpdateDestroyAPIView, UpdateAPIView, get_object_or_404
 
 from api import serializers
 from api.models import AutomaticPeritonealDialysisPeriodResponse, AutomaticPeritonealDialysisScreenResponse, \
     DailyIntakesReportsLightResponse, HealthStatusScreenResponse, HealthStatusWeeklyResponse, \
-    ManualPeritonealDialysisScreenResponse, NutrientWeeklyScreenResponse, NutritionScreenResponse, \
+    ManualPeritonealDialysisScreenResponse, NutrientWeeklyScreenResponse, \
     NutritionScreenV2Response, ProductSearchResponse, GeneralRecommendationsResponse
 from api.utils import date_from_request_and_validated_data, datetime_from_request_and_validated_data, datetime_to_date, \
     parse_date_or_validation_error, \

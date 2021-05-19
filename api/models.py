@@ -10,7 +10,8 @@ from rest_framework.request import Request
 from api import utils
 from api.utils import parse_date_query_params
 from core.models import AutomaticPeritonealDialysis, DailyHealthStatus, DailyHealthStatusQuerySet, DailyIntakesReport, \
-    DailyNutrientNormsAndTotals, Intake, ManualPeritonealDialysis, MealType, Product, ProductSearchLog, UserProfile
+    DailyNutrientNormsAndTotals, GeneralRecommendationCategory, Intake, ManualPeritonealDialysis, MealType, Product, \
+    ProductSearchLog, UserProfile
 
 
 @dataclass(frozen=True)
@@ -194,50 +195,6 @@ class NutritionScreenV2Response:
         )
 
 
-# Deprecated 02-12
-@dataclass(frozen=True)
-class NutritionScreenResponse:
-    today_intakes_report: DailyIntakesReport
-    latest_intakes: List[Intake]
-    daily_intakes_reports: List[DailyIntakesReport]
-    current_month_daily_reports: List[DailyIntakesReport]
-    nutrition_summary_statistics: dict
-
-    @staticmethod
-    def from_api_request(request: Request) -> NutritionScreenResponse:
-        user = request.user
-        tz = utils.parse_time_zone(request)
-
-        now = datetime.datetime.now(tz)
-
-        month_start, month_end = utils.get_month_day_range(now.date())
-
-        from_date = (now - datetime.timedelta(days=6)).date()
-        to_date = now.date()
-
-        DailyIntakesReport.get_or_create_for_user_and_date(user, to_date)
-
-        current_month_daily_reports = DailyIntakesReport.get_for_user_between_dates(
-            request.user,
-            month_start,
-            month_end
-        ).annotate_with_nutrient_totals().exclude_empty_intakes()
-
-        daily_intakes_reports = DailyIntakesReport.get_for_user_between_dates(user, from_date,
-                                                                              to_date).prefetch_intakes()
-        today_intakes_report = max(daily_intakes_reports, key=lambda r: r.date)
-        latest_intakes = Intake.get_latest_user_intakes(user)[:3]
-        nutrition_summary_statistics = DailyIntakesReport.summarize_for_user(user)
-
-        return NutritionScreenResponse(
-            today_intakes_report=today_intakes_report,
-            daily_intakes_reports=daily_intakes_reports,
-            latest_intakes=latest_intakes,
-            current_month_daily_reports=current_month_daily_reports,
-            nutrition_summary_statistics=nutrition_summary_statistics,
-        )
-
-
 @dataclass(frozen=True)
 class NutrientWeeklyScreenResponse:
     earliest_report_date: Optional[datetime.date]
@@ -308,7 +265,6 @@ class ProductSearchResponse:
     daily_nutrient_norms_and_totals: DailyNutrientNormsAndTotals
 
     @staticmethod
-    # noinspection DuplicatedCode
     def from_api_request(request: Request, limit: int) -> ProductSearchResponse:
         query = request.query_params.get('query', '')
 
