@@ -21,6 +21,7 @@ class AutomaticPeritonealDialysisScreenResponse:
     last_peritoneal_dialysis: Optional[AutomaticPeritonealDialysis]
     peritoneal_dialysis_in_progress: Optional[AutomaticPeritonealDialysis]
 
+    # noinspection DuplicatedCode
     @staticmethod
     def from_api_request(request: Request) -> AutomaticPeritonealDialysisScreenResponse:
         tz = utils.parse_time_zone(request)
@@ -86,6 +87,7 @@ class ManualPeritonealDialysisScreenResponse:
     last_week_light_nutrition_reports: QuerySet[DailyIntakesReport]
     peritoneal_dialysis_in_progress: Optional[ManualPeritonealDialysis]
 
+    # noinspection DuplicatedCode
     @staticmethod
     def from_api_request(request: Request) -> ManualPeritonealDialysisScreenResponse:
         tz = utils.parse_time_zone(request)

@@ -34,7 +34,7 @@ from core import models
         ),
         OpenApiParameter(
             name='meal_type',
-            enum=models.MealType,
+            enum=models.MealType.values,
             default=models.MealType.Unknown,
             location=OpenApiParameter.QUERY
         ),
