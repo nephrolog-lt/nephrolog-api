@@ -4,6 +4,7 @@ from factory.django import DjangoModelFactory
 from pytz import utc
 
 from core import models
+from core.models import ProductRegion
 
 
 class UserFactory(DjangoModelFactory):
@@ -32,6 +33,7 @@ class ProductFactory(DjangoModelFactory):
     name = factory.Faker('user_name')
     name_en = factory.Faker('user_name')
     product_kind = factory.Iterator(models.ProductKind.Food, models.ProductKind.Drink)
+    region = ProductRegion.LT
 
     potassium_mg = 10
     sodium_mg = 20
