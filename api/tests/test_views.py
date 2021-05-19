@@ -302,50 +302,6 @@ class ProductSearchViewTests(BaseApiTest):
         self.assertIsNotNone(response.data['daily_nutrient_norms_and_totals'])
 
 
-class DailyIntakesReportsViewTests(BaseApiTest):
-    def test_daily_reports_unauthenticated(self):
-        response = self.client.get(reverse('api-daily-reports'))
-
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_daily_reports_retrieving_without_arguments(self):
-        self.login_user()
-
-        product = ProductFactory()
-
-        daily_report1 = DailyIntakesReportFactory(user=self.user, date=date(2020, 2, 7))
-        daily_report2 = DailyIntakesReportFactory(user=self.user, date=date(2020, 2, 8))
-        IntakeFactory(user=self.user, daily_report=daily_report1, product=product, amount_g=100)
-        IntakeFactory(user=self.user, daily_report=daily_report2, product=product, amount_g=100)
-
-        # Empty should be excluded
-        DailyIntakesReportFactory(user=self.user, date=date(2020, 2, 5))
-
-        response = self.client.get(reverse('api-daily-reports'))
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        self.assertEqual(len(response.data['daily_intakes_light_reports']), 2)
-        self.assertIsNotNone(response.data['daily_intakes_light_reports'][0].get('nutrient_norms_and_totals'))
-
-    def test_daily_reports_retrieving(self):
-        self.login_user()
-
-        product = ProductFactory()
-
-        daily_report1 = DailyIntakesReportFactory(user=self.user, date=date(2020, 1, 7))
-        daily_report2 = DailyIntakesReportFactory(user=self.user, date=date(2020, 2, 8))
-        IntakeFactory(user=self.user, daily_report=daily_report1, product=product, amount_g=100)
-        IntakeFactory(user=self.user, daily_report=daily_report2, product=product, amount_g=100)
-
-        response = self.client.get(reverse('api-daily-reports'), data={'from': '2020-02-01', 'to': '2020-02-08'})
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        self.assertEqual(len(response.data['daily_intakes_light_reports']), 1)
-        self.assertEqual(response.data['daily_intakes_light_reports'][0].get('date'), '2020-02-08')
-
-
 class HealthStatusCreateViewTests(BaseApiTest):
 
     def test_unauthenticated(self):
