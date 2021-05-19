@@ -445,7 +445,7 @@ class Product(models.Model):
         self.name_en = self.name_en.strip()
         self.synonyms = self.synonyms.lower().strip()
 
-        search_term_raw = f"{self.name} {self.synonyms}".strip().lower()
+        search_term_raw = f"{self.name} {self.synonyms.replace(',', ' ').replace(';', ' ')}".strip().lower()
 
         self.name_search_lt = only_alphanumeric_or_spaces(str_to_ascii(search_term_raw))
 
