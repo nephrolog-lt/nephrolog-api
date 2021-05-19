@@ -130,13 +130,9 @@ class DailyIntakesReportsLightResponse:
     def from_api_request(request: Request) -> DailyIntakesReportsLightResponse:
         date_from, date_to = parse_date_query_params(request, required=False)
 
-        daily_intakes_reports = DailyIntakesReport.get_for_user_between_dates(request.user, date_from, date_to)
-
-        # TODO this is for backward compatability. Remove in the future 02-09
-        if date_from is None or date_to is None:
-            daily_intakes_reports = DailyIntakesReport.filter_for_user(request.user)
-
-        daily_intakes_reports = daily_intakes_reports.annotate_with_nutrient_totals().exclude_empty_intakes()
+        daily_intakes_reports = DailyIntakesReport.get_for_user_between_dates(request.user, date_from, date_to) \
+            .annotate_with_nutrient_totals() \
+            .exclude_empty_intakes()
 
         return DailyIntakesReportsLightResponse(
             daily_intakes_light_reports=daily_intakes_reports
