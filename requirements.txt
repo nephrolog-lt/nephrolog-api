@@ -16,7 +16,7 @@ ddtrace==0.48.4
 datadog==0.41.0
 
 # Celery
-celery[redis]==5.0.5
+celery[redis]==5.1.0
 
 # Django rest framework
 djangorestframework==3.12.4
