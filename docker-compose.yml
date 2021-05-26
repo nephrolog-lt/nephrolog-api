@@ -102,7 +102,7 @@ services:
       test: [ "CMD-SHELL", "redis-cli ping" ]
 
   nginx:
-    image: nginx:1.20
+    image: nginx:1.21
     ports:
       - 80:80
       - 443:443
