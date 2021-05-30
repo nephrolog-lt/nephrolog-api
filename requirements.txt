@@ -4,7 +4,7 @@ python-environ==0.4.54
 
 # Storage and caching
 psycopg2-binary==2.8.6
-django-redis==4.12.1
+django-redis==5.0.0
 
 # Authentication
 django-allauth==0.44.0
