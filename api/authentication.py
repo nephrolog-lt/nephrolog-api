@@ -1,10 +1,9 @@
 import base64
 from typing import Optional
 
-from django.utils import timezone
+from django.core.cache import cache
 from drf_firebase_token_auth.authentication import FirebaseTokenAuthentication as BaseFirebaseAuthentication, Tuple
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
-from django.core.cache import cache
 
 from core.models import User
 

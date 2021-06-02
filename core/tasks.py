@@ -1,15 +1,14 @@
 import logging
 from datetime import timedelta
-from typing import List, Tuple
 
 from celery import shared_task
 from django.db.models import F, QuerySet
 from django.db.models.aggregates import Count, Sum
 from django.utils import timezone
 
-from core.models import Appetite, BloodPressure, DailyHealthStatus, DailyIntakesReport, DiabetesType, \
-    HistoricalUserProfile, Intake, \
-    Product, \
+from core.models import Appetite, AutomaticPeritonealDialysis, BloodPressure, DailyHealthStatus, DailyIntakesReport, \
+    GeneralRecommendation, GeneralRecommendationRead, HistoricalUserProfile, Intake, \
+    ManualPeritonealDialysis, Product, \
     ProductKind, \
     Pulse, ShortnessOfBreath, SwellingDifficulty, User, \
     UserProfile, WellFeeling
@@ -122,3 +121,9 @@ def sync_product_metrics():
 
     datadog.gauge('product.health_status.shortness_of_breath',
                   DailyHealthStatus.objects.exclude(shortness_of_breath=ShortnessOfBreath.Unknown).count())
+
+    datadog.gauge('product.dialysis.manual.total', ManualPeritonealDialysis.objects.count())
+    datadog.gauge('product.dialysis.automatic.total', AutomaticPeritonealDialysis.objects.count())
+    datadog.gauge('product.general_recommendations.total', GeneralRecommendation.objects.count())
+    datadog.gauge('product.general_recommendations.reads.total',
+                  GeneralRecommendationRead.objects.aggregate(Sum('reads'))['reads__sum'])
