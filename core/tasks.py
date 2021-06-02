@@ -127,3 +127,5 @@ def sync_product_metrics():
     datadog.gauge('product.general_recommendations.total', GeneralRecommendation.objects.count())
     datadog.gauge('product.general_recommendations.reads.total',
                   GeneralRecommendationRead.objects.aggregate(Sum('reads'))['reads__sum'])
+    datadog.gauge('product.general_recommendations.reads.unique_total',
+                  GeneralRecommendationRead.objects.count())
