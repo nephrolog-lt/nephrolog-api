@@ -141,7 +141,7 @@ class ProductAdmin(admin.ModelAdmin):
         'created_at',
         'updated_at',
     )
-    readonly_fields = ('product_source', 'name_search_lt',)
+    readonly_fields = ('product_source', 'search_terms',)
     list_filter = (
         'region',
         ('density_g_ml', EmptyFieldListFilter),
@@ -151,7 +151,7 @@ class ProductAdmin(admin.ModelAdmin):
         'created_at',
         'updated_at'
     )
-    search_fields = ('name', 'name_en', 'name_search_lt')
+    search_fields = ('name', 'name_en', 'search_terms')
     actions = [csvexport]
 
     def get_queryset(self, request):

@@ -382,7 +382,7 @@ class Product(models.Model):
 
     synonyms = models.TextField(blank=True)
 
-    name_search_lt = models.CharField(max_length=128, unique=True)
+    search_terms = models.CharField(max_length=128, unique=True)
 
     product_kind = models.CharField(
         max_length=16,
@@ -429,8 +429,8 @@ class Product(models.Model):
     class Meta:
         ordering = ("-pk",)
         indexes = [
-            GinIndex(name="gin_trgm_product_lt", fields=('name_search_lt',), opclasses=("gin_trgm_ops",)),
-            GistIndex(name="gist_trgm_product_lt", fields=('name_search_lt',), opclasses=("gist_trgm_ops",)),
+            GinIndex(name="gin_trgm_product_lt", fields=('search_terms',), opclasses=("gin_trgm_ops",)),
+            GistIndex(name="gist_trgm_product_lt", fields=('search_terms',), opclasses=("gist_trgm_ops",)),
             models.Index(fields=['region', 'name', ])
         ]
 
@@ -447,7 +447,7 @@ class Product(models.Model):
 
         search_term_raw = f"{self.name} {self.synonyms.replace(',', ' ').replace(';', ' ')}".strip().lower()
 
-        self.name_search_lt = only_alphanumeric_or_spaces(str_to_ascii(search_term_raw))
+        self.search_terms = only_alphanumeric_or_spaces(str_to_ascii(search_term_raw))
 
         super().save(force_insert, force_update, using, update_fields)
 
@@ -490,7 +490,7 @@ class Product(models.Model):
             )
 
         query_words = query.split(' ')
-        query_filters = map(lambda q: models.Q(name_search_lt__contains=q), query_words)
+        query_filters = map(lambda q: models.Q(search_terms__contains=q), query_words)
         query_filter = reduce(lambda a, b: a & b, query_filters)
 
         first_word = query_words[0]
@@ -499,7 +499,7 @@ class Product(models.Model):
             .filter(region=ProductRegion.LT) \
             .annotate(
             starts_with_word=models.ExpressionWrapper(
-                models.Q(name_search_lt__startswith=first_word),
+                models.Q(search_terms__startswith=first_word),
                 output_field=models.BooleanField()
             ),
             starts_with_original_query=models.ExpressionWrapper(
