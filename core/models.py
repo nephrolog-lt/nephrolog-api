@@ -1205,6 +1205,13 @@ class GeneralRecommendationSubcategory(models.Model):
         return f"{self.name_lt} ({self.category})"
 
 
+class GeneralRecommendationQuerySet(models.QuerySet):
+    def annotate_total_reads(self) -> QuerySet[GeneralRecommendation]:
+        return self.annotate(
+            total_reads=models.Sum('general_recommendation_reads__reads')
+        )
+
+
 class GeneralRecommendation(models.Model):
     subcategory = models.ForeignKey(GeneralRecommendationSubcategory, on_delete=models.PROTECT,
                                     related_name='recommendations')
@@ -1221,6 +1228,8 @@ class GeneralRecommendation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    objects = GeneralRecommendationQuerySet.as_manager()
+
     class Meta:
         ordering = ("order",)
 
@@ -1235,7 +1244,6 @@ class GeneralRecommendationRead(models.Model):
     general_recommendation = models.ForeignKey(
         GeneralRecommendation,
         on_delete=models.CASCADE,
-        db_index=False,
     )
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
     reads = models.IntegerField(default=0)
@@ -1251,6 +1259,7 @@ class GeneralRecommendationRead(models.Model):
                 name='unique_user_and_recommendation_for_read'
             )
         ]
+        default_related_name = "general_recommendation_reads"
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.reads = (self.reads or 0) + 1

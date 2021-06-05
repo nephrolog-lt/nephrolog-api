@@ -456,6 +456,7 @@ class GeneralRecommendationAdmin(SortableAdminMixin, admin.ModelAdmin):
         'name_en',
         'name_de',
         'subcategory',
+        'total_reads',
         'created_at',
         'updated_at',
     )
@@ -467,6 +468,16 @@ class GeneralRecommendationAdmin(SortableAdminMixin, admin.ModelAdmin):
     )
     list_select_related = ('subcategory', 'subcategory__category')
     actions = [csvexport]
+
+    def get_queryset(self, request):
+        # noinspection PyUnresolvedReferences
+        return super().get_queryset(request).annotate_total_reads()
+
+    def total_reads(self, obj):
+        return obj.total_reads
+
+    total_reads.admin_order_field = "total_reads"
+    total_reads.short_description = "total reads"
 
 
 @admin.register(models.GeneralRecommendationRead)
