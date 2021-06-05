@@ -1208,7 +1208,7 @@ class GeneralRecommendationSubcategory(models.Model):
 class GeneralRecommendationQuerySet(models.QuerySet):
     def annotate_total_reads(self) -> QuerySet[GeneralRecommendation]:
         return self.annotate(
-            total_reads=models.Sum('general_recommendation_reads__reads')
+            total_reads=functions.Coalesce(models.Sum('general_recommendation_reads__reads'), 0)
         )
 
 
