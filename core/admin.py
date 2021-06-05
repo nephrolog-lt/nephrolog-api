@@ -460,7 +460,7 @@ class GeneralRecommendationAdmin(SortableAdminMixin, admin.ModelAdmin):
         'created_at',
         'updated_at',
     )
-    search_fields = ('name_lt', 'name_en', 'name_de', 'body',)
+    search_fields = ('name_lt', 'name_en', 'name_de', 'body_lt',)
     list_filter = (
         ('name_en', EmptyFieldListFilter),
         ('name_de', EmptyFieldListFilter),
