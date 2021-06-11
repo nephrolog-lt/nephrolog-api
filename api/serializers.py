@@ -49,7 +49,6 @@ class CountrySerializer(ReadOnlyModelSerializer):
             'code',
             'flag_emoji',
             'order',
-            'region',
         )
 
 
