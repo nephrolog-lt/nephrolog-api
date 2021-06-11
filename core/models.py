@@ -41,6 +41,36 @@ class DailyNutrientNormsAndTotals:
     carbohydrates_mg: DailyNutrientConsumption
 
 
+class Region(models.TextChoices):
+    LT = "LT"
+    DE = "DE"
+
+
+class Country(models.Model):
+    name = models.CharField(max_length=64, unique=True)
+    code = models.CharField(max_length=2, unique=True, help_text='ISO 3166-1 Alpha 2')
+
+    flag_emoji = models.CharField(max_length=4)
+    region = models.CharField(
+        max_length=2,
+        choices=Region.choices,
+    )
+
+    order = models.PositiveSmallIntegerField(default=0, db_index=True)
+
+    class Meta:
+        ordering = ("order", "pk")
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        self.code = self.code.upper()
+
+        super().save(force_insert, force_update, using, update_fields)
+
+    def __str__(self):
+        return self.name
+
+
 class UserQuerySet(models.QuerySet):
     def annotate_with_statistics(self) -> QuerySet[User]:
         intakes_count = User.objects.annotate(
@@ -95,6 +125,7 @@ class UserManager(AbstractUserManager.from_queryset(UserQuerySet)):
 class User(AbstractUser):
     is_marketing_allowed = models.BooleanField(null=True, blank=True)
     last_app_review_dialog_showed = models.DateTimeField(null=True, blank=True)
+    country = models.ForeignKey(Country, on_delete=models.PROTECT, null=True, blank=True)
 
     objects = UserManager()
 
@@ -358,11 +389,6 @@ class ProductSource(models.TextChoices):
     SW = "SW"
 
 
-class ProductRegion(models.TextChoices):
-    LT = "LT"
-    DE = "DE"
-
-
 class ProductQuerySet(models.QuerySet):
     def annotate_with_popularity(self) -> QuerySet[Product]:
         return self.annotate(popularity=SubqueryCount('intakes'))
@@ -392,7 +418,7 @@ class Product(models.Model):
 
     region = models.CharField(
         max_length=2,
-        choices=ProductRegion.choices,
+        choices=Region.choices,
     )
 
     product_source = models.CharField(
@@ -481,7 +507,7 @@ class Product(models.Model):
 
         if not query:
             return Product.objects.exclude(pk__in=exclude_product_ids) \
-                .filter(region=ProductRegion.LT) \
+                .filter(region=Region.LT) \
                 .annotate_with_popularity() \
                 .annotate_with_last_consumed_by_user(user) \
                 .order_by(
@@ -496,7 +522,7 @@ class Product(models.Model):
         first_word = query_words[0]
 
         return Product.objects.filter(query_filter).exclude(pk__in=exclude_product_ids) \
-            .filter(region=ProductRegion.LT) \
+            .filter(region=Region.LT) \
             .annotate(
             starts_with_word=models.ExpressionWrapper(
                 models.Q(search_terms__startswith=first_word),

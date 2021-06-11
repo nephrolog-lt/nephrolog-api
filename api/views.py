@@ -9,13 +9,21 @@ from rest_framework.generics import CreateAPIView, DestroyAPIView, RetrieveAPIVi
 
 from api import serializers
 from api.models import AutomaticPeritonealDialysisPeriodResponse, AutomaticPeritonealDialysisScreenResponse, \
-    DailyIntakesReportsLightResponse, HealthStatusScreenResponse, HealthStatusWeeklyResponse, \
+    CountryResponse, DailyIntakesReportsLightResponse, HealthStatusScreenResponse, HealthStatusWeeklyResponse, \
     ManualPeritonealDialysisScreenResponse, NutrientWeeklyScreenResponse, \
     NutritionScreenV2Response, ProductSearchResponse, GeneralRecommendationsResponse
 from api.utils import date_from_request_and_validated_data, datetime_from_request_and_validated_data, datetime_to_date, \
     parse_date_or_validation_error, \
     parse_time_zone
 from core import models
+
+
+@extend_schema(tags=['user'])
+class CountriesView(RetrieveAPIView):
+    serializer_class = serializers.CountryResponseSerializer
+
+    def get_object(self) -> CountryResponse:
+        return CountryResponse.from_api_request(self.request)
 
 
 @extend_schema(

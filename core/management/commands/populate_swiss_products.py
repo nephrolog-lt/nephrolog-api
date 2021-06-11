@@ -4,7 +4,7 @@ from pprint import pprint
 import requests
 from django.core.management.base import BaseCommand
 
-from core.models import Product, ProductKind, ProductSource, ProductRegion
+from core.models import Product, ProductKind, ProductSource, Region
 
 
 class Command(BaseCommand):
@@ -29,7 +29,7 @@ class Command(BaseCommand):
                 'synonyms': item['Synonyms'],
                 'product_kind': kind,
                 'density_g_ml': density,
-                'region': ProductRegion.DE,
+                'region': Region.DE,
                 'potassium_mg': round(float(item['Potassium (K) (mg)']) * multiplicator),
                 'proteins_mg': round(float(item['Protein (g)']) * 1000.0 * multiplicator),
                 'sodium_mg': round(float(item['Sodium (Na) (mg)']) * multiplicator),

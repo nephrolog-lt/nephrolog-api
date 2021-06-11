@@ -22,6 +22,7 @@ class UserProfileAdminInline(admin.StackedInline):
 class UserAdmin(BaseUserAdmin):
     list_display = (
         'username', 'id', 'email', 'first_name', 'last_name', 'is_marketing_allowed', 'last_app_review_dialog_showed',
+        'country',
         'is_staff',
         'profile_count',
         'intakes_count', 'daily_intakes_reports_count',
@@ -43,9 +44,10 @@ class UserAdmin(BaseUserAdmin):
 
     ordering = ('-last_login',)
     search_fields = ('username', 'first_name', 'last_name', 'email', 'pk')
+    list_select_related = ('country',)
 
     date_hierarchy = 'last_login'
-    list_filter = (('profile', EmptyFieldListFilter), 'is_marketing_allowed',
+    list_filter = (('profile', EmptyFieldListFilter), 'country', 'is_marketing_allowed',
                    'last_login', 'date_joined', 'last_app_review_dialog_showed', 'is_staff', 'is_superuser',
                    'is_active',)
 
@@ -83,6 +85,22 @@ class UserAdmin(BaseUserAdmin):
 
     daily_health_statuses_count.admin_order_field = "daily_health_statuses_count"
     daily_health_statuses_count.short_description = "Daily health statuses"
+
+
+@admin.register(models.Country)
+class CountryAdmin(SortableAdminMixin, admin.ModelAdmin):
+    list_display = (
+        'name',
+        'code',
+        'flag_emoji',
+        'region',
+    )
+    search_fields = (
+        'name',
+        'code',
+    )
+
+    actions = [csvexport]
 
 
 @admin.register(models.ProductSearchLog)

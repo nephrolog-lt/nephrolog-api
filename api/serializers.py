@@ -2,16 +2,13 @@ import datetime
 from logging import getLogger
 from typing import Dict
 
-from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from core.models import AutomaticPeritonealDialysis, BloodPressure, DailyHealthStatus, DailyIntakesReport, \
-    GeneralRecommendation, GeneralRecommendationCategory, GeneralRecommendationSubcategory, Intake, \
-    ManualPeritonealDialysis, \
-    Product, Pulse, Swelling, User, \
-    UserProfile, GeneralRecommendationRead
 from api.utils import datetime_from_request_and_validated_data
+from core.models import AutomaticPeritonealDialysis, BloodPressure, Country, DailyHealthStatus, DailyIntakesReport, \
+    GeneralRecommendation, GeneralRecommendationCategory, GeneralRecommendationRead, GeneralRecommendationSubcategory, \
+    Intake, ManualPeritonealDialysis, Product, Pulse, Swelling, User, UserProfile
 
 logger = getLogger()
 
@@ -28,6 +25,31 @@ class ReadOnlySerializer(serializers.Serializer):
 
     def create(self, validated_data):
         raise RuntimeError("ReadOnlySerializer can not perform create")
+
+
+class CountrySerializer(ReadOnlySerializer):
+    class Meta:
+        model = Country
+        fields = (
+            'name',
+            'code',
+            'flag_emoji',
+            'order',
+            'region',
+        )
+
+
+class CountryResponseSerializer(ReadOnlySerializer):
+    selected_country = CountrySerializer(allow_null=True)
+    suggested_country = CountrySerializer(allow_null=True)
+    countries = CountrySerializer(many=True, allow_empty=False)
+
+    class Meta:
+        fields = (
+            'selected_country',
+            'suggested_country',
+            'countries',
+        )
 
 
 class UserProfileV2Serializer(serializers.ModelSerializer):
@@ -56,10 +78,13 @@ class NutritionSummaryStatisticsSerializer(ReadOnlySerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     nutrition_summary = NutritionSummaryStatisticsSerializer(source='nutrition_summary_statistics')
+    selected_country = CountrySerializer(allow_null=True, read_only=True, source='country')
+    selected_country_id = serializers.PrimaryKeyRelatedField(queryset=Country.objects.all(), source='country',
+                                                             write_only=True, allow_null=True)
 
     class Meta:
         model = User
-        fields = ('is_marketing_allowed', 'nutrition_summary')
+        fields = ('is_marketing_allowed', 'nutrition_summary', 'selected_country', 'selected_country_id')
 
 
 class UserAppReviewSerializer(serializers.ModelSerializer):

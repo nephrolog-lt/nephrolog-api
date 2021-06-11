@@ -9,9 +9,31 @@ from rest_framework.request import Request
 
 from api import utils
 from api.utils import parse_date_query_params
-from core.models import AutomaticPeritonealDialysis, DailyHealthStatus, DailyHealthStatusQuerySet, DailyIntakesReport, \
+from core.models import AutomaticPeritonealDialysis, Country, DailyHealthStatus, DailyHealthStatusQuerySet, \
+    DailyIntakesReport, \
     DailyNutrientNormsAndTotals, GeneralRecommendationCategory, Intake, ManualPeritonealDialysis, MealType, Product, \
     ProductSearchLog, UserProfile
+
+
+@dataclass(frozen=True)
+class CountryResponse:
+    selected_country: Optional[Country]
+    suggested_country: Optional[Country]
+    countries: QuerySet[Country]
+
+    @staticmethod
+    def from_api_request(request: Request) -> CountryResponse:
+        countries = Country.objects.all()
+        ip_country = request.headers.get('CF-IPCountry', '')
+
+        suggested_country = next(filter(lambda c: c.code == ip_country, countries), None)
+
+        # noinspection PyUnresolvedReferences
+        return CountryResponse(
+            countries=countries,
+            suggested_country=suggested_country,
+            selected_country=request.user.country
+        )
 
 
 @dataclass(frozen=True)

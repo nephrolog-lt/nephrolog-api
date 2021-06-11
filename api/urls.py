@@ -6,6 +6,7 @@ from api import views
 urlpatterns = [
     path('user/profile/v2/', views.UserProfileV2View.as_view(), name="api-user-profile-v2"),
     path('user/app-review/', views.UserAppReview.as_view(), name="api-user-app-review"),
+    path('user/countries/', views.CountriesView.as_view(), name="api-user-countries"),
     path('user/', views.UserView.as_view(), name="api-user"),
 
     path('general-recommendations/v2/', views.GeneralRecommendationsView.as_view(), name="api-general-recommendations"),
