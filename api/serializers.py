@@ -27,7 +27,21 @@ class ReadOnlySerializer(serializers.Serializer):
         raise RuntimeError("ReadOnlySerializer can not perform create")
 
 
-class CountrySerializer(ReadOnlySerializer):
+class ReadOnlyModelSerializer(serializers.ModelSerializer):
+
+    def __init__(self, *args, **kwargs):
+        kwargs['read_only'] = True
+
+        super().__init__(*args, **kwargs)
+
+    def update(self, instance, validated_data):
+        raise RuntimeError("ReadOnlySerializer can not perform update")
+
+    def create(self, validated_data):
+        raise RuntimeError("ReadOnlySerializer can not perform create")
+
+
+class CountrySerializer(ReadOnlyModelSerializer):
     class Meta:
         model = Country
         fields = (
