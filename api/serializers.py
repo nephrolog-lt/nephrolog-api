@@ -92,16 +92,23 @@ class NutritionSummaryStatisticsSerializer(ReadOnlySerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     nutrition_summary = NutritionSummaryStatisticsSerializer(source='nutrition_summary_statistics')
+    selected_country = CountrySerializer(
+        source='country',
+        allow_null=True,
+        read_only=True,
+    )
+
     selected_country_code = serializers.SlugRelatedField(
         queryset=Country.objects.all(),
         source='country',
         slug_field='code',
-        allow_null=True
+        allow_null=True,
+        write_only=True,
     )
 
     class Meta:
         model = User
-        fields = ('is_marketing_allowed', 'nutrition_summary', 'selected_country_code')
+        fields = ('is_marketing_allowed', 'nutrition_summary', 'selected_country', 'selected_country_code')
 
 
 class UserAppReviewSerializer(serializers.ModelSerializer):
