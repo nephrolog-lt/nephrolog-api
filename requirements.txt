@@ -21,7 +21,7 @@ celery[redis]==5.1.0
 # Django rest framework
 djangorestframework==3.12.4
 drf-firebase-token-auth==0.2.1
-drf-spectacular==0.17.0
+drf-spectacular==0.17.1
 django-filter==2.4.0
 
 # Additional functionality
