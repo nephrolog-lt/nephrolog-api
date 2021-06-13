@@ -84,6 +84,22 @@ class UserViewTests(BaseApiTest):
         self.assertEqual(response.data['nutrition_summary']['min_report_date'], '2020-01-01')
         self.assertEqual(response.data['nutrition_summary']['max_report_date'], '2020-01-06')
 
+    def test_update(self):
+        self.login_user()
+
+        request_data = {
+            "is_marketing_allowed": True,
+        }
+
+        response = self.client.put(
+            reverse('api-user'),
+            data=request_data,
+        )
+
+        print(response.content)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['is_marketing_allowed'], True)
+
 
 class DailyIntakesReportViewTests(BaseApiTest):
     def test_daily_intakes_report_unauthenticated(self):

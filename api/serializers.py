@@ -103,6 +103,7 @@ class UserSerializer(serializers.ModelSerializer):
         slug_field='code',
         allow_null=True,
         write_only=True,
+        required=False,
     )
 
     class Meta:
