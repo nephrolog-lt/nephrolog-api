@@ -16,6 +16,7 @@ from django.db import models
 from django.db.models import Prefetch, QuerySet, functions
 from django.db.models.aggregates import Min
 from django.db.transaction import atomic
+from django.utils.functional import cached_property
 from django.utils.timezone import now
 from sql_util.aggregates import SubqueryCount, SubqueryMax
 
@@ -149,6 +150,14 @@ class User(AbstractUser):
 
     def nutrition_summary_statistics(self):
         return DailyIntakesReport.summarize_for_user(self)
+
+    @cached_property
+    def region_with_default(self) -> Region:
+        if self.country is None:
+            return Region.LT
+
+        # noinspection PyTypeChecker
+        return self.country.region
 
 
 class Gender(models.TextChoices):
@@ -505,9 +514,12 @@ class Product(models.Model):
         original_query = (query or '').strip().lower()
         query = only_alphanumeric_or_spaces(str_to_ascii(original_query))
 
+        # noinspection PyUnresolvedReferences
+        region = user.region_with_default
+
         if not query:
             return Product.objects.exclude(pk__in=exclude_product_ids) \
-                .filter(region=Region.LT) \
+                .filter(region=region) \
                 .annotate_with_popularity() \
                 .annotate_with_last_consumed_by_user(user) \
                 .order_by(
@@ -522,7 +534,7 @@ class Product(models.Model):
         first_word = query_words[0]
 
         return Product.objects.filter(query_filter).exclude(pk__in=exclude_product_ids) \
-            .filter(region=Region.LT) \
+            .filter(region=region) \
             .annotate(
             starts_with_word=models.ExpressionWrapper(
                 models.Q(search_terms__startswith=first_word),
