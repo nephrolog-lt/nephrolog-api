@@ -1210,8 +1210,8 @@ class ProductSearchLog(models.Model):
 
 class GeneralRecommendationCategory(models.Model):
     name_lt = models.CharField(max_length=128, unique=True)
-    name_en = models.CharField(max_length=128, null=True, blank=True, unique=True)
-    name_de = models.CharField(max_length=128, null=True, blank=True, unique=True)
+    name_en = models.CharField(max_length=128, unique=True)
+    name_de = models.CharField(max_length=128, unique=True)
 
     order = models.PositiveSmallIntegerField(default=0, db_index=True)
 
