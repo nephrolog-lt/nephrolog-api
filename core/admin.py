@@ -33,7 +33,7 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         (_('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
-        (_('NephroGo info'), {'fields': ('is_marketing_allowed', 'last_app_review_dialog_showed',)}),
+        (_('NephroGo info'), {'fields': ('is_marketing_allowed', 'country', 'last_app_review_dialog_showed',)}),
         (_('Permissions'), {
             'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
         }),
