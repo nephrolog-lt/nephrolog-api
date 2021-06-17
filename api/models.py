@@ -32,7 +32,7 @@ class CountryResponse:
         return CountryResponse(
             countries=countries,
             suggested_country=suggested_country,
-            selected_country=request.user.country
+            selected_country=request.user.country if request.user.is_authenticated else None
         )
 
 

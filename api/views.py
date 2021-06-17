@@ -6,12 +6,13 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.generics import CreateAPIView, DestroyAPIView, RetrieveAPIView, RetrieveUpdateAPIView, \
     RetrieveUpdateDestroyAPIView, UpdateAPIView, get_object_or_404
+from rest_framework.permissions import AllowAny
 
 from api import serializers
 from api.models import AutomaticPeritonealDialysisPeriodResponse, AutomaticPeritonealDialysisScreenResponse, \
-    CountryResponse, DailyIntakesReportsLightResponse, HealthStatusScreenResponse, HealthStatusWeeklyResponse, \
-    ManualPeritonealDialysisScreenResponse, NutrientWeeklyScreenResponse, \
-    NutritionScreenV2Response, ProductSearchResponse, GeneralRecommendationsResponse
+    CountryResponse, DailyIntakesReportsLightResponse, GeneralRecommendationsResponse, HealthStatusScreenResponse, \
+    HealthStatusWeeklyResponse, ManualPeritonealDialysisScreenResponse, NutrientWeeklyScreenResponse, \
+    NutritionScreenV2Response, ProductSearchResponse
 from api.utils import date_from_request_and_validated_data, datetime_from_request_and_validated_data, datetime_to_date, \
     parse_date_or_validation_error, \
     parse_time_zone
@@ -20,6 +21,8 @@ from core import models
 
 @extend_schema(tags=['user'])
 class CountriesView(RetrieveAPIView):
+    permission_classes = [AllowAny]
+
     serializer_class = serializers.CountryResponseSerializer
 
     def get_object(self) -> CountryResponse:
