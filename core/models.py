@@ -1224,6 +1224,15 @@ class GeneralRecommendationCategory(models.Model):
     def __str__(self):
         return self.name_lt
 
+    def localized_name(self, region: Region) -> Optional[str]:
+        if region == Region.LT:
+            return self.name_lt
+
+        if region == Region.DE:
+            return self.name_de
+
+        return None
+
 
 class GeneralRecommendationSubcategory(models.Model):
     category = models.ForeignKey(GeneralRecommendationCategory, on_delete=models.CASCADE, related_name='subcategories')
@@ -1238,6 +1247,15 @@ class GeneralRecommendationSubcategory(models.Model):
 
     class Meta:
         ordering = ("order",)
+
+    def localized_name(self, region: Region) -> Optional[str]:
+        if region == Region.LT:
+            return self.name_lt
+
+        if region == Region.DE:
+            return self.name_de
+
+        return None
 
     def __str__(self):
         return f"{self.name_lt} ({self.category})"
@@ -1274,8 +1292,26 @@ class GeneralRecommendation(models.Model):
     def __str__(self):
         return self.name_lt
 
-    def full_body(self) -> str:
-        return f"<h3>{self.name_lt}</h3>{self.body_lt}"
+    def localized_name(self, region: Region) -> Optional[str]:
+        if region == Region.LT:
+            return self.name_lt
+
+        if region == Region.DE:
+            return self.name_de
+
+        return None
+
+    def localized_body(self, region: Region) -> Optional[str]:
+        if region == Region.LT:
+            return self.body_lt
+
+        if region == Region.DE:
+            return self.body_de
+
+        return None
+
+    def localized_full_body(self, region: Region) -> str:
+        return f"<h3>{self.localized_name(region)}</h3>{self.localized_body(region)}"
 
 
 class GeneralRecommendationRead(models.Model):

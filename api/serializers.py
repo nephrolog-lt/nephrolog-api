@@ -403,30 +403,50 @@ class ProductSearchResponseSerializer(serializers.Serializer):
 
 
 class GeneralRecommendationSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='name_lt')
-    body = serializers.CharField(source='full_body')
+    name = serializers.SerializerMethodField()
+    body = serializers.SerializerMethodField()
 
     class Meta:
         model = GeneralRecommendation
         fields = ('id', 'name', 'body',)
 
+    def get_name(self, obj: GeneralRecommendation) -> str:
+        region = self.context['request'].user.region_with_default
+
+        return obj.localized_name(region)
+
+    def get_body(self, obj: GeneralRecommendation) -> str:
+        region = self.context['request'].user.region_with_default
+
+        return obj.localized_full_body(region)
+
 
 class GeneralRecommendationSubcategorySerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='name_lt')
+    name = serializers.SerializerMethodField()
     recommendations = GeneralRecommendationSerializer(many=True)
 
     class Meta:
         model = GeneralRecommendationSubcategory
         fields = ('name', 'recommendations',)
 
+    def get_name(self, obj: GeneralRecommendationSubcategory) -> str:
+        region = self.context['request'].user.region_with_default
+
+        return obj.localized_name(region)
+
 
 class GeneralRecommendationCategorySerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='name_lt')
+    name = serializers.SerializerMethodField()
     subcategories = GeneralRecommendationSubcategorySerializer(many=True)
 
     class Meta:
         model = GeneralRecommendationCategory
         fields = ('name', 'subcategories',)
+
+    def get_name(self, obj: GeneralRecommendationCategory) -> str:
+        region = self.context['request'].user.region_with_default
+
+        return obj.localized_name(region)
 
 
 class GeneralRecommendationsResponseSerializer(ReadOnlySerializer):
