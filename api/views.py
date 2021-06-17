@@ -318,10 +318,20 @@ class GeneralRecommendationsView(RetrieveAPIView):
     serializer_class = serializers.GeneralRecommendationsResponseSerializer
 
     def get_object(self):
+        # noinspection PyUnresolvedReferences
+        region = self.request.user.region_with_default
+
+        name_filter = {f'name_{region.lower()}__isnull': False}
+
         categories = models.GeneralRecommendationCategory.objects.prefetch_related(
             Prefetch(
                 'subcategories',
-                models.GeneralRecommendationSubcategory.objects.prefetch_related('recommendations')
+                models.GeneralRecommendationSubcategory.objects.filter(**name_filter).prefetch_related(
+                    Prefetch(
+                        'recommendations',
+                        models.GeneralRecommendation.objects.filter(**name_filter)
+                    )
+                )
             )
         )
 
