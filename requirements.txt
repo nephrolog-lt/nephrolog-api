@@ -3,7 +3,7 @@ gunicorn==20.1.0
 python-environ==0.4.54
 
 # Storage and caching
-psycopg2-binary==2.8.6
+psycopg2-binary==2.9.1
 django-redis==5.0.0
 
 # Authentication
@@ -16,12 +16,12 @@ ddtrace==0.49.3
 datadog==0.41.0
 
 # Celery
-celery[redis]==5.1.0
+celery[redis]==5.1.1
 
 # Django rest framework
 djangorestframework==3.12.4
 drf-firebase-token-auth==0.2.1
-drf-spectacular==0.17.0
+drf-spectacular==0.17.2
 django-filter==2.4.0
 
 # Additional functionality
