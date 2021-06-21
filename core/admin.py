@@ -92,12 +92,14 @@ class CountryAdmin(SortableAdminMixin, admin.ModelAdmin):
     list_display = (
         'name',
         'code',
+        'language_code',
         'flag_emoji',
         'region',
     )
     search_fields = (
         'name',
         'code',
+        'language_code',
     )
 
     actions = [csvexport]

@@ -47,9 +47,15 @@ class Region(models.TextChoices):
     DE = "DE"
 
 
+class Language(models.TextChoices):
+    LT = "lt"
+    DE = "de"
+
+
 class Country(models.Model):
     name = models.CharField(max_length=64, unique=True)
     code = models.CharField(max_length=2, unique=True, help_text='ISO 3166-1 Alpha 2')
+    language_code = models.CharField(max_length=2, choices=Language.choices)
 
     flag_emoji = models.CharField(max_length=4)
     region = models.CharField(
