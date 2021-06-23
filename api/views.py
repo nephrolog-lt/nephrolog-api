@@ -64,6 +64,12 @@ class ProductSearchView(RetrieveAPIView):
 
 
 @extend_schema(tags=['nutrition'])
+class MissingProductCreateView(CreateAPIView):
+    queryset = models.MissingProduct.objects.all()
+    serializer_class = serializers.MissingProductSerializer
+
+
+@extend_schema(tags=['nutrition'])
 class IntakeView(RetrieveUpdateDestroyAPIView):
     queryset = models.Intake.objects.all()
     serializer_class = serializers.IntakeSerializer

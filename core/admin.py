@@ -105,6 +105,26 @@ class CountryAdmin(SortableAdminMixin, admin.ModelAdmin):
     actions = [csvexport]
 
 
+@admin.register(models.MissingProduct)
+class MissingProductAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'message',
+        'created_at',
+        'updated_at',
+    )
+    search_fields = (
+        'user__email',
+        'user__username',
+        'message',
+    )
+    list_select_related = ('user',)
+    list_filter = ('created_at',)
+    date_hierarchy = 'created_at'
+
+    actions = [csvexport]
+
+
 @admin.register(models.ProductSearchLog)
 class ProductSearchLogAdmin(NumericFilterModelAdmin):
     list_display = (

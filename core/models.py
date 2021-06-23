@@ -564,6 +564,17 @@ class Product(models.Model):
         return self.name
 
 
+class MissingProduct(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    message = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-pk",)
+
+
 class DailyIntakesReportQuerySet(models.QuerySet):
     def prefetch_intakes(self) -> DailyIntakesReportQuerySet:
         return self.prefetch_related(Prefetch('intakes', queryset=Intake.objects.select_related_product()))

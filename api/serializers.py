@@ -8,7 +8,7 @@ from rest_framework.validators import UniqueTogetherValidator
 from api.utils import datetime_from_request_and_validated_data
 from core.models import AutomaticPeritonealDialysis, BloodPressure, Country, DailyHealthStatus, DailyIntakesReport, \
     GeneralRecommendation, GeneralRecommendationCategory, GeneralRecommendationRead, GeneralRecommendationSubcategory, \
-    Intake, ManualPeritonealDialysis, Product, Pulse, Swelling, User, UserProfile
+    Intake, ManualPeritonealDialysis, MissingProduct, Product, Pulse, Swelling, User, UserProfile
 
 logger = getLogger()
 
@@ -139,6 +139,17 @@ class ProductSerializer(serializers.ModelSerializer):
             'carbohydrates_mg',
             'fat_mg',
             'density_g_ml'
+        )
+
+
+class MissingProductSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = MissingProduct
+        fields = (
+            'user',
+            'message',
         )
 
 

@@ -14,6 +14,7 @@ urlpatterns = [
          name="api-general-recommendations-read"),
 
     path('nutrition/products/search/', views.ProductSearchView.as_view(), name="api-products-search"),
+    path('nutrition/products/missing/', views.MissingProductCreateView.as_view(), name="api-products-missing-create"),
 
     path('nutrition/daily-reports/light/', views.DailyIntakesReportsLightView.as_view(),
          name="api-daily-reports"),
