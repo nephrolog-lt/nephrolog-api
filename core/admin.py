@@ -4,7 +4,9 @@ from csvexport.actions import csvexport
 from django.contrib import admin
 from django.contrib.admin import EmptyFieldListFilter
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.postgres.search import TrigramSimilarity
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from core import models
@@ -160,6 +162,7 @@ class ProductAdmin(admin.ModelAdmin):
         'name',
         'synonyms',
         'name_en',
+        'most_similar',
         'region',
         'popularity',
         'density_g_ml',
@@ -192,6 +195,8 @@ class ProductAdmin(admin.ModelAdmin):
         'updated_at'
     )
     search_fields = ('name', 'name_en', 'search_terms')
+    list_per_page = 50
+    save_as = True
     actions = [csvexport]
 
     def get_queryset(self, request):
@@ -208,11 +213,11 @@ class ProductAdmin(admin.ModelAdmin):
     def liquids_ml(self, obj):
         return obj.liquids_ml
 
-    # def most_similar(self, obj):
-    #     return mark_safe('<br><br>'.join(map(lambda x: x.name_lt, Product.objects.annotate(
-    #         similarity=TrigramSimilarity('name_search_lt', obj.name_search_lt)).exclude(
-    #         pk=obj.pk).order_by('-similarity')[:3]))
-    #                      )
+    def most_similar(self, obj):
+        return mark_safe('<br><br>'.join(map(lambda x: f'<a href="/admin/core/product/{x.pk}/change/" target="_blank">{x.name_en} ({x.name})</a>', models.Product.objects.annotate(
+            similarity=TrigramSimilarity('name_en', obj.name_en)).exclude(
+            region=obj.region).order_by('-similarity')[:3]))
+                         )
 
 
 class BaseUserProfileAdminMixin(NumericFilterModelAdmin):
