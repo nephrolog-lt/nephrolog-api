@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from core.models import Appetite, AutomaticPeritonealDialysis, BloodPressure, DailyHealthStatus, DailyIntakesReport, \
     GeneralRecommendation, GeneralRecommendationRead, HistoricalUserProfile, Intake, \
-    ManualPeritonealDialysis, Product, \
+    ManualPeritonealDialysis, MissingProduct, Product, \
     ProductKind, \
     Pulse, ShortnessOfBreath, SwellingDifficulty, User, \
     UserProfile, WellFeeling
@@ -94,6 +94,11 @@ def sync_product_metrics():
             Product.objects.filter(product_kind=kind).count(),
             tags=[f'kind:{kind}']
         )
+
+    datadog.gauge(
+        'product.products.missing',
+        MissingProduct.objects.count(),
+    )
 
     datadog.gauge('product.health_status.blood_pressure', BloodPressure.objects.count())
     datadog.gauge('product.health_status.pulse', Pulse.objects.count())
