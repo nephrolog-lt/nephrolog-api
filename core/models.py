@@ -133,7 +133,7 @@ class User(AbstractUser):
     objects = UserManager()
 
     def __str__(self):
-        return self.get_username() or self.get_full_name() or self.email
+        return self.email or self.get_full_name() or self.get_username()
 
     def _should_show_app_review_dialog(self) -> bool:
         if self.last_app_review_dialog_showed is None and (now() - self.date_joined).days > 3:
