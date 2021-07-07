@@ -8,7 +8,7 @@ django-redis==5.0.0
 
 # Authentication
 django-allauth==0.44.0
-firebase-admin==4.5.3
+firebase-admin==5.0.1
 
 # Logging and monitoring
 sentry-sdk==1.1.0
