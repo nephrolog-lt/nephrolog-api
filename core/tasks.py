@@ -2,11 +2,12 @@ import logging
 from datetime import timedelta
 
 from celery import shared_task
-from django.db.models import F, QuerySet
+from django.db.models import F
 from django.db.models.aggregates import Count, Sum
 from django.utils import timezone
 
-from core.models import Appetite, AutomaticPeritonealDialysis, BloodPressure, DailyHealthStatus, DailyIntakesReport, \
+from core.models import Appetite, AutomaticPeritonealDialysis, BloodPressure, Country, DailyHealthStatus, \
+    DailyIntakesReport, \
     GeneralRecommendation, GeneralRecommendationRead, HistoricalUserProfile, Intake, \
     ManualPeritonealDialysis, MissingProduct, Product, \
     ProductKind, \
@@ -36,39 +37,76 @@ def sync_product_metrics():
         datadog.gauge(
             f'product.nutrition.norms.{metric_name}.exceeded', exceeded.count())
 
-    def _gauge_aggregated_user_profile_metric(field_name: str, user_profile_queryset: QuerySet[UserProfile] = None):
-        if user_profile_queryset is None:
-            user_profile_queryset = UserProfile.objects.all()
+    # noinspection PyShadowingNames
+    def _gauge_aggregated_user_profile_metric(field_name: str, country: Country):
+        agg_users = UserProfile.objects.filter(user__country=country).values(field_name) \
+            .annotate(total=Count(field_name)) \
+            .order_by('total')
 
-        agg_users = user_profile_queryset.values(field_name).annotate(total=Count(field_name)).order_by('total')
         for metric in agg_users:
             datadog.gauge(f'product.users.profiles.{field_name}', metric['total'],
-                          tags=[f'{field_name}:{metric[field_name]}'])
+                          tags=[f'{field_name}:{metric[field_name]}', f'country_code:{country.code}'])
 
-    user_with_statistics_queryset = User.objects.annotate_with_statistics()
-    user_with_statistics_and_profile_queryset = user_with_statistics_queryset.exclude(profile_count=0)
+    for country in Country.objects.all():
+        country_tag = f'country_code:{country.code}'
 
-    datadog.gauge('product.users.total', User.objects.count())
-    datadog.gauge('product.users.profiles', user_with_statistics_and_profile_queryset.count())
-    datadog.gauge('product.users.profiles.diabetics', UserProfile.objects.filter_diabetics().count())
-    datadog.gauge('product.users.profiles.historical', HistoricalUserProfile.objects.count())
-    datadog.gauge('product.users.profiles_with_intakes',
-                  user_with_statistics_and_profile_queryset.exclude(intakes_count=0).count())
-    datadog.gauge('product.users.profiles_with_health_status',
-                  user_with_statistics_and_profile_queryset.exclude(daily_health_statuses_count=0).count())
+        user_with_statistics_queryset = User.objects.annotate_with_statistics().filter(country=country)
+        user_with_statistics_and_profile_queryset = user_with_statistics_queryset.exclude(profile_count=0)
 
-    _gauge_aggregated_user_profile_metric('gender')
-    _gauge_aggregated_user_profile_metric('chronic_kidney_disease_age')
-    _gauge_aggregated_user_profile_metric('chronic_kidney_disease_stage')
-    _gauge_aggregated_user_profile_metric('dialysis')
-    _gauge_aggregated_user_profile_metric('diabetes_type')
+        datadog.gauge(
+            'product.users.total',
+            user_with_statistics_queryset.count(),
+            tags=[country_tag],
+        )
+        datadog.gauge(
+            'product.users.profiles',
+            user_with_statistics_and_profile_queryset.count(),
+            tags=[country_tag],
+        )
 
-    datadog.gauge('product.users.last_sign_in.24_hours',
-                  user_with_statistics_and_profile_queryset.filter(last_login__gte=now - timedelta(days=1)).count())
-    datadog.gauge('product.users.last_sign_in.3_days',
-                  user_with_statistics_and_profile_queryset.filter(last_login__gte=now - timedelta(days=3)).count())
-    datadog.gauge('product.users.last_sign_in.14_days',
-                  user_with_statistics_and_profile_queryset.filter(last_login__gte=now - timedelta(days=14)).count())
+        datadog.gauge(
+            'product.users.profiles.diabetics',
+            UserProfile.objects.filter(user__country=country).filter_diabetics().count(),
+            tags=[country_tag],
+        )
+        datadog.gauge(
+            'product.users.profiles.historical',
+            HistoricalUserProfile.objects.filter(user__country=country).count(),
+            tags=[country_tag],
+        )
+
+        datadog.gauge(
+            'product.users.profiles_with_intakes',
+            user_with_statistics_and_profile_queryset.exclude(intakes_count=0).count(),
+            tags=[country_tag],
+        )
+        datadog.gauge(
+            'product.users.profiles_with_health_status',
+            user_with_statistics_and_profile_queryset.exclude(daily_health_statuses_count=0).count(),
+            tags=[country_tag],
+        )
+
+        datadog.gauge(
+            'product.users.last_sign_in.24_hours',
+            user_with_statistics_and_profile_queryset.filter(last_login__gte=now - timedelta(days=1)).count(),
+            tags=[country_tag],
+        )
+        datadog.gauge(
+            'product.users.last_sign_in.3_days',
+            user_with_statistics_and_profile_queryset.filter(last_login__gte=now - timedelta(days=3)).count(),
+            tags=[country_tag],
+        )
+        datadog.gauge(
+            'product.users.last_sign_in.14_days',
+            user_with_statistics_and_profile_queryset.filter(last_login__gte=now - timedelta(days=14)).count(),
+            tags=[country_tag],
+        )
+
+        _gauge_aggregated_user_profile_metric('gender', country=country)
+        _gauge_aggregated_user_profile_metric('chronic_kidney_disease_age', country=country)
+        _gauge_aggregated_user_profile_metric('chronic_kidney_disease_stage', country=country)
+        _gauge_aggregated_user_profile_metric('dialysis', country=country)
+        _gauge_aggregated_user_profile_metric('diabetes_type', country=country)
 
     datadog.gauge('product.health_status.total', DailyHealthStatus.objects.count())
 
